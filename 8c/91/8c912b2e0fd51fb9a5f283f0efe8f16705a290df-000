@@ -1,10 +1,6 @@
-Traceback (most recent call last):
-  File "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/Scripts/FitTrim.py", line 28, in <module>
-    best = evaluate(cur); print('start IoU per band', [round(x, 3) for x in best], 'mean %.3f' % np.mean(best), flush=True)
-  File "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/Scripts/FitTrim.py", line 24, in evaluate
-    return [M.iou(M.seg(gen[int(a * RES) + 3:int(b * RES) - 3]), RM[i]) for i, (a, b) in enumerate(BANDS)]
-  File "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/Scripts/FitTrim.py", line 24, in <listcomp>
-    return [M.iou(M.seg(gen[int(a * RES) + 3:int(b * RES) - 3]), RM[i]) for i, (a, b) in enumerate(BANDS)]
-  File "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/Scripts/TrimMask.py", line 14, in iou
-    def iou(a, b): return float((a & b).sum()) / max(float((a | b).sum()), 1.0)
-ValueError: operands could not be broadcast together with shapes (92,1024) (92,512) 
+start IoU per band [0.778, 0.411, 0.162, 0.772, 0.635, 0.344, 0.619] mean 0.531
+round 0 IoU [0.798, 0.431, 0.183, 0.772, 0.635, 0.363, 0.619] mean 0.543
+round 1 IoU [0.802, 0.433, 0.193, 0.773, 0.635, 0.372, 0.621] mean 0.547
+round 2 IoU [0.804, 0.434, 0.199, 0.773, 0.635, 0.379, 0.621] mean 0.549
+final IoU [0.804, 0.434, 0.199, 0.773, 0.635, 0.379, 0.621] mean 0.549
+{"a_neck": 0.2316666666666667, "a_small_w": 0.22333333333333333, "a_open": 0.6666666666666666, "b_w0": 0.6100000000000001, "b_pow": 0.7666666666666666, "c_anther_w": 0.041, "c_anther_l": 0.39166666666666666, "c_stigma_w": 0.082, "d_fan": 0.925, "f_width": 0.45166666666666666, "f_wave": 0.065, "g_width": 0.42500000000000004}

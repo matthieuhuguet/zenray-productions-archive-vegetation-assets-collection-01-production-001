@@ -13,6 +13,7 @@ float V0[] = {%(v0)s}; float V1[] = {%(v1)s};
 int band = 0; for (int i = 0; i < 7; i++) if (vt >= V0[i] && vt < V1[i] + 0.0001) band = i;
 float lv = clamp((vt - V0[band]) / (V1[band] - V0[band]), 0.0, 1.0);
 int on = (band == %(bid)d);
+%(occ)s
 float h = p@C.x; if (!on) h = 0.0;   // outside its band a chain outputs zero (the canvas colour is not trusted)
 '''
 PRELUDE = {
@@ -71,18 +72,22 @@ def stages(band):
         S += noises(r, 5, '1.0', 150, 500, 150, 500, 0.002, 0.005, 'grain')
         S += [('base_taper_dark', 'h -= 0.06 * sm(0.8, 1.0, lv) * inW;'), ('gap_base_dark', 'h -= 0.05 * sm(0.5, 1.0, lv) * bgm;'), ('wedge_shadow', 'h -= 0.05 * exp(-pow((abs(cx) - ww) / 0.03, 2.0)) * bgm;'), ('wedge_lift', 'h += 0.03 * (1.0 - lv) * inW;')]
     elif band == 2:
-        for i in range(5):
-            S += [('anther%d_head' % (i + 1), 'float dx = wrapd(s, AX[%d]) * 3.0 * 0.333; float ex = dx / chf("../c_anther_w"); float ey = (lv - 0.30) / chf("../c_anther_l"); float rr = sqrt(ex * ex + ey * ey); float m = 1.0 - sm(0.88, 1.0, rr); h = max(h, lerp(h, 0.62 + 0.16 * (1.0 - rr * rr), m));' % i),
-                  ('anther%d_pollen' % (i + 1), 'float dx = wrapd(s, AX[%d]) * 3.0 * 0.333; float ex = dx / chf("../c_anther_w"); float ey = (lv - 0.30) / chf("../c_anther_l"); float rr = sqrt(ex * ex + ey * ey); float m = 1.0 - sm(0.88, 1.0, rr); h += chf("../c_pollen") * (noise(set(u * 420.0, vt * 420.0, %d.1)) - 0.5) * m;' % (i, i)),
-                  ('anther%d_stalk' % (i + 1), 'float dx = wrapd(s, AX[%d]) * 3.0 * 0.333; float st = (1.0 - sm(0.006, 0.010, dx)) * sm(0.45, 0.50, lv); h = max(h, lerp(h, 0.55, st));' % i)]
-        for i in range(3):
-            S += [('filament%d_tip' % (i + 1), 'float dx = wrapd(s, FX[%d]) * 3.0 * 0.333; float top = %.2f; float ex = dx / 0.010; float ey = (lv - top) / 0.07; float rr = sqrt(ex * ex + ey * ey); h = max(h, lerp(h, 0.56, 1.0 - sm(0.9, 1.0, rr)));' % (i, 0.36 + 0.06 * i)),
-                  ('filament%d_stalk' % (i + 1), 'float dx = wrapd(s, FX[%d]) * 3.0 * 0.333; float top = %.2f; float m = (1.0 - sm(0.006, 0.009, dx)) * sm(top, top + 0.02, lv); h = max(h, lerp(h, 0.56, m));' % (i, 0.36 + 0.06 * i))]
-        S += [('stigma_head', 'float dx = wrapd(s, 0.37) * 3.0 * 0.333; float ex = dx / chf("../c_stigma_w"); float ey = (lv - 0.15) / 0.11; float rr = sqrt(ex * ex + ey * ey); h = max(h, lerp(h, 0.66 + 0.10 * (1.0 - rr * rr), 1.0 - sm(0.9, 1.0, rr)));'),
-              ('stigma_rough', 'float dx = wrapd(s, 0.37) * 3.0 * 0.333; float ex = dx / chf("../c_stigma_w"); float ey = (lv - 0.15) / 0.11; float rr = sqrt(ex * ex + ey * ey); h += 0.10 * (noise(set(u * 300.0, vt * 300.0, 7.7)) - 0.5) * (1.0 - sm(0.9, 1.0, rr));'),
-              ('stigma_stalk', 'float dx = wrapd(s, 0.37) * 3.0 * 0.333; float stw = 0.020 + 0.012 * sm(0.5, 1.0, lv); float m = (1.0 - sm(stw - 0.003, stw + 0.003, dx)) * sm(0.2, 0.26, lv); h = max(h, lerp(h, 0.58 + 0.05 * (1.0 - dx / stw), m));')]
-        bg = 'h = 0.40 + 0.03 * pn(u, vt * 30.0, 4.4, 30.0);'
-        S = [('ground', bg)] + S
+        blobs = json.load(open('/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/ref-maps/stamen_blobs.json'))   # positions measured on the reference mask (not the image)
+        S += [('ground', 'h = 0.40 + 0.03 * pn(u, vt * 30.0, 4.4, 30.0);')]
+        for k, d in enumerate(blobs[:40]):
+            cx, w, top, bot = d['cx'], d['w'], d['top'], d['bot']
+            if w > 0.04 and (bot - top) < 0.3:     # stigma head
+                body = 'float dx = wrapd(u, %.4f); float ex = dx / %.4f; float ey = (lv - %.4f) / %.4f; float rr = sqrt(ex * ex + ey * ey); float m = 1.0 - sm(0.85, 1.0, rr); h = max(h, lerp(h, 0.66 + 0.10 * (1.0 - rr * rr) + 0.08 * (noise(set(u * 300.0, vt * 300.0, %d.7)) - 0.5), m));' % (cx, w / 2, (top + bot) / 2, (bot - top) / 2, k)
+                nm = 'stigma_head_%02d' % k
+            elif top > 0.3 or (bot - top) > 0.75:    # thin stalk or filament alone
+                body = 'float dx = wrapd(u, %.4f); float m = (1.0 - sm(%.4f, %.4f, dx)) * sm(%.4f, %.4f, lv) * (1.0 - sm(%.4f, %.4f, lv)); h = max(h, lerp(h, 0.57, m));' % (cx, w * 0.35, w * 0.55, top, top + 0.03, bot - 0.02, bot)
+                nm = 'filament_%02d' % k
+            else:                                   # anther head on its filament
+                cut = top + 0.62 * (bot - top)
+                body = ('float dx = wrapd(u, %.4f); float ex = dx / %.4f; float ey = (lv - %.4f) / %.4f; float rr = sqrt(ex * ex + ey * ey); float m = 1.0 - sm(0.85, 1.0, rr); h = max(h, lerp(h, 0.62 + 0.16 * (1.0 - rr * rr) + chf("../c_pollen") * (noise(set(u * 420.0, vt * 420.0, %d.1)) - 0.5), m));'
+                        ' float ms = (1.0 - sm(%.4f, %.4f, dx)) * sm(%.4f, %.4f, lv) * (1.0 - sm(%.4f, %.4f, lv)); h = max(h, lerp(h, 0.56, ms));') % (cx, w / 2, (top + cut) / 2, (cut - top) / 2, k, w * 0.18, w * 0.28, cut - 0.03, cut, bot - 0.02, bot)
+                nm = 'anther_%02d' % k
+            S.append((nm, body.replace('chf_scale', '1.0')))
         S += noises(r, 8, '1.0', 100, 300, 100, 300, 0.003, 0.008, 'bg_grain') + noises(r, 8, '(h > 0.5 ? 1.0 : 0.0)', 300, 700, 300, 700, 0.01, 0.03, 'pollen_micro')
         S += [('edge_shadow_1', 'h -= 0.03 * clamp(0.5 - h, 0.0, 1.0);'), ('edge_shadow_2', 'h -= 0.02 * clamp(0.45 - h, 0.0, 1.0);')]
     elif band == 3:
