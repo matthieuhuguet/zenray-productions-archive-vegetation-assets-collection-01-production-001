@@ -7,7 +7,7 @@ REF = {q: (np.asarray(Image.open(B + 'previews/mask_%s.png' % q))[..., 0] > 0) f
 REF['front'][510:] = False; REF['side'][510:] = False
 NS = {'hou': hou, '__name__': 'lilifit'}
 exec(open(B + 'Scripts/LilyLib.py').read() + '\n' + open(B + 'Scripts/LilyParts.py').read(), NS)
-P = {'stem_height': 0.82, 'stem_bend': 0.02, 'leaf_count': 34, 'leaf_length': 0.2, 'tepal_length': 0.24, 'tepal_flare': 1.45, 'pedicel_length': 0.08, 'seed': 7, 'leaf_droop': 1.6, 'leaf_width': 0.0075, 'tepal_width': 0.036, 'tepal_wave': 0.004, 'stamen_length': 0.15, 'stem_radius': 0.005, 'calyx_size': 0.03, 'funnel': 0.36, 'leaf_ramp': 0.3, 'leaf_angle': 42.0}
+P = {'stem_height': 0.82, 'stem_bend': 0.02, 'leaf_count': 34, 'leaf_length': 0.2, 'tepal_length': 0.24, 'tepal_flare': 1.45, 'pedicel_length': 0.08, 'seed': 7, 'leaf_droop': 1.6, 'leaf_width': 0.0075, 'tepal_width': 0.036, 'tepal_wave': 0.004, 'stamen_length': 0.15, 'stem_radius': 0.005, 'calyx_size': 0.03, 'funnel': 0.36, 'leaf_ramp': 0.3, 'leaf_angle': 42.0, 'uv_mode': 0}
 if len(sys.argv) > 2 and False: pass
 try: P.update(json.load(open(B + 'ref-maps/lily_fit.json'))['params'])
 except Exception: pass

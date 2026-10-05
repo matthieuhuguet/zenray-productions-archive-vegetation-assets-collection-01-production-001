@@ -1,4 +1,4 @@
-# 5 October 2026 : puts the lily trim sheet in /stage (Solaris, Karma) so it can be seen in the Look Dev viewport: a 2 m plane with square UV 0..1 in /obj/Lily_TrimPlane, a Principled Shader /mat/LilyTrim_Material whose base colour reads maps/trim/lily_trim_basecolor.png (the height shown as colour) and whose displacement reads maps/trim/lily_trim_height.png, a material library, an assignment, a top camera, a dome and a key light, Karma render properties and a USD Render ROP. All nodes are prefixed lt_ and the chain ends in lt_render (display flag). Run live with sys.argv = ['x', 'LIVE', 'LIVE']. FR : la trim sheet dans /stage pour le Look Dev.
+# 5 October 2026 (v2: the FLOWER itself, not a plane): puts the lily HDA with the trim sheet material in /stage (Solaris, Karma) so it can be seen in the Look Dev viewport: a 2 m plane with square UV 0..1 in /obj/Lily_TrimPlane, a Principled Shader /mat/LilyTrim_Material whose base colour reads maps/trim/lily_trim_basecolor.png (the height shown as colour) and whose displacement reads maps/trim/lily_trim_height.png, a material library, an assignment, a top camera, a dome and a key light, Karma render properties and a USD Render ROP. All nodes are prefixed lt_ and the chain ends in lt_render (display flag). Run live with sys.argv = ['x', 'LIVE', 'LIVE']. FR : la trim sheet dans /stage pour le Look Dev.
 import hou
 B = '/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/'
 P = dict(size=2.0, disp_scale=0.04, disp_offset=0.45, cam_height=2.6, focal=35.0, aperture=24.0, dome_exposure=0.0, key_exposure=1.5)
@@ -14,16 +14,15 @@ if mat.node('LilyTrim_Material'): mat.node('LilyTrim_Material').destroy()
 sh = mat.createNode('principledshader::2.0', 'LilyTrim_Material')
 sh.parm('basecolor_useTexture').set(1); sh.parm('basecolor_texture').set(B + 'maps/trim/lily_trim_basecolor.png')
 if sh.parm('basecolor_textureColorSpace'): sh.parm('basecolor_textureColorSpace').set('linear' if 'linear' in sh.parm('basecolor_textureColorSpace').menuItems() else sh.parm('basecolor_textureColorSpace').menuItems()[0])
-sh.parm('rough').set(0.7); sh.parm('dispTex_enable').set(1); sh.parm('dispTex_texture').set(B + 'maps/trim/lily_trim_height.png'); sh.parm('dispTex_scale').set(P['disp_scale']); sh.parm('dispTex_offset').set(P['disp_offset'])
-if sh.parm('dispTex_textureColorSpace'): sh.parm('dispTex_textureColorSpace').set('linear' if 'linear' in sh.parm('dispTex_textureColorSpace').menuItems() else sh.parm('dispTex_textureColorSpace').menuItems()[0])
+sh.parm('rough').set(0.7); sh.parm('dispTex_enable').set(0)   # the flower is shown with the trim only; no displacement on such small parts
 # ---- stage chain
 for n in list(st.children()):
     if n.name().startswith('lt_'): n.destroy()
-imp = st.createNode('sopimport', 'lt_plane'); imp.parm('soppath').set('/obj/Lily_TrimPlane/OUT'); imp.parm('pathprefix').set('/lt_plane'); imp.setPosition(hou.Vector2(14, 0))
+imp = st.createNode('sopimport', 'lt_flower'); imp.parm('soppath').set('/obj/Lily_Flower/OUT_lily'); imp.parm('pathprefix').set('/lt_flower'); imp.setPosition(hou.Vector2(14, 0))
 ml = st.createNode('materiallibrary', 'lt_materials'); ml.setInput(0, imp); ml.parm('matnet').set('/mat'); ml.parm('matpathprefix').set('/materials/'); ml.parm('fillmaterials').pressButton()
-asg = st.createNode('assignmaterial', 'lt_assign'); asg.setInput(0, ml); asg.parm('nummaterials').set(1); asg.parm('primpattern1').set('/lt_plane/*'); asg.parm('matspecpath1').set('/materials/LilyTrim_Material')
+asg = st.createNode('assignmaterial', 'lt_assign'); asg.setInput(0, ml); asg.parm('nummaterials').set(1); asg.parm('primpattern1').set('/lt_flower/*'); asg.parm('matspecpath1').set('/materials/LilyTrim_Material')
 cam = st.createNode('camera', 'lt_camera'); cam.setInput(0, asg)
-for k, v in dict(tx=0.0, ty=P['cam_height'], tz=0.0, rx=-90.0).items(): cam.parm(k).set(v)
+for k, v in dict(tx=0.0, ty=0.45, tz=2.1, rx=-4.0).items(): cam.parm(k).set(v)
 cam.parm('focalLength').set(P['focal']); cam.parm('horizontalAperture').set(P['aperture']); cam.parm('primpath').set('/cameras/lt_camera')
 dome = st.createNode('domelight::3.0', 'lt_dome'); dome.setInput(0, cam); dome.parm('xn__inputsexposure_vya').set(P['dome_exposure'])
 key = st.createNode('distantlight::2.0', 'lt_key'); key.setInput(0, dome); key.parm('rx').set(-40); key.parm('ry').set(-35); key.parm('xn__inputsexposure_control_wcb').set('set'); key.parm('xn__inputsexposure_vya').set(P['key_exposure'])

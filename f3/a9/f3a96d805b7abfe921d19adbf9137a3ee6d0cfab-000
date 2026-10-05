@@ -13,26 +13,37 @@ def prim_attrs(geo):
     for n, t in (('mat', ''), ('part', '')):
         if geo.findPrimAttrib(n) is None: geo.addAttrib(hou.attribType.Prim, n, t)
     if geo.findPointAttrib('uv') is None: geo.addAttrib(hou.attribType.Point, 'uv', (0.0, 0.0, 0.0))
+    if geo.findPointAttrib('uvl') is None: geo.addAttrib(hou.attribType.Point, 'uvl', (0.0, 0.0, 0.0))   # the local uv (across, along) is kept next to the trim uv
     if geo.findPointAttrib('Cd') is None: geo.addAttrib(hou.attribType.Point, 'Cd', (1.0, 1.0, 1.0))   # 5 October 2026 : colour per point (a tuple or a function of the uv), so that stripes show in the viewport
-def grid(geo, rows, mat, part, col):
+def trim_band(name):
+    """band rectangle of the trim sheet from the HDA table trim_bands: rows 'name v0 v1' with v measured from the TOP of the sheet (the measured layout, ref-maps/trim_measure.json). FR : bande de la trim sheet."""
+    for line in hou.pwd().parent().parm('trim_bands').eval().splitlines():
+        t = line.split()
+        if len(t) >= 3 and t[0] == name: return float(t[1]), float(t[2])
+    raise ValueError('trim band %s is missing from the HDA table' % name)
+def TU(name, U, lv):
+    """canvas uv from a band name, a horizontal position U (0..1, may exceed 1: the sheet is seamless) and lv inside the band (0 top, 1 bottom). Houdini v goes up, the band table goes down."""
+    v0, v1 = trim_band(name); return (U, 1.0 - (v0 + max(0.0, min(1.0, lv)) * (v1 - v0)))
+def trim_on(): return int(PRM('uv_mode')) == 1
+def grid(geo, rows, mat, part, col, uvf=None):
     """rows: list of rows, each a list of (position V3, uv (u, v)); builds quads between neighbouring rows."""
     prim_attrs(geo); ids = []
     for row in rows:
         r = []
         for (p, uv) in row:
-            pt = geo.createPoint(); pt.setPosition(p); pt.setAttribValue('uv', (uv[0], uv[1], 0.0)); pt.setAttribValue('Cd', col(uv[0], uv[1]) if callable(col) else col); r.append(pt)
+            pt = geo.createPoint(); pt.setPosition(p); tu = uvf(uv[0], uv[1], (uv[2], uv[3]) if len(uv) > 2 else (0.0, 1.0)) if (uvf and trim_on()) else uv; pt.setAttribValue('uv', (tu[0], tu[1], 0.0)); pt.setAttribValue('uvl', (uv[0], uv[1], 0.0)); pt.setAttribValue('Cd', col(uv[0], uv[1]) if callable(col) else col); r.append(pt)
         ids.append(r)
     for i in range(len(ids) - 1):
         for j in range(len(ids[i]) - 1):
             pr = geo.createPolygon()
             for pt in (ids[i][j], ids[i][j + 1], ids[i + 1][j + 1], ids[i + 1][j]): pr.addVertex(pt)
             pr.setAttribValue('mat', mat); pr.setAttribValue('part', part)
-def tube(geo, pts, radii, sides, mat, part, col, closed_tip=False):
+def tube(geo, pts, radii, sides, mat, part, col, closed_tip=False, uvf=None):
     """tube along a polyline with parallel transport frames; uv u around, v = length * 4.0 (4 UV per metre)."""
     n = len(pts); tans = []
     for i in range(n):
         a = pts[max(0, i - 1)]; b = pts[min(n - 1, i + 1)]; tans.append((b - a).normalized())
-    e1, e2 = frame_perp(tans[0]); rows = []; L = 0.0
+    e1, e2 = frame_perp(tans[0]); rows = []; L = 0.0; Lt = sum((pts[i] - pts[i - 1]).length() for i in range(1, n)) or 1.0
     for i in range(n):
         if i > 0:
             L += (pts[i] - pts[i - 1]).length(); t0, t1 = tans[i - 1], tans[i]
@@ -41,9 +52,9 @@ def tube(geo, pts, radii, sides, mat, part, col, closed_tip=False):
                 ang = math.acos(max(-1.0, min(1.0, t0.dot(t1)))); e1 = rot(e1, ax, ang); e2 = rot(e2, ax, ang)
         row = []
         for k in range(sides + 1):
-            a = 2 * math.pi * k / sides; row.append((pts[i] + (e1 * math.cos(a) + e2 * math.sin(a)) * radii[i], (k / float(sides), L * 4.0)))
+            a = 2 * math.pi * k / sides; row.append((pts[i] + (e1 * math.cos(a) + e2 * math.sin(a)) * radii[i], (k / float(sides), L * 4.0, L / Lt, Lt)))
         rows.append(row)
-    grid(geo, rows, mat, part, col)
+    grid(geo, rows, mat, part, col, uvf)
 def bez(p0, p1, p2, p3, n):
     out = []
     for i in range(n):

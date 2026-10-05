@@ -25,6 +25,13 @@ B 0.70 72 25 1.00
 B 0.62 331 25 0.95"""
 SHAPE = [('stem_height', 'Stem height (m)', 0.82, 0.3, 1.5), ('stem_bend', 'Stem bend (m)', 0.02, 0.0, 0.2), ('leaf_count', 'Leaf count', 34, 10, 90), ('leaf_length', 'Leaf length (m)', 0.28, 0.05, 0.4), ('tepal_length', 'Tepal length (m)', 0.24, 0.05, 0.3), ('tepal_flare', 'Tepal flare (rad)', 1.45, 0.2, 1.8), ('pedicel_length', 'Pedicel length (m)', 0.08, 0.02, 0.15), ('seed', 'Seed', 7, 0, 999)]
 DETAIL = [('leaf_droop', 'Leaf droop', 1.6, 0.0, 2.5), ('leaf_width', 'Leaf half width (m)', 0.0075, 0.003, 0.03), ('tepal_width', 'Tepal half width (m)', 0.036, 0.015, 0.07), ('tepal_wave', 'Tepal edge wave (m)', 0.004, 0.0, 0.015), ('stamen_length', 'Stamen length (m)', 0.15, 0.04, 0.25), ('stem_radius', 'Stem radius (m)', 0.005, 0.003, 0.02), ('calyx_size', 'Calyx size (m)', 0.03, 0.0, 0.08), ('funnel', 'Tube funnel (rad)', 0.36, 0.05, 0.6)]
+TRIMBANDS = """tepal_inner 0.0 0.193
+tepal_outer 0.193 0.388
+stamens 0.388 0.507
+calyx 0.507 0.609
+stem 0.609 0.725
+leaf 0.725 0.837
+bud 0.837 1.0"""
 LEAFPROF = [('leaf_ramp', 'Leaf length ramp (0 = same everywhere)', 0.3, -0.8, 1.5), ('leaf_angle', 'Leaf start angle (deg above horizontal)', 42.0, 5.0, 85.0)]
 FIT = B + 'ref-maps/lily_fit.json'   # 5 October 2026 : defaults measured by Scripts/FitLily.py against the masks of the 4 view sheet override the first guesses below
 if os.path.exists(FIT):
@@ -38,6 +45,8 @@ for fname, spec in (('HDA Shape', SHAPE), ('HDA Detail', DETAIL)):
     ptg.append(f)
 fl = hou.FolderParmTemplate('hda_layout', 'HDA Layout', folder_type=hou.folderType.Simple)
 t = hou.StringParmTemplate('flower_table', 'Flower and bud table', 1, default_value=(LAYOUT,)); t.setTags({'editor': '1'}); fl.addParmTemplate(t)
+t2 = hou.StringParmTemplate('trim_bands', 'Trim sheet bands (name v0 v1 from the top)', 1, default_value=(TRIMBANDS,)); t2.setTags({'editor': '1'}); fl.addParmTemplate(t2)
+fl.addParmTemplate(hou.IntParmTemplate('uv_mode', 'UV mode (0 local, 1 trim sheet)', 1, default_value=(1,), min=0, max=1))
 for n, lab, dv, lo, hi in LEAFPROF: fl.addParmTemplate(hou.FloatParmTemplate(n, lab, 1, default_value=(dv,), min=lo, max=hi))
 ptg.append(fl)
 g.setParmTemplateGroup(ptg)

@@ -5,7 +5,7 @@ def ss(a, b, x):
 def mix(a, b, t): return tuple(a[i] * (1 - t) + b[i] * t for i in range(3))
 def stem(geo):
     N = 28; pts = [stem_point(i / float(N - 1)) for i in range(N)]
-    tube(geo, pts, [stem_radius(i / float(N - 1)) for i in range(N)], 8, 'stem', 'stem', STEM)
+    tube(geo, pts, [stem_radius(i / float(N - 1)) for i in range(N)], 8, 'stem', 'stem', STEM, uvf=lambda u, v, ex: TU('stem', ex[0] * ex[1] * 4.0, u))
 def leaves(geo):
     n = int(PRM('leaf_count')); L0 = PRM('leaf_length'); W = PRM('leaf_width'); droop = PRM('leaf_droop'); rnd = random.Random(int(PRM('seed')) + 1)
     for i in range(n):
@@ -20,16 +20,16 @@ def leaves(geo):
             w = W * (math.sin(math.pi * min(1.0, f * 0.9 + 0.05)) ** 0.5) * (1.0 - 0.3 * f) + 0.0003
             sd = d.cross(V3(0, 1, 0)); sd = sd.normalized() if sd.length() > 1e-6 else base_side; sd = rot(sd, d, twist * f); nv = sd.cross(d).normalized()
             rows.append([(pos + sd * (w * tt) + nv * (-0.4 * w * abs(tt)), (tt * 0.5 + 0.5, f)) for tt in (-1.0, 0.0, 1.0)])
-        grid(geo, rows, 'leaf', 'leaf%d' % i, lambda u, v: mix((0.15, 0.5, 0.1), (0.35, 0.7, 0.2), 0.5 + 0.5 * math.cos((u - 0.5) * 6.28) * 0.5 * (1 - v)))
+        grid(geo, rows, 'leaf', 'leaf%d' % i, uvf=lambda u, f, ex, c=i % 2: TU('leaf', 0.25 + 0.5 * c + 0.5 * (0.04 + 0.92 * f), 0.5 + (u * 2.0 - 1.0) * 0.36 * math.sin(math.pi * (0.04 + 0.92 * f)) ** 0.7), col=lambda u, v: mix((0.15, 0.5, 0.1), (0.35, 0.7, 0.2), 0.5 + 0.5 * math.cos((u - 0.5) * 6.28) * 0.5 * (1 - v)))
 def pedicels(geo):
     for k, slot in enumerate(flower_slots()):
         pts, d, out = attach(slot); r = PRM('stem_radius'); n = len(pts)
         if slot[3]:
             Lb = PRM('tepal_length') * slot[4] * 0.8; base = pts[-1]; ptsb = [base + d * (Lb * i / 9.0) + V3(0, 1, 0) * (0.015 * (i / 9.0) ** 2) for i in range(10)]
-            tube(geo, pts, [r * 0.8 + r * 0.9 * (i / float(n - 1)) ** 2 for i in range(n)], 6, 'pedicel', 'pedicel%d' % k, LIME)
-            tube(geo, ptsb, [0.0125 * (math.sin(math.pi * (0.03 + 0.94 * i / 9.0)) ** 0.7) + 0.0003 for i in range(10)], 12, 'bud', 'bud%d' % k, lambda u, v: mix(WHITE, MAG, ss(0.5, 0.8, 0.5 + 0.5 * math.cos(u * 6.2832 * 3)) * (1 - 0.5 * v)))
+            tube(geo, pts, [r * 0.8 + r * 0.9 * (i / float(n - 1)) ** 2 for i in range(n)], 6, 'pedicel', 'pedicel%d' % k, LIME, uvf=lambda u, v, ex, c=k: TU('calyx', (c % 7 + 0.5 + (u - 0.5) * 0.22) / 7.0, 1.0 - 0.26 * ex[0]))
+            tube(geo, ptsb, [0.0125 * (math.sin(math.pi * (0.03 + 0.94 * i / 9.0)) ** 0.7) + 0.0003 for i in range(10)], 12, 'bud', 'bud%d' % k, uvf=lambda u, v, ex, c=k: TU('bud', ((c % 3) + ex[0]) / 3.0, 0.5 + 0.4 * (math.sin(math.pi * (0.03 + 0.94 * ex[0])) ** 0.85) * math.cos(2 * math.pi * u)), col=lambda u, v: mix(WHITE, MAG, ss(0.5, 0.8, 0.5 + 0.5 * math.cos(u * 6.2832 * 3)) * (1 - 0.5 * v)))
         else:
-            tube(geo, pts, [r * 0.8 + r * 1.4 * (i / float(n - 1)) ** 2.5 for i in range(n)], 8, 'pedicel', 'pedicel%d' % k, LIME)
+            tube(geo, pts, [r * 0.8 + r * 1.4 * (i / float(n - 1)) ** 2.5 for i in range(n)], 8, 'pedicel', 'pedicel%d' % k, LIME, uvf=lambda u, v, ex, c=k: TU('calyx', (c % 7 + 0.5 + (u - 0.5) * 0.22) / 7.0, 1.0 - 0.26 * ex[0]))
 def flower_frame(slot):
     pts, d, out = attach(slot); return pts[-1], d
 def tepal_color(u, f):
@@ -57,7 +57,11 @@ def tepals(geo):
                     pos = c + l * x - nout * drop + nout * (0.0012 * (1 - abs(tt)) * g) + nout * (wave * math.sin(f * 11.0 + j * 1.7 + tt * 2.3) * tt * tt * g)
                     row.append((pos, (tt * 0.5 + 0.5, f)))
                 rows.append(row)
-            grid(geo, rows, 'tepal', 'tepal%d_%d' % (k, j), tepal_color)
+            ks = max(2, int(0.55 * (NS - 1))); cell = (j // 2) % 3
+            def uv_tube(u, f, ex, c=cell): lv = 1.0 - f / 0.55; ww = 0.50 * (1.0 - lv * 0.97) ** 0.9 + 0.045; return TU('tepal_outer', (c + 0.5 + (u * 2.0 - 1.0) * ww * 0.95) / 3.0, lv)
+            def uv_flare(u, f, ex, c=cell): lv = 1.0 - (f - 0.55) / 0.45; wb = 0.225 + 0.275 * (1.0 - lv) ** 1.0; return TU('tepal_inner', (c + 0.5 + (u * 2.0 - 1.0) * wb * 0.95) / 3.0, lv)
+            grid(geo, rows[:ks + 1], 'tepal', 'tepal%d_%d_tube' % (k, j), tepal_color, uvf=uv_tube)
+            grid(geo, rows[ks:], 'tepal', 'tepal%d_%d_flare' % (k, j), tepal_color, uvf=uv_flare)
 def stamens(geo):
     rnd = random.Random(int(PRM('seed')) + 3)
     for k, slot in enumerate(flower_slots()):
@@ -66,18 +70,18 @@ def stamens(geo):
         for j in range(6):
             a = roll + j * math.pi / 3.0 + 0.2; r = e1 * math.cos(a) + e2 * math.sin(a); l = d.cross(r).normalized(); sp = rnd.uniform(0.008, 0.022)
             pts = bez(B + r * 0.003, B + d * Ls * 0.4 + r * 0.004, B + d * Ls * 0.8 + r * sp * 0.7, B + d * Ls * 0.97 + r * sp, 7)
-            tube(geo, pts, [0.0011 - 0.0003 * i / 6.0 for i in range(7)], 5, 'stamen', 'filament%d_%d' % (k, j), OLIVE)
+            tube(geo, pts, [0.0011 - 0.0003 * i / 6.0 for i in range(7)], 5, 'stamen', 'filament%d_%d' % (k, j), OLIVE, uvf=lambda u, v, ex, c=k, q=j: TU('stamens', ((c % 3) + [0.27, 0.45, 0.97, 0.27, 0.45, 0.97][q]) / 3.0 + 0.008 * math.cos(2 * math.pi * u), 1.0 - 0.65 * ex[0]))
             tip = pts[-1]; tdir = (pts[-1] - pts[-2]).normalized(); ax = (l * 0.6 + tdir * 0.5 + r * 0.2 * rnd.uniform(-1, 1)).normalized(); ac = [tip - ax * 0.007 + ax * (0.021 * i / 6.0) for i in range(7)]
-            tube(geo, ac, [0.0034 * (math.sin(math.pi * (0.08 + 0.84 * i / 6.0)) ** 0.5) + 0.0003 for i in range(7)], 8, 'anther', 'anther%d_%d' % (k, j), ORANGE)
+            tube(geo, ac, [0.0034 * (math.sin(math.pi * (0.08 + 0.84 * i / 6.0)) ** 0.5) + 0.0003 for i in range(7)], 8, 'anther', 'anther%d_%d' % (k, j), ORANGE, uvf=lambda u, v, ex, c=k, q=j: TU('stamens', ((c % 3) + [0.06, 0.18, 0.55, 0.70, 0.86, 0.18][q]) / 3.0 + 0.030 * math.cos(2 * math.pi * u), 0.60 - 0.60 * ex[0]))
 def pistil(geo):
     rnd = random.Random(int(PRM('seed')) + 4)
     for k, slot in enumerate(flower_slots()):
         if slot[3]: continue
         B, d = flower_frame(slot); e1, e2 = frame_perp(d); a = rnd.uniform(0, 2 * math.pi); r = e1 * math.cos(a) + e2 * math.sin(a); Lp = PRM('stamen_length') * slot[4] * 1.18
         pts = bez(B, B + d * Lp * 0.4, B + d * Lp * 0.8 + r * 0.006, B + d * Lp + r * 0.012, 9)
-        tube(geo, pts, [0.0019 - 0.0006 * i / 8.0 for i in range(9)], 6, 'pistil', 'style%d' % k, OLIVE)
+        tube(geo, pts, [0.0019 - 0.0006 * i / 8.0 for i in range(9)], 6, 'pistil', 'style%d' % k, OLIVE, uvf=lambda u, v, ex, c=k: TU('stamens', ((c % 3) + 0.37) / 3.0 + 0.02 * math.cos(2 * math.pi * u), 0.27 + 0.73 * ex[0]))
         tip = pts[-1]; td = (pts[-1] - pts[-2]).normalized()
-        tube(geo, [tip, tip + td * 0.0045, tip + td * 0.009], [0.0007, 0.0048, 0.0007], 8, 'stigma', 'stigma%d' % k, BROWN)
+        tube(geo, [tip, tip + td * 0.0045, tip + td * 0.009], [0.0007, 0.0048, 0.0007], 8, 'stigma', 'stigma%d' % k, BROWN, uvf=lambda u, v, ex, c=k: TU('stamens', ((c % 3) + 0.37) / 3.0 + 0.060 * math.cos(2 * math.pi * u) * math.sin(math.pi * ex[0]), 0.26 - 0.22 * ex[0]))
 def calyx(geo):
     """epicalyx and calyx of the parts sheet (upscaled-flower-parts.png): a ring of six small lime bracts at the top of the pedicel, hugging the base of the tube. FR : calice."""
     Lc = PRM('calyx_size'); rnd = random.Random(int(PRM('seed')) + 5)
@@ -88,4 +92,4 @@ def calyx(geo):
             for q in range(5):
                 f = q / 4.0; c = B - d * 0.004 + d * (sz * f) + r * (0.0075 + sz * 0.35 * f * f); w = 0.0045 * math.sin(math.pi * (0.1 + 0.8 * f)) ** 0.8 + 0.0002
                 rows.append([(c + l * (w * t), (t * 0.5 + 0.5, f)) for t in (-1.0, 0.0, 1.0)])
-            grid(geo, rows, 'calyx', 'calyx%d_%d' % (k, j), LIME)
+            grid(geo, rows, 'calyx', 'calyx%d_%d' % (k, j), LIME, uvf=lambda u, f, ex, c=(k * 6 + j) % 7: TU('calyx', (c + 0.5 + (u * 2.0 - 1.0) * (0.10 + 0.40 * (f ** 1.7)) * 0.95) / 7.0, 0.72 - 0.72 * f))
