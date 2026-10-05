@@ -1,0 +1,51 @@
+[
+ {
+  "band": "tepal_inner",
+  "seam_before": 0.0262,
+  "seam_after": 0.0019,
+  "interior_median": 0.0377,
+  "seam_percentile": 1.0
+ },
+ {
+  "band": "tepal_outer",
+  "seam_before": 0.0237,
+  "seam_after": 0.0039,
+  "interior_median": 0.0425,
+  "seam_percentile": 1.0
+ },
+ {
+  "band": "stamens",
+  "seam_before": 0.0248,
+  "seam_after": 0.0065,
+  "interior_median": 0.0692,
+  "seam_percentile": 1.3
+ },
+ {
+  "band": "calyx",
+  "seam_before": 0.0437,
+  "seam_after": 0.0042,
+  "interior_median": 0.0388,
+  "seam_percentile": 0.6
+ },
+ {
+  "band": "stem",
+  "seam_before": 0.0939,
+  "seam_after": 0.007,
+  "interior_median": 0.0583,
+  "seam_percentile": 0.2
+ },
+ {
+  "band": "leaf",
+  "seam_before": 0.0546,
+  "seam_after": 0.0019,
+  "interior_median": 0.0201,
+  "seam_percentile": 0.4
+ },
+ {
+  "band": "bud",
+  "seam_before": 0.0857,
+  "seam_after": 0.0066,
+  "interior_median": 0.0191,
+  "seam_percentile": 0.7
+ }
+]

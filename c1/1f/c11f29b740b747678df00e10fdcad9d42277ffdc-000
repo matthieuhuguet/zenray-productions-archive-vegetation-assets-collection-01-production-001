@@ -1,0 +1,29 @@
+# 5 October 2026 : measures the colour of every zone of the lily on the reference photographs by MASKS: each zone is a hue / saturation / value window applied inside the crop of the material sheet, and the median sRGB colour of the pixels that pass is kept (with the pixel count, a small count means an unreliable zone). The same masks method serves geometry (silhouettes of the 4 view sheet) and texture (colours). Output ref-maps/lily_colours.json. FR : mesure des couleurs par masques sur les photos de reference.
+import numpy as np, json, colorsys
+from PIL import Image
+R = '/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/refs/raw/1-flower-lily/'
+def hsv(c):
+    r, g, b = c[..., 0], c[..., 1], c[..., 2]; mx = np.maximum(np.maximum(r, g), b); mn = np.minimum(np.minimum(r, g), b); d = mx - mn + 1e-6
+    h = np.where(mx == r, ((g - b) / d) % 6, np.where(mx == g, (b - r) / d + 2, (r - g) / d + 4)) * 60.0
+    return h, d / (mx + 1e-6), mx
+ZONES = {   # name: (image, crop box, hue windows [(lo, hi)], sat window, value window)
+ 'tepal_white': ('01_erwan-gaudichon-render01.jpg', (1183, 908, 2283, 1708), [(0, 360)], (0.0, 0.14), (0.78, 1.0)),
+ 'tepal_pink_flush': ('01_erwan-gaudichon-render01.jpg', (1183, 908, 2283, 1708), [(310, 360), (0, 10)], (0.12, 0.45), (0.6, 1.0)),
+ 'tepal_magenta': ('02_erwan-gaudichon-render02.jpg', (2635, 370, 3735, 1170), [(315, 350)], (0.35, 1.0), (0.3, 0.95)),
+ 'tepal_purple_base': ('02_erwan-gaudichon-render02.jpg', (2635, 370, 3735, 1170), [(300, 350)], (0.25, 1.0), (0.1, 0.4)),
+ 'anther_orange': ('01_erwan-gaudichon-render01.jpg', (1521, 820, 2621, 1620), [(18, 42)], (0.6, 1.0), (0.5, 1.0)),
+ 'filament_olive': ('01_erwan-gaudichon-render01.jpg', (1521, 820, 2621, 1620), [(55, 85)], (0.35, 1.0), (0.2, 0.8)),
+ 'stigma_brown': ('01_erwan-gaudichon-render01.jpg', (1521, 820, 2621, 1620), [(320, 360), (0, 25)], (0.2, 0.7), (0.15, 0.5)),
+ 'pedicel_lime': ('01_erwan-gaudichon-render01.jpg', (1875, 300, 2975, 1100), [(65, 88)], (0.5, 1.0), (0.4, 1.0)),
+ 'stem_grey_green': ('02_erwan-gaudichon-render02.jpg', (2202, 610, 3302, 1410), [(75, 130)], (0.12, 0.5), (0.25, 0.7)),
+ 'leaf_green': ('02_erwan-gaudichon-render02.jpg', (2276, 1110, 3376, 1910), [(85, 140)], (0.55, 1.0), (0.25, 0.85)),
+ 'bud_magenta': ('01_erwan-gaudichon-render01.jpg', (2740, 0, 3840, 800), [(315, 350)], (0.35, 1.0), (0.3, 0.95)),
+ 'bud_white': ('01_erwan-gaudichon-render01.jpg', (2740, 0, 3840, 800), [(0, 360)], (0.0, 0.16), (0.8, 1.0)),
+}
+out = {}
+for name, (f, box, hues, sat, val) in ZONES.items():
+    c = np.asarray(Image.open(R + f).convert('RGB').crop(box), np.float32) / 255.0; h, s, v = hsv(c)
+    m = (s >= sat[0]) & (s <= sat[1]) & (v >= val[0]) & (v <= val[1]) & np.any([(h >= a) & (h <= b) for a, b in hues], axis=0)
+    n = int(m.sum()); med = np.median(c[m], axis=0) if n > 50 else np.array([np.nan] * 3)
+    out[name] = dict(srgb=[round(float(x), 4) for x in med], pixels=n); print('%-18s %6d px  sRGB %s' % (name, n, np.round(med, 3)))
+json.dump(out, open('/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/ref-maps/lily_colours.json', 'w'), indent=1)

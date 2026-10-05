@@ -1,0 +1,41 @@
+# 5 October 2026 : turns the AI generated trim sheet height into a SEAMLESS one, band by band (the AI sheet has seams and cut shapes). Every band is closed horizontally by blending with its half shifted copy inside a window at the border, the window depending on the band (structured bands a few pixels, the hairy stem wide). The bud band is rebuilt: the complete middle bud is repeated three times at an exact pitch of one third of the width, so no bud is cut by the border. Writes maps/trim/trim_height_seamless_<size>.png and prints the seam error of every band before and after against the neighbour column error. Usage: python3 MakeTrimSeamless.py [size=2048]. FR : rend la height de la trim sheet parfaitement seamless.
+import numpy as np, json, sys
+from PIL import Image
+B = '/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/'
+SRC = '/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/refs/flower-sheets/trimsheet-height-flower.png'
+SIZE = int(sys.argv[1]) if len(sys.argv) > 1 else 2048
+im = np.asarray(Image.open(SRC).convert('L'), np.float32) / 255.0; H, W = im.shape
+# bands measured by MeasureTrim.py (separator rows of the AI sheet): name, y0, y1, border window in pixels
+BANDS = [('tepal_inner', 0, 242, 20), ('tepal_outer', 242, 487, 20), ('stamens', 487, 636, 20), ('calyx', 636, 764, 24), ('stem', 764, 909, 160), ('leaf', 909, 1050, 40), ('bud', 1050, 1254, 0)]
+def seamless(band, win):
+    h, w = band.shape; out = band.copy(); rolled = np.roll(band, w // 2, axis=1)
+    if win <= 0: return out
+    x = np.arange(w, dtype=np.float32); d = np.minimum(x, w - 1 - x); m = np.clip(d / win, 0, 1); m = m * m * (3 - 2 * m)
+    return band * m[None, :] + rolled * (1 - m[None, :])
+def rebuild_bud(band):
+    h, w = band.shape; mid = band[:, 365:830]; pitch = w // 3
+    mid = np.asarray(Image.fromarray((mid * 255).astype(np.uint8)).resize((pitch + 24, h), Image.LANCZOS), np.float32) / 255.0
+    out = np.full((h, w), np.median(band), np.float32); acc = np.zeros((h, w), np.float32)
+    for k in range(3):
+        x0 = k * pitch - 12
+        for i in range(mid.shape[1]):
+            x = (x0 + i) % w; acc[:, x] = np.maximum(acc[:, x], mid[:, i] - 0.0) if acc[:, x].max() > 0 else mid[:, i]
+    return acc
+res = im.copy(); report = []
+for name, a, b, win in BANDS:
+    band = im[a + 3 if a else 0:b - 3 if b < H else H]; y0 = a + 3 if a else 0
+    new = rebuild_bud(band) if name == 'bud' else seamless(band, win)
+    col0 = np.abs(new[:, 1:] - new[:, :-1]).mean(0); seam0 = float(np.abs(new[:, 0] - new[:, -1]).mean())
+    if (col0 < seam0).mean() > 0.6:   # the border pair is worse than 60 percent of the interior pairs: move the cut to the smoothest interior pair (a roll, no content is lost)
+        k = int(np.argmin(col0[40:-40])) + 41; new = np.roll(new, -k, axis=1); print('   %s: cut moved by %d px' % (name, k))
+    seam1 = float(np.abs(new[:, 0] - new[:, -1]).mean()); col1 = np.abs(new[:, 1:] - new[:, :-1]).mean(0)
+    if True:   # feather (always: the colour derived from the height amplifies tiny seam steps): a short linear ramp across the seam (K columns on each side) so the border pair is as smooth as the smoothest interior pairs
+        K = 6; w = new.shape[1]; A = new[:, w - K - 1].copy(); Bv = new[:, K].copy()
+        for j in range(2 * K):
+            t_ = (j + 1) / (2.0 * K + 1.0); x = (w - K + j) % w; new[:, x] = A * (1 - t_) + Bv * t_
+    res[y0:y0 + new.shape[0]] = new
+    before = float(np.abs(band[:, 0] - band[:, -1]).mean()); after = float(np.abs(new[:, 0] - new[:, -1]).mean()); col = np.abs(new[:, 1:] - new[:, :-1]).mean(0)   # the seam is a pair of neighbouring columns like any other: its error must sit inside the distribution of the interior pairs
+    pct = float((col < after).mean() * 100); report.append(dict(band=name, seam_before=round(before, 4), seam_after=round(after, 4), interior_median=round(float(np.median(col)), 4), seam_percentile=round(pct, 1))); print('%-12s seam before %.4f after %.4f | interior pairs median %.4f, seam at percentile %.0f %s' % (name, before, after, np.median(col), pct, 'OK' if pct <= 90 else 'CHECK'))
+out = Image.fromarray(np.clip(res * 255, 0, 255).astype(np.uint8)).resize((SIZE, SIZE), Image.LANCZOS)
+import os; os.makedirs(B + 'maps/trim', exist_ok=True); path = B + 'maps/trim/trim_height_seamless_%d.png' % SIZE; out.save(path); print('saved', path)
+json.dump(report, open(B + 'ref-maps/trim_seam_report.json', 'w'), indent=1)

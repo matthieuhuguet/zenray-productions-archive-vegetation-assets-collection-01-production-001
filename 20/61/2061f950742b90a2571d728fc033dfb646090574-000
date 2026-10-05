@@ -1,0 +1,17 @@
+# 5 October 2026 : headless export of the trim sheet maps from the Lily_Trim network and measurement of seams on the result. Usage: hython ExportTrim.py <hip> [mode 0|1]. FR : exporte la trim sheet et mesure les raccords.
+import hou, sys, os, numpy as np
+from PIL import Image
+B = '/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/'
+hou.hipFile.load(sys.argv[1], suppress_save_prompt=True, ignore_load_warnings=True)
+net = hou.node('/obj/Lily_Trim')
+if len(sys.argv) > 2: net.parm('basecolor_mode').set(int(sys.argv[2]))
+for nm in ('VX_export__basecolor', 'VX_export__height'):
+    r = net.node(nm); out = r.parm('copoutput').eval()
+    if os.path.exists(out): os.remove(out)
+    r.parm('execute').pressButton(); print(nm, os.path.exists(out), [str(e)[:100] for e in net.node(nm).errors()])
+BANDS = [('tepal_inner', 0.0, 0.193), ('tepal_outer', 0.193, 0.388), ('stamens', 0.388, 0.507), ('calyx', 0.507, 0.609), ('stem', 0.609, 0.725), ('leaf', 0.725, 0.837), ('bud', 0.837, 1.0)]
+im = np.asarray(Image.open(B + 'maps/trim/lily_trim_basecolor.png').convert('RGB'), np.float32) / 255.0; H, W, _ = im.shape
+print('size', W, H)
+for name, a, b in BANDS:
+    band = im[int(a * H) + 4:int(b * H) - 4]; col = np.abs(band[:, 1:] - band[:, :-1]).mean((0, 2)); seam = float(np.abs(band[:, 0] - band[:, -1]).mean()); pct = float((col < seam).mean() * 100)
+    print('%-12s mean colour %s  wrap seam %.4f  interior median %.4f  percentile %.0f %s' % (name, np.round(band.mean((0, 1)), 3), seam, np.median(col), pct, 'SEAMLESS' if pct <= 90 else 'SEAM VISIBLE'))
