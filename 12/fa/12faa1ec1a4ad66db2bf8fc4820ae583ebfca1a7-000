@@ -1,0 +1,8 @@
+#!/bin/bash
+# 5 October 2026 : one iteration of the lily: rebuild the HDA headless on a scratch copy, export the geometry, compare the silhouettes with the 4 view sheet, make the four view preview. Usage: Iterate.sh <label>. FR : une iteration du lys.
+P=/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01; HY=/Users/zenray/Create/Build/Houdini22/Houdini22.0.368/Frameworks/Houdini.framework/Versions/Current/Resources/bin/hython
+cp $P/hip/VegetationCollection01.hiplc /tmp/veg_try.hiplc
+$HY $P/Scripts/BuildLily.py /tmp/veg_try.hiplc /tmp/veg_try.hiplc 2>&1 | tail -1 | cut -c1-300
+$HY $P/Scripts/ExportGeo.py /tmp/veg_try.hiplc /obj/Lily_Flower/OUT_lily $P/previews/lily.npz | tail -1
+python3 $P/Scripts/SilCompare.py $P/previews/lily.npz $P/previews/sil_$1.png 2>&1 | grep -v -i "warn\|matmul\|pos ="
+python3 $P/Scripts/PreviewGeo.py $P/previews/lily.npz $P/previews/lily_$1.png - 650 2>&1 | tail -1

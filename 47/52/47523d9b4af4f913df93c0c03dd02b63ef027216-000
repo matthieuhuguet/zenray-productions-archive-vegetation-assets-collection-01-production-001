@@ -1,0 +1,74 @@
+# 5 October 2026 : fits the parameters of the Lily HDA to the masks of the 4 view sheet. It runs the real component functions of LilyLib.py and LilyParts.py on a free hou.Geometry (the PRM and flower_slots helpers are redirected to a dictionary), rasterises front, side and top silhouettes, scores them against the masks with a tolerant IoU, and walks the parameters one by one (coordinate descent with shrinking steps). Writes ref-maps/lily_fit.json, read by BuildLily.py as the HDA defaults. Usage: hython Scripts/FitLily.py [rounds=3]. FR : calage des parametres du lys sur les masques de la planche.
+import hou, sys, json, math, time
+import numpy as np
+from PIL import Image, ImageDraw, ImageFilter
+B = '/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/'
+REF = {q: (np.asarray(Image.open(B + 'previews/mask_%s.png' % q))[..., 0] > 0) for q in ('front', 'side', 'top')}
+REF['front'][510:] = False; REF['side'][510:] = False
+NS = {'hou': hou, '__name__': 'lilifit'}
+exec(open(B + 'Scripts/LilyLib.py').read() + '\n' + open(B + 'Scripts/LilyParts.py').read(), NS)
+P = {'stem_height': 0.82, 'stem_bend': 0.02, 'leaf_count': 34, 'leaf_length': 0.2, 'tepal_length': 0.24, 'tepal_flare': 1.45, 'pedicel_length': 0.08, 'seed': 7, 'leaf_droop': 1.6, 'leaf_width': 0.0075, 'tepal_width': 0.036, 'tepal_wave': 0.004, 'stamen_length': 0.15, 'stem_radius': 0.005, 'calyx_size': 0.03, 'funnel': 0.36, 'leaf_ramp': 0.3, 'leaf_angle': 42.0}
+if len(sys.argv) > 2 and False: pass
+try: P.update(json.load(open(B + 'ref-maps/lily_fit.json'))['params'])
+except Exception: pass
+TABLE = [['F', 0.98, 260, 45, 1.00], ['F', 0.87, 200, 8, 1.00], ['F', 0.86, 359, 39, 0.92], ['F', 0.72, 143, 30, 0.95], ['B', 0.70, 72, 25, 1.00], ['B', 0.62, 331, 25, 0.95]]
+try: TABLE = json.load(open(B + 'ref-maps/lily_fit.json'))['table']
+except Exception: pass
+NS['PRM'] = lambda n: P[n]
+NS['flower_slots'] = lambda: [(r[1], math.radians(r[2]), math.radians(r[3]), r[0] == 'B', r[4]) for r in TABLE]
+COMPONENTS = ('stem', 'leaves', 'pedicels', 'tepals', 'stamens', 'pistil', 'calyx')
+def build():
+    geo = hou.Geometry()
+    for c in COMPONENTS: NS[c](geo)
+    pos = np.array(geo.pointFloatAttribValues('P'), np.float32).reshape(-1, 3); polys = [[v.point().number() for v in pr.vertices()] for pr in geo.prims()]
+    return pos, polys
+def raster(pos, polys, S, ST):
+    y0 = pos[:, 1].min(); out = {}
+    for view in ('front', 'side', 'top'):
+        h, w = REF[view].shape; im = Image.new('L', (w, h), 0); dr = ImageDraw.Draw(im)
+        if view == 'front': xy = np.stack([382 + pos[:, 0] * S, 505 - (pos[:, 1] - y0) * S], 1)
+        elif view == 'side': xy = np.stack([371 - pos[:, 2] * S, 505 - (pos[:, 1] - y0) * S], 1)
+        else: xy = np.stack([396 + pos[:, 0] * ST, 232 + pos[:, 2] * ST], 1)
+        for p in polys: dr.polygon([tuple(xy[i]) for i in p], fill=255)
+        out[view] = im
+    return out
+def dil(im, r): return im.filter(ImageFilter.MaxFilter(2 * r + 1))
+def tiou(im, ref, tol=4):
+    a = np.asarray(im) > 0; da = np.asarray(dil(im, tol)) > 0; db = np.asarray(dil(Image.fromarray((ref * 255).astype(np.uint8)), tol)) > 0
+    return float(((a & db).sum() + (ref & da).sum())) / float(a.sum() + ref.sum())
+def score(detail=False):
+    pos, polys = build(); H = pos[:, 1].max() - pos[:, 1].min(); S = 494.0 / H
+    best = (-1, None)
+    for ST in (700, 800, 900, 1000):     # top camera zoom is unknown, take the best of a few
+        r = raster(pos, polys, S, ST); t = tiou(r['top'], REF['top'], 6)
+        if t > best[0]: best = (t, ST, r)
+    t, ST, r = best; f = tiou(r['front'], REF['front']); s = tiou(r['side'], REF['side'])
+    tot = (f + s + t) / 3.0
+    return (tot, dict(front=round(f, 3), side=round(s, 3), top=round(t, 3), S=round(S, 1), ST=ST)) if detail else tot
+STEPS = {'stem_height': 0.03, 'leaf_length': 0.03, 'leaf_droop': 0.3, 'leaf_width': 0.002, 'leaf_ramp': 0.15, 'leaf_angle': 8.0, 'tepal_length': 0.025, 'tepal_width': 0.006, 'tepal_flare': 0.15, 'funnel': 0.05, 'pedicel_length': 0.015, 'stamen_length': 0.02}
+LIM = {'leaf_ramp': (-0.8, 1.5), 'leaf_angle': (5, 85), 'leaf_droop': (0, 2.5), 'tepal_flare': (0.2, 1.8), 'funnel': (0.05, 0.6)}
+rounds = int(sys.argv[1]) if len(sys.argv) > 1 else 3
+t0 = time.time(); cur = score(); print('start', score(True)[1], 'score %.4f' % cur, 'eval %.1f s' % (time.time() - t0), flush=True)
+def try_set(getter, setter, steps, lo=None, hi=None):
+    global cur
+    base = getter()
+    for d in steps:
+        v = base + d
+        if lo is not None and not (lo <= v <= hi): continue
+        setter(v); sc = score()
+        if sc > cur + 1e-4: cur = sc; return True
+        setter(base)
+    return False
+for rd in range(rounds):
+    k = 1.0 / (1 + rd)
+    for name, st in STEPS.items():
+        lo, hi = LIM.get(name, (None, None)); st *= k
+        try_set(lambda: P[name], lambda v: P.__setitem__(name, v), (st, -st), lo, hi)
+    for i, row in enumerate(TABLE):
+        for col, st in ((1, 0.02), (2, 12.0), (3, 8.0), (4, 0.06)):
+            if row[0] == 'B' and col == 4: continue
+            stp = st * k; lim = (0.3, 1.0) if col == 1 else (0.6, 1.4) if col == 4 else (None, None)
+            try_set(lambda: row[col], lambda v: row.__setitem__(col, v), (stp, -stp), *lim)
+    print('round', rd, 'score %.4f' % cur, score(True)[1], '%.0f s' % (time.time() - t0), flush=True)
+    json.dump(dict(params=P, table=TABLE, layout='\n'.join('%s %.3f %.1f %.1f %.2f' % (r[0], r[1], r[2] % 360, r[3], r[4]) for r in TABLE), score=cur), open(B + 'ref-maps/lily_fit.json', 'w'), indent=1)
+print('done', json.dumps(P))

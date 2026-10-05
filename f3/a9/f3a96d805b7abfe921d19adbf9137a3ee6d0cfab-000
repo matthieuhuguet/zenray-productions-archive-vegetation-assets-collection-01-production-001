@@ -1,0 +1,70 @@
+# 5 October 2026 : geometry library of the Lily (Lilium) asset, embedded verbatim in every Python SOP of /obj/Lily_Flower so that the hip does not depend on an external file. Every size comes from the spare parameters of the parent geo node (HDA rule). Units: metres, Y up, texel density 4.0 UV per metre on tube like parts.
+# FR : bibliotheque de geometrie du lys, copiee dans chaque Python SOP.
+import hou, math, random
+V3 = hou.Vector3
+def PRM(n): return hou.pwd().parent().parm(n).eval()
+def rot(v, ax, a):
+    ax = ax.normalized(); c, s = math.cos(a), math.sin(a)
+    return v * c + ax.cross(v) * s + ax * (ax.dot(v) * (1 - c))
+def frame_perp(d):
+    ref = V3(0, 1, 0) if abs(d.normalized().dot(V3(0, 1, 0))) < 0.95 else V3(1, 0, 0)
+    e1 = d.cross(ref).normalized(); e2 = d.cross(e1).normalized(); return e1, e2
+def prim_attrs(geo):
+    for n, t in (('mat', ''), ('part', '')):
+        if geo.findPrimAttrib(n) is None: geo.addAttrib(hou.attribType.Prim, n, t)
+    if geo.findPointAttrib('uv') is None: geo.addAttrib(hou.attribType.Point, 'uv', (0.0, 0.0, 0.0))
+    if geo.findPointAttrib('Cd') is None: geo.addAttrib(hou.attribType.Point, 'Cd', (1.0, 1.0, 1.0))   # 5 October 2026 : colour per point (a tuple or a function of the uv), so that stripes show in the viewport
+def grid(geo, rows, mat, part, col):
+    """rows: list of rows, each a list of (position V3, uv (u, v)); builds quads between neighbouring rows."""
+    prim_attrs(geo); ids = []
+    for row in rows:
+        r = []
+        for (p, uv) in row:
+            pt = geo.createPoint(); pt.setPosition(p); pt.setAttribValue('uv', (uv[0], uv[1], 0.0)); pt.setAttribValue('Cd', col(uv[0], uv[1]) if callable(col) else col); r.append(pt)
+        ids.append(r)
+    for i in range(len(ids) - 1):
+        for j in range(len(ids[i]) - 1):
+            pr = geo.createPolygon()
+            for pt in (ids[i][j], ids[i][j + 1], ids[i + 1][j + 1], ids[i + 1][j]): pr.addVertex(pt)
+            pr.setAttribValue('mat', mat); pr.setAttribValue('part', part)
+def tube(geo, pts, radii, sides, mat, part, col, closed_tip=False):
+    """tube along a polyline with parallel transport frames; uv u around, v = length * 4.0 (4 UV per metre)."""
+    n = len(pts); tans = []
+    for i in range(n):
+        a = pts[max(0, i - 1)]; b = pts[min(n - 1, i + 1)]; tans.append((b - a).normalized())
+    e1, e2 = frame_perp(tans[0]); rows = []; L = 0.0
+    for i in range(n):
+        if i > 0:
+            L += (pts[i] - pts[i - 1]).length(); t0, t1 = tans[i - 1], tans[i]
+            ax = t0.cross(t1)
+            if ax.length() > 1e-8:
+                ang = math.acos(max(-1.0, min(1.0, t0.dot(t1)))); e1 = rot(e1, ax, ang); e2 = rot(e2, ax, ang)
+        row = []
+        for k in range(sides + 1):
+            a = 2 * math.pi * k / sides; row.append((pts[i] + (e1 * math.cos(a) + e2 * math.sin(a)) * radii[i], (k / float(sides), L * 4.0)))
+        rows.append(row)
+    grid(geo, rows, mat, part, col)
+def bez(p0, p1, p2, p3, n):
+    out = []
+    for i in range(n):
+        t = i / float(n - 1); u = 1 - t
+        out.append(p0 * (u ** 3) + p1 * (3 * u * u * t) + p2 * (3 * u * t * t) + p3 * (t ** 3))
+    return out
+def stem_point(s):
+    H, B = PRM('stem_height'), PRM('stem_bend')
+    return V3(B * math.sin(s * math.pi * 0.8), H * s, B * 0.4 * math.sin(s * math.pi * 1.3))
+def stem_radius(s): return PRM('stem_radius') * (1.0 - 0.55 * s)
+def flower_slots():
+    """layout table (HDA parameter flower_table), one row per flower or bud: kind (F or B), position on the stem 0..1, azimuth in degrees, tilt above horizontal in degrees, size multiplier. Measured on the 4 view sheet (Scripts/MeasureLilyViews.py). One place, used by pedicels, tepals, stamens, pistil and calyx. FR : table de disposition."""
+    out = []
+    for line in hou.pwd().parent().parm('flower_table').eval().splitlines():
+        t = line.split('#')[0].split()
+        if len(t) < 5: continue
+        out.append((float(t[1]), math.radians(float(t[2])), math.radians(float(t[3])), t[0].upper() == 'B', float(t[4])))
+    return out
+def attach(slot):
+    s, az, tilt, bud, size = slot; out = V3(math.cos(az), 0, math.sin(az)); P = stem_point(s)
+    L = PRM('pedicel_length'); d_out = out * math.cos(tilt) + V3(0, 1, 0) * math.sin(tilt)
+    p0 = P + out * stem_radius(s); p3 = p0 + out * L * 0.75 + V3(0, 1, 0) * L * 0.55
+    pts = bez(p0, p0 + V3(0, 1, 0) * L * 0.2 + out * L * 0.3, p3 - d_out * L * 0.4, p3, 8)
+    return pts, d_out.normalized(), out

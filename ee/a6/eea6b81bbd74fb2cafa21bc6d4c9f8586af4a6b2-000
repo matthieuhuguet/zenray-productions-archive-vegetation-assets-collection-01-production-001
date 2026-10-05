@@ -1,0 +1,17 @@
+# 5 October 2026 : downloads every image of the three ArtStation references (Erwan Gaudichon) into the TMP workshop, trying the 4k size first then large. URLs come from the project JSON read inside the built-in browser (Cloudflare blocks curl on the page, not on the CDN). FR : telecharge les references.
+import subprocess, os, re, sys
+T = '/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/refs/raw/'
+SETS = {
+ '1-flower-lily': ['https://cdnb.artstation.com/p/assets/images/images/056/327/021/large/erwan-gaudichon-render01.jpg?1668990956','https://cdna.artstation.com/p/assets/images/images/056/327/024/large/erwan-gaudichon-render02.jpg?1668990873','https://cdnb.artstation.com/p/assets/images/images/056/327/025/large/erwan-gaudichon-render03.jpg?1668990884','https://cdna.artstation.com/p/assets/images/images/056/327/020/large/erwan-gaudichon-render04.jpg?1668990852'],
+ '2-pampas-grass-pond': ['https://cdna.artstation.com/p/assets/images/images/089/747/214/large/erwan-gaudichon-pampassgrass-diorama-a.jpg?1751849417','https://cdnb.artstation.com/p/assets/images/images/089/747/217/large/erwan-gaudichon-pampassgrass-diorama-b.jpg?1751849427','https://cdna.artstation.com/p/assets/covers/images/089/768/782/large/erwan-gaudichon-erwan-gaudichon-pampassgrass-closeup.jpg?1751903746','https://cdna.artstation.com/p/assets/images/images/089/747/220/large/erwan-gaudichon-pampassgrass-diorama-c.jpg?1751849436','https://cdna.artstation.com/p/assets/images/images/089/747/210/large/erwan-gaudichon-pampassgrass-single.jpg?1751849396','https://cdna.artstation.com/p/assets/images/images/089/747/212/large/erwan-gaudichon-pampassgrass-closeup.jpg?1751849410','https://cdna.artstation.com/p/assets/images/images/089/747/222/large/erwan-gaudichon-pampassgrass-presentation.jpg?1751849444','https://cdnb.artstation.com/p/assets/images/images/089/747/211/large/erwan-gaudichon-japanesegrass-closeup.jpg?1751849404'],
+ '3-eucalyptus': ['https://cdna.artstation.com/p/assets/covers/images/082/377/268/large/erwan-gaudichon-erwan-gaudichon-eucalyptus-03.jpg?1732808320']+['https://cdn%s.artstation.com/p/assets/images/images/082/345/%s/large/erwan-gaudichon-eucalyptus-%s.jpg?%s' % t for t in [('a','266','02','1732723003'),('b','271','03','1732723011'),('b','275','04','1732723019'),('a','342','05','1732723165'),('b','353','06','1732723175'),('a','362','07','1732723183'),('a','366','08','1732723191'),('b','371','09','1732723198'),('a','378','10','1732723205'),('b','383','11','1732723213')]],
+}
+for k, urls in SETS.items():
+    os.makedirs(T + k, exist_ok=True)
+    for i, u in enumerate(urls, 1):
+        name = '%02d_%s' % (i, re.sub(r'\?.*', '', u.split('/')[-1]))
+        out = T + k + '/' + name
+        for size in ('4k', 'large'):
+            r = subprocess.run(['curl', '-sfL', '-A', 'Mozilla/5.0', '-o', out, u.replace('/large/', '/%s/' % size)])
+            if r.returncode == 0 and os.path.getsize(out) > 10000: print(k, name, size, os.path.getsize(out)); break
+        else: print('FAILED', k, name)

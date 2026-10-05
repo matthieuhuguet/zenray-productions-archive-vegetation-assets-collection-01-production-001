@@ -1,0 +1,29 @@
+# 5 October 2026 : builds /obj/Eucalyptus in the scene VegetationCollection01 (same structure as the lily and the pampas: two HDA folders of 8 parameters, four Python SOP components, merge, normals, OUT). Usage: hython Scripts/BuildEucalyptus.py <hip> <hip out>, or inside the live Houdini with sys.argv = ['x', 'LIVE', 'LIVE']. FR : construit l'eucalyptus.
+import hou, sys, collections
+B = '/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/'
+LIVE = sys.argv[1] == 'LIVE'
+if not LIVE: hou.hipFile.load(sys.argv[1], suppress_save_prompt=True, ignore_load_warnings=True)
+lib = open(B + 'Scripts/LilyLib.py').read(); LIB = lib[:lib.index('def stem_point')] + '\n' + open(B + 'Scripts/EucaParts.py').read()
+obj = hou.node('/obj')
+if obj.node('Eucalyptus'): obj.node('Eucalyptus').destroy()
+g = obj.createNode('geo', 'Eucalyptus'); g.parm('tx').set(4.5)
+for c in g.children(): c.destroy()
+SHAPE = [('trunk_height', 'Trunk height (m)', 4.5, 2.0, 9.0), ('trunk_radius', 'Trunk radius (m)', 0.24, 0.1, 0.6), ('trunk_lean', 'Trunk lean (m)', 0.8, 0.0, 3.0), ('crown_radius', 'Crown radius (m)', 3.0, 1.0, 6.0), ('branch_count', 'Main branches', 6, 2, 12), ('sub_branches', 'Sub branches per branch', 3, 1, 6), ('twigs_per_branch', 'Twigs per sub branch', 4, 1, 8), ('seed', 'Seed', 11, 0, 999)]
+DETAIL = [('twig_droop', 'Twig droop', 1.0, 0.0, 2.0), ('card_size', 'Leaf card size (m)', 0.5, 0.2, 1.0)]
+ptg = g.parmTemplateGroup()
+for fname, spec in (('HDA Shape', SHAPE), ('HDA Detail', DETAIL)):
+    assert len(spec) <= 8
+    f = hou.FolderParmTemplate(fname.replace(' ', '_').lower(), fname, folder_type=hou.folderType.Simple)
+    for n, lab, dv, lo, hi in spec: f.addParmTemplate((hou.IntParmTemplate if isinstance(dv, int) else hou.FloatParmTemplate)(n, lab, 1, default_value=(dv,), min=lo, max=hi))
+    ptg.append(f)
+g.setParmTemplateGroup(ptg)
+parts = ['trunk', 'branches', 'twigs', 'leaf_cards']; nodes = []
+for i, nm in enumerate(parts):
+    py = g.createNode('python', 'C%d_%s' % (i + 1, nm)); py.parm('python').set(LIB + '\ngeo = hou.pwd().geometry(); geo.clear()\n%s(geo)\n' % nm); nodes.append(py)
+mg = g.createNode('merge', 'M_components')
+for i, p in enumerate(nodes): mg.setInput(i, p)
+nm = g.createNode('normal', 'N_normals'); nm.setInput(0, mg); nm.parm('type').set(0)
+out = g.createNode('null', 'OUT_eucalyptus'); out.setInput(0, nm); out.setDisplayFlag(True); out.setRenderFlag(True); g.layoutChildren()
+bad = [(c.name(), list(c.errors())[:1]) for c in g.children() if c.errors()]; geo = out.geometry()
+print('prims', len(geo.prims()), 'points', len(geo.points()), dict(collections.Counter(p.attribValue('mat') for p in geo.prims())), 'errors', bad)
+if not LIVE: hou.hipFile.save(sys.argv[2])

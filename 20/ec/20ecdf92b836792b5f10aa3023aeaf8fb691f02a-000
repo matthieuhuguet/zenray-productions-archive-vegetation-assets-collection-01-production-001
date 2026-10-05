@@ -1,0 +1,30 @@
+# 5 October 2026 : builds /obj/Pampas_Grass in the scene VegetationCollection01.hiplc, same structure as the lily (two HDA folders of 8 parameters, four Python SOP components, merge, normals, OUT). Usage: hython Scripts/BuildPampa.py <hip> <hip out>. FR : construit l'herbe de la pampa.
+import hou, sys, collections
+B = '/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/'
+LIVE = sys.argv[1] == 'LIVE'   # 5 October 2026 : LIVE builds inside the open Houdini session, nothing is loaded or saved
+if not LIVE:
+    hou.hipFile.load(sys.argv[1], suppress_save_prompt=True, ignore_load_warnings=True)
+lib = open(B + 'Scripts/LilyLib.py').read(); LIB = lib[:lib.index('def stem_point')] + '\n' + open(B + 'Scripts/PampaParts.py').read()
+obj = hou.node('/obj')
+if obj.node('Pampas_Grass'): obj.node('Pampas_Grass').destroy()
+g = obj.createNode('geo', 'Pampas_Grass'); g.parm('tx').set(1.5)
+for c in g.children(): c.destroy()
+SHAPE = [('clump_radius', 'Clump radius (m)', 0.28, 0.1, 0.8), ('blade_count', 'Blade count', 90, 10, 300), ('blade_length', 'Blade length (m)', 1.1, 0.3, 2.0), ('culm_count', 'Culm count', 7, 1, 20), ('culm_height', 'Culm height (m)', 1.8, 0.8, 3.0), ('plume_length', 'Plume length (m)', 0.45, 0.2, 0.8), ('plume_width', 'Plume width (m)', 0.12, 0.03, 0.2), ('seed', 'Seed', 5, 0, 999)]
+DETAIL = [('blade_width', 'Blade half width (m)', 0.011, 0.004, 0.03), ('blade_droop', 'Blade droop', 1.0, 0.0, 2.0), ('dead_count', 'Dead blade count', 50, 0, 200), ('plume_hairs', 'Plume hairs', 110, 10, 200), ('culm_radius', 'Culm radius (m)', 0.004, 0.002, 0.012), ('plume_curve', 'Plume curve', 0.25, 0.0, 0.8), ('hair_width', 'Hair half width (m)', 0.003, 0.001, 0.008)]
+ptg = g.parmTemplateGroup()
+for fname, spec in (('HDA Shape', SHAPE), ('HDA Detail', DETAIL)):
+    assert len(spec) <= 8
+    f = hou.FolderParmTemplate(fname.replace(' ', '_').lower(), fname, folder_type=hou.folderType.Simple)
+    for n, lab, dv, lo, hi in spec: f.addParmTemplate((hou.IntParmTemplate if isinstance(dv, int) else hou.FloatParmTemplate)(n, lab, 1, default_value=(dv,), min=lo, max=hi))
+    ptg.append(f)
+g.setParmTemplateGroup(ptg)
+parts = ['blades', 'dead', 'culms', 'plumes']; nodes = []
+for i, nm in enumerate(parts):
+    py = g.createNode('python', 'C%d_%s' % (i + 1, nm)); py.parm('python').set(LIB + '\ngeo = hou.pwd().geometry(); geo.clear()\n%s(geo)\n' % nm); nodes.append(py)
+mg = g.createNode('merge', 'M_components')
+for i, p in enumerate(nodes): mg.setInput(i, p)
+nm = g.createNode('normal', 'N_normals'); nm.setInput(0, mg); nm.parm('type').set(0)
+out = g.createNode('null', 'OUT_pampas'); out.setInput(0, nm); out.setDisplayFlag(True); out.setRenderFlag(True); g.layoutChildren()
+bad = [(c.name(), list(c.errors())[:1]) for c in g.children() if c.errors()]; geo = out.geometry()
+print('prims', len(geo.prims()), 'points', len(geo.points()), dict(collections.Counter(p.attribValue('mat') for p in geo.prims())), 'errors', bad)
+if not LIVE: hou.hipFile.save(sys.argv[2])

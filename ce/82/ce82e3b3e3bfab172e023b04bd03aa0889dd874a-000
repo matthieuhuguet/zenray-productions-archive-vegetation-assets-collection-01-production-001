@@ -1,0 +1,44 @@
+# 5 October 2026 : components of the Pampas grass (Cortaderia selloana): blades, dead brush, culms, plumes. Appended after the generic helpers of LilyLib.py (everything before stem_point). FR : composants de l'herbe de la pampa.
+GREEN = (0.22, 0.38, 0.12); DRY = (0.62, 0.52, 0.34); CULM = (0.5, 0.5, 0.25); PLUME = (0.78, 0.68, 0.5)
+def clump_pos(rnd, R):
+    r = R * (rnd.random() ** 0.7); a = rnd.uniform(0, 2 * math.pi); return V3(r * math.cos(a), 0, r * math.sin(a)), a
+def blade(geo, rnd, base, az, L, W, droop, mat, part, col, lean):
+    out = V3(math.cos(az), 0, math.sin(az)); d = (out * math.sin(lean) + V3(0, 1, 0) * math.cos(lean)).normalized(); K = 10; pos = base; rows = []
+    side = d.cross(V3(0, 1, 0)).normalized()
+    for s in range(K):
+        f = s / float(K - 1)
+        if s > 0:
+            side = d.cross(V3(0, 1, 0)); side = side.normalized() if side.length() > 1e-6 else V3(1, 0, 0)
+            d = rot(d, side, -droop * 0.11 * (0.2 + f * f * 2.2)); d = rot(d, V3(0, 1, 0), math.radians(rnd.uniform(-1.5, 1.5) + 4 * f)); pos = pos + d * (L / (K - 1))
+        w = W * (1.0 - f ** 1.6) + 0.0004; sd = d.cross(V3(0, 1, 0)); sd = sd.normalized() if sd.length() > 1e-6 else V3(1, 0, 0); nv = sd.cross(d).normalized()
+        rows.append([(pos + sd * (w * t) + nv * (-0.5 * w * abs(t)), (t * 0.5 + 0.5, f * L * 4.0)) for t in (-1.0, 0.0, 1.0)])
+    grid(geo, rows, mat, part, col)
+def blades(geo):
+    rnd = random.Random(int(PRM('seed'))); n = int(PRM('blade_count'))
+    for i in range(n):
+        base, a = clump_pos(rnd, PRM('clump_radius') * 0.6); L = PRM('blade_length') * rnd.uniform(0.55, 1.15)
+        blade(geo, rnd, base, a + rnd.uniform(-0.4, 0.4), L, PRM('blade_width') * rnd.uniform(0.8, 1.2), PRM('blade_droop') * rnd.uniform(0.7, 1.3), 'blade', 'blade%d' % i, GREEN, math.radians(rnd.uniform(8, 38)))
+def dead(geo):
+    rnd = random.Random(int(PRM('seed')) + 1); n = int(PRM('dead_count'))
+    for i in range(n):
+        base, a = clump_pos(rnd, PRM('clump_radius')); blade(geo, rnd, base, a, PRM('blade_length') * rnd.uniform(0.3, 0.7), PRM('blade_width') * 0.7, PRM('blade_droop') * 1.5, 'dead', 'dead%d' % i, DRY, math.radians(rnd.uniform(25, 60)))
+def culm_data():
+    rnd = random.Random(int(PRM('seed')) + 2); out = []
+    for i in range(int(PRM('culm_count'))):
+        base, a = clump_pos(rnd, PRM('clump_radius') * 0.25); H = PRM('culm_height') * rnd.uniform(0.7, 1.05); lean = rnd.uniform(0.05, 0.22) * H; o = V3(math.cos(a), 0, math.sin(a))
+        p3 = base + o * lean + V3(0, H, 0); pts = bez(base, base + V3(0, H * 0.45, 0), base + V3(0, H * 0.75, 0) + o * lean * 0.5, p3, 14); out.append((pts, o, rnd))
+    return out
+def culms(geo):
+    for i, (pts, o, rnd) in enumerate(culm_data()): tube(geo, pts, [PRM('culm_radius') * (1.0 - 0.5 * k / 13.0) for k in range(14)], 5, 'culm', 'culm%d' % i, CULM)
+def plumes(geo):
+    for i, (pts, o, rnd) in enumerate(culm_data()):
+        top = pts[-1]; td = (pts[-1] - pts[-3]).normalized(); PL = PRM('plume_length') * rnd.uniform(0.85, 1.1); PW = PRM('plume_width'); nh = int(PRM('plume_hairs')); curve = PRM('plume_curve')
+        rach = [top + td * (PL * k / 8.0) + o * (curve * PL * (k / 8.0) ** 2) for k in range(9)]
+        tube(geo, rach, [PRM('culm_radius') * 0.8 * (1.0 - 0.7 * k / 8.0) for k in range(9)], 4, 'culm', 'rachis%d' % i, CULM)
+        for h in range(nh):
+            a = rnd.uniform(0.04, 1.0); k = min(7, int(a * 8)); frac = a * 8 - k; base = rach[k] * (1 - frac) + rach[k + 1] * frac; axis = (rach[k + 1] - rach[k]).normalized()
+            e1, e2 = frame_perp(axis); ang = rnd.uniform(0, 2 * math.pi); rad = e1 * math.cos(ang) + e2 * math.sin(ang); prof = math.sin(math.pi * (a ** 0.75)) ** 0.8
+            HL = PW * (0.6 + 0.9 * prof) * rnd.uniform(0.7, 1.2) + 0.01; hp = []
+            for q in range(5):
+                u = q / 4.0; hp.append(base + rad * (HL * math.sin(u * 1.1) * 0.9) + axis * (HL * 1.3 * u) + V3(0, -1, 0) * (HL * 0.25 * u * u))
+            tube(geo, hp, [PRM('hair_width') * (1.0 - 0.75 * q / 4.0) for q in range(5)], 3, 'plume', 'hair%d_%d' % (i, h), PLUME)

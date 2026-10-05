@@ -1,0 +1,9 @@
+# 5 October 2026 : exports the OUT geometry of an /obj node to a light npz (positions, polygons, colours, material names) for the matplotlib preview, no Houdini UI needed. Usage: hython ExportGeo.py <hip> <node path to the OUT null> <out.npz>. FR : exporte la geometrie pour l'apercu.
+import hou, sys, numpy as np
+hou.hipFile.load(sys.argv[1], suppress_save_prompt=True, ignore_load_warnings=True)
+g = hou.node(sys.argv[2]).geometry(); pos = np.array([list(p.position()) for p in g.points()], np.float32)
+polys = [[v.point().number() for v in pr.vertices()] for pr in g.prims()]; mx = max(len(p) for p in polys)
+P = np.full((len(polys), mx), -1, np.int32)
+for i, p in enumerate(polys): P[i, :len(p)] = p
+col = np.array([np.mean([list(v.point().attribValue('Cd')) for v in pr.vertices()], axis=0) for pr in g.prims()], np.float32); mat = np.array([pr.attribValue('mat') for pr in g.prims()])
+np.savez_compressed(sys.argv[3], pos=pos, polys=P, col=col, mat=mat); print('exported', len(pos), len(polys))

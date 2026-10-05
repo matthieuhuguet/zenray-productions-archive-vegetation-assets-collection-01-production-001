@@ -1,0 +1,5 @@
+#!/bin/bash
+# 5 October 2026 : rebuild the lily in the live Houdini is done by MCP; this script saves nothing. It exports the saved hip copy and renders the preview next to a reference crop. Usage: CompareLily.sh <label> <zoom y0,y1>. FR : apercu a cote de la reference.
+P=/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01; HY=/Users/zenray/Create/Build/Houdini22/Houdini22.0.368/Frameworks/Houdini.framework/Versions/Current/Resources/bin/hython
+cp $P/hip/VegetationCollection01.hiplc /tmp/veg_read.hiplc; $HY $P/Scripts/ExportGeo.py /tmp/veg_read.hiplc /obj/Lily_Flower/OUT_lily $P/previews/lily.npz | tail -1
+python3 $P/Scripts/PreviewGeo.py $P/previews/lily.npz $P/previews/lily_$1.png ${2:-0.55,0.95} 600 | tail -1

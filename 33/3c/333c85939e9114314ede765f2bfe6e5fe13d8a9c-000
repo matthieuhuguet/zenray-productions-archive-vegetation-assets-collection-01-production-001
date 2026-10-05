@@ -1,0 +1,44 @@
+# 5 October 2026 : compares the silhouettes of the lily model with the masks of the 4 view sheet (front, side, top). The model is placed with one scale (pixels per metre, set from the total height against the reference stem height) and the stem axis of the sheet; the side view is tried in both directions. Prints the intersection over union per view and writes an overlay (white both, red model only, green reference only). Usage: python3 SilCompare.py <geo.npz> <out.png> [px_per_m]. FR : compare les silhouettes du modele a celles de la planche.
+import sys, numpy as np
+from PIL import Image, ImageDraw
+sys.path.insert(0, '/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/Scripts')
+B = '/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/previews/'
+d = np.load(sys.argv[1]); pos, P = d['pos'], d['polys']
+REF = {q: (np.asarray(Image.open(B + 'mask_%s.png' % q))[..., 0] > 0) for q in ('front', 'side', 'top')}   # red channel of the saved masks = foreground
+BASE_Y, AXIS = {'front': 505, 'side': 505}, {'front': 382, 'side': 371}; C_TOP = (396, 232)
+S = float(sys.argv[3]) if len(sys.argv) > 3 else 494.0 / (pos[:, 1].max() - pos[:, 1].min())
+def sil(view, sign=1, S=S):
+    h, w = REF[view].shape; im = Image.new('L', (w, h), 0); dr = ImageDraw.Draw(im)
+    for row in P:
+        idx = row[row >= 0]; q = pos[idx]
+        if view == 'front': pts = [(AXIS['front'] + p[0] * S, BASE_Y['front'] - (p[1] - pos[:, 1].min()) * S) for p in q]
+        elif view == 'side': pts = [(AXIS['side'] + sign * p[2] * S, BASE_Y['side'] - (p[1] - pos[:, 1].min()) * S) for p in q]
+        else: pts = [(C_TOP[0] + p[0] * S, C_TOP[1] + p[2] * S) for p in q]
+        dr.polygon(pts, fill=255)
+    return np.asarray(im) > 0
+from scipy import ndimage as ndi
+def iou(a, b, tol=4):   # tolerant IoU: a pixel counts as matched when the other mask is within tol pixels (thin leaves never overlap exactly)
+    da, db = ndi.binary_dilation(a, iterations=tol), ndi.binary_dilation(b, iterations=tol)
+    return float(((a & db).sum() + (b & da).sum())) / float(a.sum() + b.sum())
+res = {}; sheets = []
+ST = max(np.linspace(300, 1300, 51), key=lambda t: iou(sil('top', 1, t), REF['top'], 6)); print('best top scale px/m %.0f (front scale %.0f)' % (ST, S))
+for view, sign in (('front', 1), ('side', 1), ('side', -1), ('top', 1)):
+    m = sil(view, sign, ST if view == 'top' else S); r = REF[view].copy()
+    if view != 'top': r[510:] = False   # the ground shadow of the sheet is not part of the plant
+    k = view + ('' if view != 'side' else ('+' if sign > 0 else '-')); res[k] = iou(m, r)
+    ov = np.zeros(m.shape + (3,), np.uint8); ov[m & r] = (255, 255, 255); ov[m & ~r] = (255, 60, 60); ov[~m & r] = (60, 255, 60); sheets.append((k, ov))
+best_side = '+' if res['side+'] >= res['side-'] else '-'
+print('scale px/m %.1f' % S, {k: round(v, 3) for k, v in res.items()}, 'best side', best_side)
+sel = [s for s in sheets if s[0] in ('front', 'side' + best_side, 'top')]
+out = Image.new('RGB', (sum(s[1].shape[1] for s in sel), sel[0][1].shape[0]))
+x = 0
+for k, ov in sel: out.paste(Image.fromarray(ov), (x, 0)); x += ov.shape[1]
+out.save(sys.argv[2]); print('saved', sys.argv[2])
+
+# half span envelope of the leaf zone per row band (front view), model against reference, in metres
+mf = sil('front'); rf = REF['front'].copy(); rf[510:] = False
+print('row band (m above base) : half span ref / model (m)')
+for y in range(500, 120, -40):
+    a = np.nonzero(rf[y - 40:y].any(0))[0]; b = np.nonzero(mf[y - 40:y].any(0))[0]
+    f = lambda v: (max(abs(v.min() - AXIS['front']), abs(v.max() - AXIS['front'])) / S) if len(v) else 0
+    print('  %.2f-%.2f : %.3f / %.3f' % ((505 - y) / S, (545 - y) / S, f(a), f(b)))

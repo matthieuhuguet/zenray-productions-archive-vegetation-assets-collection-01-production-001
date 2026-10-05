@@ -1,0 +1,91 @@
+# 5 October 2026 : the six components of the Lily, version 2 rebuilt from close crops of the reference (Erwan Gaudichon, render01 and render02): long trumpet whose tube is made of the six tepals wrapped around the axis (magenta outside, white margins), tips flaring and curling back, olive filaments with large orange anthers, brown ball stigma, lime pedicel swelling into the calyx, grey green stem, narrow twisted curling leaves. Appended after LilyLib.py in every Python SOP. FR : le lys, version 2 d'apres la reference.
+GREEN = (0.2, 0.55, 0.12); STEM = (0.38, 0.5, 0.28); LIME = (0.55, 0.7, 0.2); WHITE = (0.96, 0.93, 0.94); ORANGE = (0.95, 0.45, 0.05); OLIVE = (0.4, 0.45, 0.1); BROWN = (0.35, 0.15, 0.12); MAG = (0.72, 0.12, 0.38)
+def ss(a, b, x):
+    t = max(0.0, min(1.0, (x - a) / float(b - a))); return t * t * (3 - 2 * t)
+def mix(a, b, t): return tuple(a[i] * (1 - t) + b[i] * t for i in range(3))
+def stem(geo):
+    N = 28; pts = [stem_point(i / float(N - 1)) for i in range(N)]
+    tube(geo, pts, [stem_radius(i / float(N - 1)) for i in range(N)], 8, 'stem', 'stem', STEM)
+def leaves(geo):
+    n = int(PRM('leaf_count')); L0 = PRM('leaf_length'); W = PRM('leaf_width'); droop = PRM('leaf_droop'); rnd = random.Random(int(PRM('seed')) + 1)
+    for i in range(n):
+        t = 0.04 + 0.89 * i / float(max(1, n - 1)); az = math.radians(137.5 * i + rnd.uniform(-10, 10)); out = V3(math.cos(az), 0, math.sin(az)); S = stem_point(t) + out * stem_radius(t)
+        L = L0 * (1.0 + PRM('leaf_ramp') * t) * rnd.uniform(0.85, 1.15); up0 = math.radians(PRM('leaf_angle') + rnd.uniform(-17, 17)); d = (out * math.cos(up0) + V3(0, 1, 0) * math.sin(up0)).normalized()
+        K = 10; pos = S; rows = []; twist = rnd.uniform(-2.4, 2.4); ph = rnd.uniform(0, 6.28); base_side = d.cross(V3(0, 1, 0)).normalized()
+        for s in range(K):
+            f = s / float(K - 1)
+            if s > 0:
+                side = d.cross(V3(0, 1, 0)); side = side.normalized() if side.length() > 1e-6 else base_side
+                d = rot(d, side, -droop * 0.075 * (0.5 + 2.5 * f * f)); d = rot(d, V3(0, 1, 0), 0.22 * math.sin(f * 7 + ph)); pos = pos + d * (L / (K - 1))
+            w = W * (math.sin(math.pi * min(1.0, f * 0.9 + 0.05)) ** 0.5) * (1.0 - 0.3 * f) + 0.0003
+            sd = d.cross(V3(0, 1, 0)); sd = sd.normalized() if sd.length() > 1e-6 else base_side; sd = rot(sd, d, twist * f); nv = sd.cross(d).normalized()
+            rows.append([(pos + sd * (w * tt) + nv * (-0.4 * w * abs(tt)), (tt * 0.5 + 0.5, f)) for tt in (-1.0, 0.0, 1.0)])
+        grid(geo, rows, 'leaf', 'leaf%d' % i, lambda u, v: mix((0.15, 0.5, 0.1), (0.35, 0.7, 0.2), 0.5 + 0.5 * math.cos((u - 0.5) * 6.28) * 0.5 * (1 - v)))
+def pedicels(geo):
+    for k, slot in enumerate(flower_slots()):
+        pts, d, out = attach(slot); r = PRM('stem_radius'); n = len(pts)
+        if slot[3]:
+            Lb = PRM('tepal_length') * slot[4] * 0.8; base = pts[-1]; ptsb = [base + d * (Lb * i / 9.0) + V3(0, 1, 0) * (0.015 * (i / 9.0) ** 2) for i in range(10)]
+            tube(geo, pts, [r * 0.8 + r * 0.9 * (i / float(n - 1)) ** 2 for i in range(n)], 6, 'pedicel', 'pedicel%d' % k, LIME)
+            tube(geo, ptsb, [0.0125 * (math.sin(math.pi * (0.03 + 0.94 * i / 9.0)) ** 0.7) + 0.0003 for i in range(10)], 12, 'bud', 'bud%d' % k, lambda u, v: mix(WHITE, MAG, ss(0.5, 0.8, 0.5 + 0.5 * math.cos(u * 6.2832 * 3)) * (1 - 0.5 * v)))
+        else:
+            tube(geo, pts, [r * 0.8 + r * 1.4 * (i / float(n - 1)) ** 2.5 for i in range(n)], 8, 'pedicel', 'pedicel%d' % k, LIME)
+def flower_frame(slot):
+    pts, d, out = attach(slot); return pts[-1], d
+def tepal_color(u, f):
+    t = 2 * u - 1; edge = abs(t); tube_c = mix(MAG, WHITE, ss(0.55, 0.92, edge)); base = mix((0.35, 0.1, 0.25), tube_c, ss(0.0, 0.14, f))
+    streak = mix((1.0, 0.85, 0.92), WHITE, ss(0.0, 0.25, edge)); upper = mix(base, streak, ss(0.46, 0.66, f)); return upper
+def tepals(geo):
+    wave = PRM('tepal_wave'); Lt = PRM('tepal_length'); Wm = PRM('tepal_width'); flare = PRM('tepal_flare'); rnd = random.Random(int(PRM('seed')) + 2)
+    for k, slot in enumerate(flower_slots()):
+        if slot[3]: continue
+        B, d = flower_frame(slot); e1, e2 = frame_perp(d); roll = rnd.uniform(0, 2 * math.pi)
+        for j in range(6):
+            inner = j % 2; a = roll + j * math.pi / 3.0; r = e1 * math.cos(a) + e2 * math.sin(a); l = d.cross(r).normalized()
+            Ls = Lt * slot[4] * (0.96 if inner else 1.0) * rnd.uniform(0.97, 1.03); Wsc = (1.18 if inner else 1.0) * slot[4]; fl = flare * rnd.uniform(0.92, 1.08)
+            NS, NT = 20, 9; c = B + r * (0.0065 - 0.0015 * inner); rows = []
+            def theta(f): return PRM('funnel') * f + fl * ss(0.55, 1.0, f) ** 1.2 + 0.5 * ss(0.88, 1.0, f)
+            for s in range(NS):
+                f = s / float(NS - 1)
+                if s > 0: thm = 0.5 * (theta(f) + theta((s - 1) / float(NS - 1))); c = c + (d * math.cos(thm) + r * math.sin(thm)) * (Ls / (NS - 1))
+                th = theta(f); tan = (d * math.cos(th) + r * math.sin(th)).normalized(); nout = (r * math.cos(th) - d * math.sin(th)).normalized()
+                rho = max(0.0065, (c - B).dot(r)); g = ss(0.42, 0.78, f); wT = 0.62 * rho * (1.1 if inner else 1.0) + 0.001
+                taper = 1.0 if f <= 0.8 else (1 - ((f - 0.8) / 0.2) ** 1.8) ** 0.7; w = max(0.0004, (1 - g) * wT + g * Wm * Wsc * taper); rc = max(rho, w * 1.02); row = []
+                for q in range(NT):
+                    tt = -1.0 + 2.0 * q / (NT - 1); x = w * tt
+                    drop_t = rc - math.sqrt(max(rc * rc - x * x, 0.0)); drop_f = 0.22 * w * tt * tt; drop = (1 - g) * drop_t + g * drop_f
+                    pos = c + l * x - nout * drop + nout * (0.0012 * (1 - abs(tt)) * g) + nout * (wave * math.sin(f * 11.0 + j * 1.7 + tt * 2.3) * tt * tt * g)
+                    row.append((pos, (tt * 0.5 + 0.5, f)))
+                rows.append(row)
+            grid(geo, rows, 'tepal', 'tepal%d_%d' % (k, j), tepal_color)
+def stamens(geo):
+    rnd = random.Random(int(PRM('seed')) + 3)
+    for k, slot in enumerate(flower_slots()):
+        if slot[3]: continue
+        B, d = flower_frame(slot); e1, e2 = frame_perp(d); roll = rnd.uniform(0, 2 * math.pi); Ls = PRM('stamen_length') * slot[4]
+        for j in range(6):
+            a = roll + j * math.pi / 3.0 + 0.2; r = e1 * math.cos(a) + e2 * math.sin(a); l = d.cross(r).normalized(); sp = rnd.uniform(0.008, 0.022)
+            pts = bez(B + r * 0.003, B + d * Ls * 0.4 + r * 0.004, B + d * Ls * 0.8 + r * sp * 0.7, B + d * Ls * 0.97 + r * sp, 7)
+            tube(geo, pts, [0.0011 - 0.0003 * i / 6.0 for i in range(7)], 5, 'stamen', 'filament%d_%d' % (k, j), OLIVE)
+            tip = pts[-1]; tdir = (pts[-1] - pts[-2]).normalized(); ax = (l * 0.6 + tdir * 0.5 + r * 0.2 * rnd.uniform(-1, 1)).normalized(); ac = [tip - ax * 0.007 + ax * (0.021 * i / 6.0) for i in range(7)]
+            tube(geo, ac, [0.0034 * (math.sin(math.pi * (0.08 + 0.84 * i / 6.0)) ** 0.5) + 0.0003 for i in range(7)], 8, 'anther', 'anther%d_%d' % (k, j), ORANGE)
+def pistil(geo):
+    rnd = random.Random(int(PRM('seed')) + 4)
+    for k, slot in enumerate(flower_slots()):
+        if slot[3]: continue
+        B, d = flower_frame(slot); e1, e2 = frame_perp(d); a = rnd.uniform(0, 2 * math.pi); r = e1 * math.cos(a) + e2 * math.sin(a); Lp = PRM('stamen_length') * slot[4] * 1.18
+        pts = bez(B, B + d * Lp * 0.4, B + d * Lp * 0.8 + r * 0.006, B + d * Lp + r * 0.012, 9)
+        tube(geo, pts, [0.0019 - 0.0006 * i / 8.0 for i in range(9)], 6, 'pistil', 'style%d' % k, OLIVE)
+        tip = pts[-1]; td = (pts[-1] - pts[-2]).normalized()
+        tube(geo, [tip, tip + td * 0.0045, tip + td * 0.009], [0.0007, 0.0048, 0.0007], 8, 'stigma', 'stigma%d' % k, BROWN)
+def calyx(geo):
+    """epicalyx and calyx of the parts sheet (upscaled-flower-parts.png): a ring of six small lime bracts at the top of the pedicel, hugging the base of the tube. FR : calice."""
+    Lc = PRM('calyx_size'); rnd = random.Random(int(PRM('seed')) + 5)
+    for k, slot in enumerate(flower_slots()):
+        B, d = flower_frame(slot); e1, e2 = frame_perp(d); roll = rnd.uniform(0, 2 * math.pi); sz = Lc * (1.0 if not slot[3] else 0.7) * slot[4]
+        for j in range(6):
+            a = roll + j * math.pi / 3.0; r = e1 * math.cos(a) + e2 * math.sin(a); l = d.cross(r).normalized(); rows = []
+            for q in range(5):
+                f = q / 4.0; c = B - d * 0.004 + d * (sz * f) + r * (0.0075 + sz * 0.35 * f * f); w = 0.0045 * math.sin(math.pi * (0.1 + 0.8 * f)) ** 0.8 + 0.0002
+                rows.append([(c + l * (w * t), (t * 0.5 + 0.5, f)) for t in (-1.0, 0.0, 1.0)])
+            grid(geo, rows, 'calyx', 'calyx%d_%d' % (k, j), LIME)

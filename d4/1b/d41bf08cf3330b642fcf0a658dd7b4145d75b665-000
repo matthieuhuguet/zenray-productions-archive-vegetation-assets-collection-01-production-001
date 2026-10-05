@@ -1,0 +1,27 @@
+# 5 October 2026 : software preview of an exported npz in four views (front, side, top, 3/4): orthographic projection, painter's algorithm, headlight shading, PIL only (no matplotlib on this Mac). Usage: python3 PreviewGeo.py <in.npz> <out.png> [y0,y1 zoom window in metres] [cell px]. FR : apercu logiciel en quatre vues.
+import sys, numpy as np
+from PIL import Image, ImageDraw
+d = np.load(sys.argv[1]); pos, P, col = d['pos'], d['polys'], d['col']
+zoom = [float(x) for x in sys.argv[3].split(',')] if len(sys.argv) > 3 and sys.argv[3] != '-' else None
+S = int(sys.argv[4]) if len(sys.argv) > 4 else 900
+VIEWS = [('front', 0, 0), ('side', 0, 90), ('top', 90, 0), ('3/4', 25, 45)]
+sheet = Image.new('RGB', (S * 4, S), (48, 48, 48))
+def basis(el, az):
+    a, e = np.radians(az), np.radians(el)
+    fwd = np.array([-np.sin(a) * np.cos(e), -np.sin(e), -np.cos(a) * np.cos(e)])   # camera looks along -forward; world: x right, y up, z towards viewer at az 0
+    right = np.array([np.cos(a), 0, -np.sin(a)]); up = np.cross(right, fwd)
+    return right, up, -fwd
+for k, (name, el, az) in enumerate(VIEWS):
+    r, u, v = basis(el, az); X = pos @ r; Y = pos @ u; Z = pos @ v
+    lo, hi = np.array([X.min(), Y.min()]), np.array([X.max(), Y.max()]); c = (lo + hi) / 2; half = (hi - lo).max() / 2 * 1.05
+    if zoom: c[1] = pos[:, 1].min() * 0 + (zoom[0] + zoom[1]) / 2 if name != 'top' else c[1]; half = (zoom[1] - zoom[0]) / 2
+    im = Image.new('RGB', (S, S), (48, 48, 48)); dr = ImageDraw.Draw(im); depth = []
+    for i in range(len(P)):
+        idx = P[i][P[i] >= 0]; depth.append(Z[idx].mean())
+    for i in np.argsort(depth):
+        idx = P[i][P[i] >= 0]; q = pos[idx]; n = np.cross(q[1] - q[0], q[2] - q[0]); l = np.linalg.norm(n)
+        sh = 0.3 + 0.7 * (abs(np.dot(n / l, v)) if l > 0 else 0.5); fc = tuple(int(255 * min(1, x * sh)) for x in col[i])
+        poly = [((X[j] - c[0]) / half * S / 2 + S / 2, S / 2 - (Y[j] - c[1]) / half * S / 2) for j in idx]
+        dr.polygon(poly, fill=fc)
+    dr.text((8, 8), name, fill=(240, 240, 240)); sheet.paste(im, (k * S, 0))
+sheet.save(sys.argv[2]); print('saved', sys.argv[2], sheet.size)

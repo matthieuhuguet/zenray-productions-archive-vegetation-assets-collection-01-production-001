@@ -1,0 +1,82 @@
+# 5 October 2026 : material identification sheets v2 (rebuilt after the remark on resolution, font and alignment). One sheet per asset: a 3600 px wide canvas, InterVariable text (60/34/26 px), a hero image, then a strict 3 column grid where every crop sits in the same 1100 x 800 box, top left aligned, at native pixel density (no upscale beyond 1.6x). The flower sheet is a TRIM SHEET plan: the parts do not get one material each, they are zones of ONE material (the sheet only specifies the zones, the trim is not created here). FR : planches d'identification v2, alignees, nettes, avec le plan de trim sheet.
+import os, textwrap
+from PIL import Image, ImageDraw, ImageFont
+R = '/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/refs/'
+os.makedirs(R + 'materials', exist_ok=True)
+FONT = '/Users/zenray/Library/Fonts/InterVariable.ttf'
+def font(px):
+    f = ImageFont.truetype(FONT, px)
+    try: f.set_variation_by_name('Regular')
+    except Exception: pass
+    return f
+F60, F34, F26 = font(60), font(34), font(26)
+W, M, GAP, CW, CH = 3600, 60, 40, 1100, 800
+BG, FG, DIM, ACC, LINE = (24, 24, 24), (240, 240, 240), (170, 170, 170), (255, 214, 120), (70, 70, 70)
+def wrap(d, text, f, width):
+    words, lines, cur = text.split(), [], ''
+    for w in words:
+        t = (cur + ' ' + w).strip()
+        if d.textlength(t, font=f) <= width: cur = t
+        else: lines.append(cur); cur = w
+    return lines + [cur]
+
+# 5 October 2026 : French lines, shown right under the English ones (Matthieu learns the vocabulary: English first, then French). Key = sheet name + zone code. FR : traductions, l'anglais d'abord puis le francais.
+FR = {
+ '1-flower-lily': {'Z1': ('Tépale, face intérieure', 'satin blanc, nervures longitudinales douces, lavis rose à la base, fines papilles'), 'Z2': ('Tépale, face extérieure', 'rayures magenta à bords blancs, base violet foncé, fibreux'), 'Z3': ('Étamine, anthère, stigmate', 'filament olive, anthère orange chargée de pollen, stigmate brun en boule'), 'Z4': ('Pédicelle et calice', 'renflement vert lime lisse, poils duveteux vers la tige'), 'Z5': ('Tige', 'tige vert-gris fibreuse et duveteuse, poils fins, taches brun rouge'), 'Z6': ('Feuille', 'lame étroite vert brillant, nervure centrale, bords abîmés brun'), 'Z7': ('Bouton et tubes de tépales', 'rayures rose et blanc le long du tube fermé, comme la face extérieure du tépale')},
+ '2-pampas-grass-pond': {'Z1': ('Plumeau', 'panicule beige duveteuse, milliers de poils fins, forme de flamme'), 'Z2': ('Hampe', 'tige raide, vert foncé virant au beige près du plumeau'), 'Z3': ('Lame verte', 'lame longue et fine, nervure centrale, bord dentelé'), 'Z4': ('Brins secs', 'lames sèches beiges à la base de la touffe'), 'Z5': ('Plumeau au vent', 'brins retombants, pointes dorées')},
+ '3-eucalyptus': {'Z1': ('Écorce', 'écorce gris clair en lambeaux, taches orange brun, nœuds'), 'Z2': ('Branche', 'branches claires lisses et fines, bord qui se détache'), 'Z3': ('Feuille pendante', 'feuille longue étroite vert-bleu, retombante, nervure centrale'), 'Z4': ('Feuille de couronne', 'couronne dense vert foncé vue à contre-jour'), 'Z5': ('Carte de feuilles', "carte alpha de la version optimisée")},
+}
+SHEETS = {
+ '1-flower-lily': dict(title='Lily (Lilium)', kicker='TRIM SHEET: ONE material, seven zones. The surfaces of a flower are small, so the parts are zones of a single trim, never six separate materials.',
+  hero='1-flower-lily/01_erwan-gaudichon-render01.jpg', items=[
+  ('Z1  TEPAL inside', 'white satin, soft longitudinal veins, pink flush at the base, fine papillae', '1-flower-lily/01_erwan-gaudichon-render01.jpg', (1183, 908, 2283, 1708)),
+  ('Z2  TEPAL outside', 'magenta stripes with white margins, dark purple base, fibrous', '1-flower-lily/02_erwan-gaudichon-render02.jpg', (2635, 370, 3735, 1170)),
+  ('Z3  STAMEN, ANTHER, STIGMA', 'olive filament, orange pollen anther, brown ball stigma', '1-flower-lily/01_erwan-gaudichon-render01.jpg', (1521, 820, 2621, 1620)),
+  ('Z4  PEDICEL and CALYX', 'lime green smooth swelling, fuzzy hairs towards the stem', '1-flower-lily/01_erwan-gaudichon-render01.jpg', (1875, 300, 2975, 1100)),
+  ('Z5  STEM', 'grey green fuzzy fibrous stem, fine hairs, red brown spots', '1-flower-lily/02_erwan-gaudichon-render02.jpg', (2202, 610, 3302, 1410)),
+  ('Z6  LEAF', 'narrow glossy green blade, centre vein, brown edge wear', '1-flower-lily/02_erwan-gaudichon-render02.jpg', (2276, 1110, 3376, 1910)),
+  ('Z7  BUD and TEPAL tubes', 'pink white stripes along the closed tube, same stripes as the tepal outside', '1-flower-lily/01_erwan-gaudichon-render01.jpg', (2740, 0, 3840, 800))],
+  trim=[('Band A', 'tepal inside + bud white part', 'Z1, Z7'), ('Band B', 'tepal outside + bud stripes', 'Z2, Z7'), ('Band C', 'stamen, anther, stigma (tiny, tight tiles)', 'Z3'), ('Band D', 'green organic: pedicel, stem, leaf (three sub bands)', 'Z4, Z5, Z6')],
+  note='One Copernicus graph, one set of maps (height, normal, basecolor, roughness, AO, reflect). The UV of every part is packed into its band of the trim. A height reference is needed per ZONE, assembled by Matthieu into ONE 4096 trim reference.'),
+ '2-pampas-grass-pond': dict(title='Pampas grass (Cortaderia)', kicker='Proposal to validate: thin parts too, so a trim for blades, culms and dead brush, plus a separate alpha material for the plume.',
+  hero='2-pampas-grass-pond/05_erwan-gaudichon-pampassgrass-single.jpg', items=[
+  ('Z1  PLUME', 'beige fluffy panicle, thousands of fine hairs, flame shape', '2-pampas-grass-pond/06_erwan-gaudichon-pampassgrass-closeup.jpg', (1800, 50, 2900, 850)),
+  ('Z2  CULM', 'stiff stalk, dark green turning beige near the plume', '2-pampas-grass-pond/06_erwan-gaudichon-pampassgrass-closeup.jpg', (1200, 1187, 2300, 1987)),
+  ('Z3  BLADE green', 'long thin blade, mid rib, serrated edge', '2-pampas-grass-pond/05_erwan-gaudichon-pampassgrass-single.jpg', (1250, 1050, 2350, 1850)),
+  ('Z4  DEAD BRUSH', 'dry beige blades at the base of the clump', '2-pampas-grass-pond/05_erwan-gaudichon-pampassgrass-single.jpg', (800, 1187, 1900, 1987)),
+  ('Z5  PLUME in the wind', 'drooping strands, golden tips', '2-pampas-grass-pond/08_erwan-gaudichon-japanesegrass-closeup.jpg', (2050, 1187, 3150, 1987))],
+  trim=[('Trim 1', 'blades, culms, dead brush', 'Z2, Z3, Z4'), ('Alpha card', 'plume', 'Z1, Z5')], note='To validate with Matthieu before any graph.'),
+ '3-eucalyptus': dict(title='Eucalyptus', kicker='Proposal to validate: the trunk bark is a large surface and keeps its own material; twigs and leaves form a trim.',
+  hero='3-eucalyptus/02_erwan-gaudichon-eucalyptus-02.jpg', items=[
+  ('Z1  BARK', 'pale grey white bark peeling in strips, orange brown patches, knots', '3-eucalyptus/02_erwan-gaudichon-eucalyptus-02.jpg', (1180, 790, 2280, 1590)),
+  ('Z2  BRANCH', 'smooth light branches, thin, peeling edge', '3-eucalyptus/02_erwan-gaudichon-eucalyptus-02.jpg', (1700, 0, 2800, 800)),
+  ('Z3  LEAF hanging', 'long narrow blue green leaf, droops, centre vein', '3-eucalyptus/02_erwan-gaudichon-eucalyptus-02.jpg', (450, 600, 1550, 1400)),
+  ('Z4  LEAF crown', 'dense dark green crown seen through the light', '3-eucalyptus/02_erwan-gaudichon-eucalyptus-02.jpg', (2600, 0, 3700, 800)),
+  ('Z5  LEAF CARD', 'alpha card of the optimized version', '3-eucalyptus/07_erwan-gaudichon-eucalyptus-07.jpg', (1350, 500, 2450, 1300))],
+  trim=[('Material 1', 'bark (trunk and branches)', 'Z1, Z2'), ('Trim 2', 'twigs and leaf cards', 'Z3, Z4, Z5')], note='To validate with Matthieu before any graph.'),
+}
+for name, S in SHEETS.items():
+    items = S['items']; rows = (len(items) + 2) // 3
+    probe = ImageDraw.Draw(Image.new('RGB', (10, 10))); kick = wrap(probe, S['kicker'], F34, W - 2 * M)
+    head_h = M + 70 + 46 * len(kick) + 30
+    hero = Image.open(R + 'raw/' + S['hero']).convert('RGB'); hh = 1000; hero = hero.resize((int(hero.width * hh / hero.height), hh), Image.LANCZOS)
+    trim_h = 70 + 56 * (len(S['trim']) + 1) + 110
+    H = head_h + hh + GAP + rows * (CH + 215) + GAP + trim_h + M
+    s = Image.new('RGB', (W, H), BG); d = ImageDraw.Draw(s)
+    d.text((M, M), S['title'] + '   (5 October 2026)', font=F60, fill=FG)
+    for i, l in enumerate(kick): d.text((M, M + 70 + 46 * i), l, font=F34, fill=ACC)
+    s.paste(hero, (M, head_h)); y0 = head_h + hh + GAP
+    for i, (title, desc, src, box) in enumerate(items):
+        col, row = i % 3, i // 3; x = M + col * (CW + GAP); y = y0 + row * (CH + 215)
+        code = title.split()[0]; ft, fd = FR[name][code]
+        d.text((x, y), title, font=F34, fill=ACC); d.text((x + 560, y), ft, font=F34, fill=(200, 235, 170))
+        im = Image.open(R + 'raw/' + src).convert('RGB').crop(box); sc = min(CW / im.width, CH / im.height, 1.0); im = im.resize((int(im.width * sc), int(im.height * sc)), Image.LANCZOS)
+        d.rectangle((x, y + 50, x + CW, y + 50 + CH), outline=LINE, width=2); s.paste(im, (x, y + 50))
+        for j, l in enumerate(wrap(d, 'EN  ' + desc, F26, CW)[:2]): d.text((x, y + 50 + CH + 12 + 34 * j), l, font=F26, fill=DIM)
+        for j, l in enumerate(wrap(d, 'FR  ' + fd, F26, CW)[:2]): d.text((x, y + 50 + CH + 12 + 68 + 34 * j), l, font=F26, fill=(200, 235, 170))
+    ty = y0 + rows * (CH + 215) + GAP
+    d.text((M, ty), 'Trim plan (zones of ONE material)' if name.startswith('1') else 'Material plan', font=F34, fill=ACC)
+    for i, (a, b, c) in enumerate(S['trim']):
+        yy = ty + 56 * (i + 1); d.text((M, yy), a, font=F34, fill=FG); d.text((M + 330, yy), b, font=F34, fill=FG); d.text((M + 2100, yy), 'covers ' + c, font=F34, fill=DIM)
+    for j, l in enumerate(wrap(d, S['note'], F26, W - 2 * M)[:3]): d.text((M, ty + 56 * (len(S['trim']) + 1) + 24 + 34 * j), l, font=F26, fill=DIM)
+    out = R + 'materials/' + name + '-materials.jpg'; s.save(out, quality=92); print(out, s.size)

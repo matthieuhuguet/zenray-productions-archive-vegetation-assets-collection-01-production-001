@@ -1,0 +1,12 @@
+# 5 October 2026 : builds one PureRef style contact sheet per asset from refs/raw/<asset>/ into refs/sheets/. Usage: python3 RefSheet.py. FR : planche de references par asset.
+import glob, os
+from PIL import Image, ImageDraw
+R = '/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/refs/'
+os.makedirs(R + 'sheets', exist_ok=True)
+for d in sorted(glob.glob(R + 'raw/*')):
+    fs = sorted(glob.glob(d + '/*.jpg')); cols = 3 if len(fs) > 4 else 2; cw, ch = 900, 506
+    rows = (len(fs) + cols - 1) // cols; s = Image.new('RGB', (cols * cw, rows * (ch + 24)), (18, 18, 18)); dr = ImageDraw.Draw(s)
+    for i, f in enumerate(fs):
+        im = Image.open(f).convert('RGB'); im.thumbnail((cw, ch)); x, y = (i % cols) * cw, (i // cols) * (ch + 24)
+        s.paste(im, (x, y + 24)); dr.text((x + 6, y + 6), os.path.basename(f), fill=(220, 220, 220))
+    out = R + 'sheets/' + os.path.basename(d) + '.jpg'; s.save(out, quality=88); print(out, s.size)

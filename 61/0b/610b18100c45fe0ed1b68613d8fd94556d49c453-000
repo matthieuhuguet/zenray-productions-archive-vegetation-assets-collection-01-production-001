@@ -1,0 +1,57 @@
+# 5 October 2026 : builds the Lily as a real HOUDINI DIGITAL ASSET (ZenRay_Lily, Object level) saved in otls/ZenRay_Lily.hda and instanced as /obj/Lily_Flower in the scene. Inside the asset: seven component Python SOPs (stem, leaves, pedicels and buds, tepals, stamens, pistil, calyx), merge, normals, OUT. Interface: three folders of 8 parameters at most (Shape, Detail, Layout), defaults measured on the 4 view sheet. The flower layout is an index table (flower_table). Usage: hython Scripts/BuildLily.py <hip in> <hip out>, or in the live Houdini with sys.argv = ['x', 'LIVE', 'LIVE']. FR : construit le lys sous forme de HDA.
+import hou, sys, os, collections
+B = '/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/'
+HDA = B + 'otls/ZenRay_Lily.hda'
+LIVE = sys.argv[1] == 'LIVE'
+if not LIVE:
+    if os.path.exists(sys.argv[1]): hou.hipFile.load(sys.argv[1], suppress_save_prompt=True, ignore_load_warnings=True)
+    else: hou.hipFile.clear(suppress_save_prompt=True)
+LIB = open(B + 'Scripts/LilyLib.py').read() + '\n' + open(B + 'Scripts/LilyParts.py').read()
+obj = hou.node('/obj'); tx = 0.0
+if obj.node('Lily_Flower'): tx = obj.node('Lily_Flower').parm('tx').eval(); obj.node('Lily_Flower').destroy()
+for d in hou.hda.definitionsInFile(HDA) if os.path.exists(HDA) else []:
+    if d.nodeTypeName() == 'zenray_lily':
+        for n in hou.nodeType(hou.objNodeTypeCategory(), 'zenray_lily').instances() if hou.nodeType(hou.objNodeTypeCategory(), 'zenray_lily') else []: n.destroy()
+        try: hou.hda.uninstallFile(HDA, change_oplibraries_file=False)
+        except hou.OperationFailed: pass   # the file is not installed in this session yet
+g = obj.createNode('geo', 'Lily_Flower')
+for c in g.children(): c.destroy()
+LAYOUT = """# kind  s(0..1 on the stem)  azimuth(deg)  tilt(deg above horizontal)  size    (measured on perfect-4-views.png, 5 October 2026)
+F 0.98 260 45 1.00
+F 0.87 200 8 1.00
+F 0.86 359 39 0.92
+F 0.72 143 30 0.95
+B 0.70 72 25 1.00
+B 0.62 331 25 0.95"""
+SHAPE = [('stem_height', 'Stem height (m)', 0.82, 0.3, 1.5), ('stem_bend', 'Stem bend (m)', 0.02, 0.0, 0.2), ('leaf_count', 'Leaf count', 34, 10, 90), ('leaf_length', 'Leaf length (m)', 0.28, 0.05, 0.4), ('tepal_length', 'Tepal length (m)', 0.24, 0.05, 0.3), ('tepal_flare', 'Tepal flare (rad)', 1.45, 0.2, 1.8), ('pedicel_length', 'Pedicel length (m)', 0.08, 0.02, 0.15), ('seed', 'Seed', 7, 0, 999)]
+DETAIL = [('leaf_droop', 'Leaf droop', 1.6, 0.0, 2.5), ('leaf_width', 'Leaf half width (m)', 0.0075, 0.003, 0.03), ('tepal_width', 'Tepal half width (m)', 0.036, 0.015, 0.07), ('tepal_wave', 'Tepal edge wave (m)', 0.004, 0.0, 0.015), ('stamen_length', 'Stamen length (m)', 0.15, 0.04, 0.25), ('stem_radius', 'Stem radius (m)', 0.005, 0.003, 0.02), ('calyx_size', 'Calyx size (m)', 0.03, 0.0, 0.08), ('funnel', 'Tube funnel (rad)', 0.36, 0.05, 0.6)]
+LEAFPROF = [('leaf_ramp', 'Leaf length ramp (0 = same everywhere)', 0.3, -0.8, 1.5), ('leaf_angle', 'Leaf start angle (deg above horizontal)', 42.0, 5.0, 85.0)]
+FIT = B + 'ref-maps/lily_fit.json'   # 5 October 2026 : defaults measured by Scripts/FitLily.py against the masks of the 4 view sheet override the first guesses below
+if os.path.exists(FIT):
+    import json; J = json.load(open(FIT)); LAYOUT = J.get('layout', LAYOUT)
+    for L_ in (SHAPE, DETAIL, LEAFPROF): L_[:] = [(n, lab, (type(dv)(J['params'][n]) if n in J.get('params', {}) else dv), lo, hi) for n, lab, dv, lo, hi in L_]
+ptg = g.parmTemplateGroup()
+for fname, spec in (('HDA Shape', SHAPE), ('HDA Detail', DETAIL)):
+    assert len(spec) <= 8
+    f = hou.FolderParmTemplate(fname.replace(' ', '_').lower(), fname, folder_type=hou.folderType.Simple)
+    for n, lab, dv, lo, hi in spec: f.addParmTemplate((hou.IntParmTemplate if isinstance(dv, int) else hou.FloatParmTemplate)(n, lab, 1, default_value=(dv,), min=lo, max=hi))
+    ptg.append(f)
+fl = hou.FolderParmTemplate('hda_layout', 'HDA Layout', folder_type=hou.folderType.Simple)
+t = hou.StringParmTemplate('flower_table', 'Flower and bud table', 1, default_value=(LAYOUT,)); t.setTags({'editor': '1'}); fl.addParmTemplate(t)
+for n, lab, dv, lo, hi in LEAFPROF: fl.addParmTemplate(hou.FloatParmTemplate(n, lab, 1, default_value=(dv,), min=lo, max=hi))
+ptg.append(fl)
+g.setParmTemplateGroup(ptg)
+parts = ['stem', 'leaves', 'pedicels', 'tepals', 'stamens', 'pistil', 'calyx']; prev = []
+for i, nm in enumerate(parts):
+    py = g.createNode('python', 'C%d_%s' % (i + 1, nm)); py.parm('python').set(LIB + '\ngeo = hou.pwd().geometry(); geo.clear()\n%s(geo)\n' % nm); prev.append(py)
+mg = g.createNode('merge', 'M_components')
+for i, p in enumerate(prev): mg.setInput(i, p)
+nm = g.createNode('normal', 'N_normals'); nm.setInput(0, mg); nm.parm('type').set(0)
+out = g.createNode('null', 'OUT_lily'); out.setInput(0, nm); out.setDisplayFlag(True); out.setRenderFlag(True); g.layoutChildren()
+asset = g.createDigitalAsset(name='zenray_lily', hda_file_name=HDA, description='ZenRay Lily', min_num_inputs=0, max_num_inputs=0, ignore_external_references=True)
+asset.setName('Lily_Flower', unique_name=True); asset.parm('tx').set(tx if LIVE else -0.8)
+asset.type().definition().save(HDA)
+a = hou.node('/obj/Lily_Flower'); geo = a.node('OUT_lily').geometry()
+bad = [(c.name(), list(c.errors())[:1]) for c in a.children() if c.errors()]
+print('HDA', HDA, 'prims', len(geo.prims()), 'points', len(geo.points()), dict(collections.Counter(p.attribValue('mat') for p in geo.prims())), 'errors', bad)
+if not LIVE: hou.hipFile.save(sys.argv[2])

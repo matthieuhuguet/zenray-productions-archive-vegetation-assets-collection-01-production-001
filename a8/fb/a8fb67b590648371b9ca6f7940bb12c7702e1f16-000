@@ -1,0 +1,31 @@
+# 5 October 2026 : measures the 4 view sheet of the lily (perfect-4-views.png): foreground masks, plant height, stem axis, green (leaf) half width per row, flower and bud blobs with their centroid and size in the front, side and top views. Output ref-maps/lily_views.json in metres once the total height is fixed (SCALE_H). FR : mesure la planche 4 vues du lys.
+import numpy as np, json
+from PIL import Image
+from scipy import ndimage as ndi
+B = '/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/'
+im = np.asarray(Image.open('/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/refs/flower-sheets/perfect-4-views.png').convert('RGB'), np.float32)
+H, W, _ = im.shape; qw, qh = W // 2, H // 2
+quads = {'front': (0, 0), 'side': (qw, 0), 'top': (0, qh), 'three_quarter': (qw, qh)}
+def masks(q):
+    x0, y0 = quads[q]; c = im[y0 + 2:y0 + qh - 2, x0 + 2:x0 + qw - 2]
+    r, g, b = c[..., 0], c[..., 1], c[..., 2]; mx = np.maximum(np.maximum(r, g), b); mn = np.minimum(np.minimum(r, g), b)
+    sat = (mx - mn) / (mx + 1e-3); bg = np.median(c.reshape(-1, 3), axis=0)
+    diff = np.abs(c - bg).sum(2); fg = (diff > 55) | (sat > 0.22)
+    fg[:45, :170] = False   # the view label (white text) is not part of the plant
+    fg = ndi.binary_opening(fg, iterations=1); green = fg & (g > r + 8) & (g > b + 8) & (sat > 0.25)
+    petal = fg & ~green
+    return c, fg, green, petal
+out = {}
+for q in ('front', 'side', 'top'):
+    c, fg, green, petal = masks(q); ys, xs = np.nonzero(fg)
+    info = dict(size=[int(c.shape[1]), int(c.shape[0])], bbox=[int(xs.min()), int(ys.min()), int(xs.max()), int(ys.max())], fg_px=int(fg.sum()), green_px=int(green.sum()), petal_px=int(petal.sum()))
+    lab, n = ndi.label(ndi.binary_dilation(petal, iterations=4)); comps = []
+    for i in range(1, n + 1):
+        m = (lab == i) & petal; a = int(m.sum())
+        if a < 400: continue
+        yy, xx = np.nonzero(m); comps.append(dict(area=a, cx=float(xx.mean()), cy=float(yy.mean()), bbox=[int(xx.min()), int(yy.min()), int(xx.max()), int(yy.max())]))
+    info['blobs'] = sorted(comps, key=lambda d: d['cy']); out[q] = info
+    Image.fromarray((np.stack([fg, green, petal], 2) * 255).astype(np.uint8)).save(B + 'previews/mask_%s.png' % q)
+json.dump(out, open(B + 'ref-maps/lily_views.json', 'w'), indent=1)
+for q, i in out.items():
+    print(q, i['size'], i['bbox'], 'blobs', [(round(b['cx']), round(b['cy']), b['area']) for b in i['blobs']])
