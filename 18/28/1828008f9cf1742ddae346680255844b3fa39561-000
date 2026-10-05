@@ -1,0 +1,9 @@
+# 5 October 2026 14:40 Europe/Paris: camera registration against explicit raw landmarks, geometry stays fixed.
+import json
+from pathlib import Path
+import numpy as np
+from scipy.optimize import least_squares
+W=Path('/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01');D=W/'measurements/tree/raw02';axes=json.loads((W/'measurements/tree/live-axes.json').read_text());ids=[3,4,5,6,7,8];p=np.asarray(axes['points'])[ids];target=np.array([[590,850],[730,660],[790,500],[845,350],[950,210],[1060,65]],float)
+def project(p,v):
+ yaw,pitch,scale,cx,cy=v;right=p[:,0]*np.cos(yaw)-p[:,2]*np.sin(yaw);depth=p[:,0]*np.sin(yaw)+p[:,2]*np.cos(yaw);up=p[:,1]*np.cos(pitch)-depth*np.sin(pitch);return np.column_stack([cx+right*scale,cy-up*scale])
+fit=least_squares(lambda v:(project(p,v)-target).ravel(),[.35,.05,300,590,1380],bounds=([-.8,-.35,100,0,800],[1.1,.35,600,1100,2400]));prediction=project(p,fit.x);report={'date':'5 October 2026','axis_indices':ids,'target_pixels_2048':target.tolist(),'predicted_pixels_2048':prediction.tolist(),'camera':dict(zip(['yaw','pitch','scale','cx','cy'],fit.x.tolist())),'landmark_rms_px_2048':float(np.sqrt(np.mean(np.sum((prediction-target)**2,axis=1)))),'limit':'manually estimated landmarks, orthographic camera approximation, not measured original extrinsics'};(D/'CameraRegistration-v001.json').write_text(json.dumps(report,indent=2));print(json.dumps(report))

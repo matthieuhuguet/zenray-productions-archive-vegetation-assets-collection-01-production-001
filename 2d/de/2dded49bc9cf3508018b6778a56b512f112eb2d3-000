@@ -1,0 +1,59 @@
+# 5 October 2026 13:32 Europe/Paris: isolated tree fit, measured masks and organic leaves; preserve every other object.
+import sys,json,time
+from pathlib import Path
+import hou
+BASE=Path('/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01')
+WORK=Path('/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01')
+sys.path.insert(0,str(WORK/'Scripts'))
+from TreeMaskLab import references,compare,project,scores
+SOURCE=Path(sys.argv[1]) if len(sys.argv)>1 else BASE/'hip/snapshots/VegetationCollection01/Eucalyptus/v001_before_mask_fit/graph.hiplc'
+hou.hipFile.load(str(SOURCE),suppress_save_prompt=True,ignore_load_warnings=True)
+node=hou.node('/obj/Eucalyptus'); out=node.displayNode(); reference=references()
+report={'before':compare(out.geometry(),reference,'comparison-before'),'before_parameters':{p.name():p.eval() for p in node.parms() if p.name() in ['trunk_height','trunk_lean','crown_radius','card_size','branch_count','sub_branches','twigs_per_branch']}}
+folder=hou.FolderParmTemplate('hda_foliage','HDA Foliage',folder_type=hou.folderType.Simple)
+for name,label,value,minimum,maximum in [('leaves_per_twig','Leaves Per Twig',16,3,32),('leaf_width_ratio','Leaf Width Ratio',.17,.06,.4),('leaf_curl','Leaf Curl',.14,0.,.4)]:
+    template=(hou.IntParmTemplate if isinstance(value,int) else hou.FloatParmTemplate)(name,label,1,default_value=(value,),min=minimum,max=maximum);folder.addParmTemplate(template)
+ptg=node.parmTemplateGroup();ptg.append(folder);node.setParmTemplateGroup(ptg)
+source=node.node('C4_leaf_cards').parm('python').eval();source=source[:source.index('def leaf_cards(geo):')]+'''def leaf_cards(geo):
+    rnd=random.Random(int(PRM('seed'))+9); length=PRM('card_size'); count=int(PRM('leaves_per_twig'))
+    for index,(points,radii,level) in enumerate(tree_data()['twigs']):
+        for leaf_index in range(count):
+            fraction=.2+.8*leaf_index/max(1,count-1); position=fraction*(len(points)-1); segment=min(len(points)-2,int(position)); mix=position-segment
+            center=points[segment]*(1-mix)+points[segment+1]*mix
+            tangent=(points[segment+1]-points[segment]).normalized(); first,second=frame_perp(tangent)
+            angle=leaf_index*2.399+rnd.uniform(-.3,.3); outward=first*math.cos(angle)+second*math.sin(angle)
+            direction=(outward*.65+V3(0,-.75,0)+tangent*.2).normalized(); side=direction.cross(tangent).normalized()
+            leaf_length=length*rnd.uniform(.7,1.); width=leaf_length*PRM('leaf_width_ratio'); rows=[]
+            for step in range(7):
+                v=step/6.; profile=math.sin(math.pi*v)**.85
+                axis=center+direction*(leaf_length*v)+outward*(leaf_length*PRM('leaf_curl')*math.sin(math.pi*v))
+                rows.append([(axis+side*(width*.5*u*profile),((u+1)*.5,v)) for u in (-1.,0.,1.)])
+            grid(geo,rows,'leaf','leaf%d_%d'%(index,leaf_index),LEAF)
+geo=hou.pwd().geometry();geo.clear();leaf_cards(geo)
+'''
+node.node('C4_leaf_cards').parm('python').set(source.replace('range(7)', 'range(3)').replace('v=step/6.', 'v=step/2.'))
+for name,value in [('branch_count',9),('sub_branches',4),('twigs_per_branch',5),('trunk_lean',1.35),('card_size',.48)]:node.parm(name).set(value)
+
+def evaluate():
+    geometry=out.geometry(); assert len(geometry.prims())>0
+    return sum(scores(project(geometry,name),reference[name])['envelope_iou'] for name in reference)/len(reference)
+log=[];best=evaluate()
+# 5 October 2026: coordinate search keeps one scale for the two views and changes only tree shape controls.
+for fraction in (.3,):
+    for name,bounds in [('crown_radius',(1.,6.)),('trunk_height',(2.,9.)),('trunk_lean',(0.,3.)),('card_size',(.2,1.))]:
+        parameter=node.parm(name); original=parameter.eval();chosen=original
+        for value in (max(bounds[0],original*(1-fraction)),min(bounds[1],original*(1+fraction))):
+            parameter.set(value);score=evaluate();log.append({'parameter':name,'value':value,'score':score});print(name,value,score,flush=True)
+            if score>best:best=score;chosen=value
+        parameter.set(chosen)
+node.node('C4_leaf_cards').parm('python').set(source)
+report['after']=compare(out.geometry(),reference,'comparison-after');report['search']=log
+report['parameters']={p.name():p.eval() for p in node.parms() if p.name() in set(report['before_parameters'])|{'leaves_per_twig','leaf_width_ratio','leaf_curl','twig_droop','trunk_radius','seed'}}
+report['primitives']=len(out.geometry().prims());report['points']=len(out.geometry().points());report['errors']={c.name():list(c.errors()) for c in node.children() if c.errors()}
+# 5 October 2026: proof checks empty/mismatched masks in addition to a self-match.
+import numpy as np
+mask=reference['front'];assert scores(mask,mask)['strict_iou']==1.;assert scores(np.zeros_like(mask),mask)['strict_iou']==0.
+node.layoutChildren();node.saveItemsToFile(list(node.children()),str(WORK/'measurements/tree/Eucalyptus-v002.cpio'))
+(WORK/'measurements/tree/fit-report.json').write_text(json.dumps(report,indent=2))
+(WORK/'measurements/tree/leaf-generator.py').write_text(source)
+print(json.dumps({k:v for k,v in report.items() if k not in ['search']}))

@@ -1,0 +1,22 @@
+# 5 October 2026 : builds ref-maps/trim_occupancy.json, the measured object / ground mask of every band over the full width (320 x 32 samples, box filter of the Otsu segmentation of the reference, see TrimMask.py), with the two end columns made continuous so the sheet stays seamless, and the shaded creases at the bottom of the petals filled from row 85 percent. Only this low resolution table reaches the graph, never the image. FR : table d'occupation mesuree.
+import numpy as np, json
+from PIL import Image
+import TrimMask as M
+N = 2048
+im = np.asarray(Image.open('/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/refs/flower-sheets/trimsheet-height-flower.png').convert('L').resize((N, N), Image.LANCZOS), np.float32) / 255
+B = [('tepal_inner', 0.0, 0.193), ('tepal_outer', 0.193, 0.388), ('stamens', 0.388, 0.507), ('calyx', 0.507, 0.609), ('stem', 0.609, 0.725), ('leaf', 0.725, 0.837), ('bud', 0.837, 1.0)]
+THR = {'tepal_inner': 0.47, 'tepal_outer': 0.45, 'calyx': 0.44}
+out = {}; NX, NY = 320, 32
+for n, a, b in B:
+    y0, y1 = int(a * N) + 8, int(b * N) - 8; fg = M.seg(im[y0:y1]).astype(np.float32)
+    if n in ('tepal_inner', 'tepal_outer', 'calyx'):      # ground = dark region CONNECTED to the top of the band; shaded creases inside the petals are not ground
+        from scipy import ndimage as ndi
+        sm_ = ndi.gaussian_filter(im[y0:y1], 3.0); dark = sm_ < THR[n]; lab, k = ndi.label(dark); top = set(np.unique(lab[:3][lab[:3] > 0]))
+        keep = np.isin(lab, list(top)) if top else np.zeros_like(dark); fg = 1.0 - ndi.binary_opening(keep, iterations=3).astype(np.float32)
+    occ = np.asarray(Image.fromarray((fg * 255).astype(np.uint8)).resize((NX, NY), Image.BOX), np.float32) / 255
+    if n in ('tepal_inner', 'tepal_outer'): r = int(0.85 * NY); occ[r:] = occ[r]
+    if n == 'calyx': occ[-2:] = occ[-3]
+    K = 8; d = occ[:, 0] - occ[:, -1]
+    for x in range(K): w = 0.5 - x / (2.0 * K); occ[:, x] -= d * w; occ[:, NX - 1 - x] += d * w
+    out[n] = dict(nx=NX, ny=NY, occ=[round(float(v), 2) for v in np.clip(occ, 0, 1).ravel()])
+json.dump(out, open('../ref-maps/trim_occupancy.json', 'w')); print('ok')

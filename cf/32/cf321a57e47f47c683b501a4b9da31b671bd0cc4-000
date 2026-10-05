@@ -1,0 +1,31 @@
+# 6 October 2026 : recover every image the model saw in a Claude Code conversation from its transcript JSONL (~/.claude/projects/<project>/<session>.jsonl): Read results of PNG files and images pasted by the user are stored there as base64. Deduplicated by content, named by time and by the file that was read, with an INDEX.md. Usage: python3 RecoverImagesFromTranscript.py <session.jsonl> <out dir> [since ISO date]. FR : recuperation des images depuis le transcript d'une conversation.
+import json, base64, hashlib, os, re, sys
+J, OUT = sys.argv[1], sys.argv[2]; SINCE = sys.argv[3] if len(sys.argv) > 3 else '0000'
+os.makedirs(OUT, exist_ok=True); uses = {}; rows = []; seen = set(); n = 0
+for l in open(J):
+    if '"tool_use"' in l and '"input"' in l:
+        try: o = json.loads(l)
+        except Exception: continue
+        c = o.get('message', {}).get('content')
+        if isinstance(c, list):
+            for b in c:
+                if isinstance(b, dict) and b.get('type') == 'tool_use':
+                    inp = b.get('input', {}); uses[b['id']] = (b.get('name'), inp.get('file_path') or inp.get('files') or (inp.get('command', '')[:160] if isinstance(inp.get('command'), str) else ''))
+    if '"type":"image"' not in l: continue
+    o = json.loads(l); ts = o.get('timestamp', '')
+    if ts < SINCE: continue
+    def walk(x, tid=None):
+        global n
+        if isinstance(x, dict):
+            if x.get('type') == 'tool_result': tid = x.get('tool_use_id')
+            if x.get('type') == 'image' and isinstance(x.get('source'), dict) and x['source'].get('type') == 'base64':
+                data = base64.b64decode(x['source']['data']); h = hashlib.sha1(data).hexdigest()[:12]
+                if h in seen: return
+                seen.add(h); n += 1; mt = x['source'].get('media_type', ''); ext = 'png' if 'png' in mt else ('jpg' if 'jp' in mt else 'webp')
+                name, desc = uses.get(tid, ('user_message', '')); base = re.sub(r'[^A-Za-z0-9_.-]', '_', os.path.basename(desc) if isinstance(desc, str) else 'files')[:50] or name
+                fn = '%04d_%s_%s.%s' % (n, ts[:19].replace(':', '-').replace('T', '_'), base, ext); open(os.path.join(OUT, fn), 'wb').write(data); rows.append((fn, ts, name, str(desc)[:140])); return
+            for v in x.values(): walk(v, tid)
+        elif isinstance(x, list):
+            for v in x: walk(v, tid)
+    walk(o)
+open(os.path.join(OUT, 'INDEX.md'), 'w').write('# Images recovered from the transcript\n\n| File | Time (UTC) | Tool | Origin |\n|---|---|---|---|\n' + '\n'.join('| %s | %s | %s | %s |' % r for r in rows) + '\n'); print('saved', n)

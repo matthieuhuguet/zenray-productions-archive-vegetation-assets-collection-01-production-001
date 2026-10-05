@@ -1,0 +1,38 @@
+# 5 October 2026 13:36 Europe/Paris: two OpenGL viewpoints; restore object display states and camera after capture.
+import hou,json
+from pathlib import Path
+BASE=Path('/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01')
+WORK=Path('/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01')
+node=hou.node('/obj/Eucalyptus');previous=node.displayNode();node.node('TRUNK_final_normals').setDisplayFlag(True);box=node.displayNode().geometry().boundingBox();center=box.center()+hou.Vector3(node.parmTuple('t').eval());size=box.sizevec().length()
+viewer=hou.ui.paneTabOfType(hou.paneTabType.SceneViewer);assert viewer is not None
+settings_view=viewer.curViewport().settings();old_textures=settings_view.displayTextures();settings_view.setDisplayTextures(False)
+old_path=viewer.pwd();old_camera=viewer.curViewport().camera();objects=hou.node('/obj').children();states={n.path():{name:n.parm(name).eval() for name in ('display','tdisplay') if n.parm(name)} for n in objects if n.parm('display')}
+target=hou.ui.curDesktop().name()+'.'+viewer.name()+'.world';old_options=hou.hscript('viewdisplay '+target)[0]
+flags={n.path():n.isDisplayFlagSet() for n in objects if hasattr(n,'isDisplayFlagSet')};old_pin=viewer.isPin();paths=[]
+try:
+    viewer.setPin(False);viewer.setPwd(node)
+    for path,flag in flags.items():hou.node(path).setDisplayFlag(path==node.path())
+    for path in states:
+        hou.node(path).parm('tdisplay').set(1);hou.node(path).parm('display').set(path==node.path())
+    hou.hscript('viewdisplay -G Eucalyptus -y off -x off -z off '+target)
+    from PySide6.QtCore import QCoreApplication
+    QCoreApplication.processEvents()
+    cam=hou.node('/obj').createNode('cam','cam_eucalyptus_proof');cam.parm('focal').set(45);cam.parm('resx').set(1600);cam.parm('resy').set(1200)
+    for label,direction in [('front34',hou.Vector3(1,.35,1.6)),('back34',hou.Vector3(-1,.25,-1.6))]:
+        position=center+direction.normalized()*size*1.6;cam.parmTuple('t').set(position);cam.parmTuple('r').set(hou.hmath.buildRotateLookAt(position,center,hou.Vector3(0,1,0)).extractRotates());viewer.curViewport().setCamera(cam)
+        settings=viewer.flipbookSettings().stash();path=str(WORK/('measurements/tree/viewport-'+label+'-trunk-v004.png'));settings.output(path);settings.outputToMPlay(False);settings.useResolution(True);settings.resolution((1600,1200));settings.cropOutMaskOverlay(True);settings.frameRange((hou.frame(),hou.frame()));viewer.flipbook(viewer.curViewport(),settings);paths.append(path)
+finally:
+    viewer.curViewport().setCamera(old_camera)
+    if hou.node('/obj/cam_eucalyptus_proof'):hou.node('/obj/cam_eucalyptus_proof').destroy()
+    for path,value in states.items():
+        if hou.node(path):
+            for name,setting in value.items():hou.node(path).parm(name).set(setting)
+    hou.hscript(old_options)
+    for path,flag in flags.items():
+        if hou.node(path):hou.node(path).setDisplayFlag(flag)
+    viewer.setPwd(old_path);viewer.setPin(old_pin)
+result={'captures':paths,'renderer':'OpenGL','restored_display':all(all(hou.node(path).parm(name).eval()==setting for name,setting in value.items()) for path,value in states.items() if hou.node(path))}
+
+# 5 October 2026 13:55: restore the complete tree after the isolated trunk proof.
+previous.setDisplayFlag(True)
+settings_view.setDisplayTextures(old_textures)

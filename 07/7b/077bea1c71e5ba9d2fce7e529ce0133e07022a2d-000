@@ -1,0 +1,24 @@
+{
+  "before": {
+    "trunk_warp": 0.008,
+    "trunk_grain": 0.012,
+    "bark_fluting": 0.018,
+    "bark_peel_lift": 0.032,
+    "bark_strip_count": 220,
+    "shoot_count": 16000,
+    "leaves_per_shoot": 85
+  },
+  "after": {
+    "trunk_warp": 0.0016,
+    "trunk_grain": 0.0024,
+    "bark_fluting": 0.0036,
+    "bark_peel_lift": 0.0032,
+    "bark_strip_count": 0,
+    "shoot_count": 4000,
+    "leaves_per_shoot": 32,
+    "leaf_length": 0.07
+  },
+  "leaf_source_faces": 2,
+  "leaf_instances": 53660,
+  "errors": []
+}

@@ -1,0 +1,78 @@
+# 5 October 2026 : BAND 6 (bud) version 2, same protocol, from the reference (Matthieu, 6 October 2026: the last bud was not like the height reference, the reference was good). Three spindle shaped buds across the sheet (period regularised from 0.361 to 0.3333), pointing RIGHT: top edge T(s) and bottom edge B(s) measured on the centre bud (s = position inside the bud, lv = position in the band), three lobes separated by creases, tone across the bud measured (q = 0 top edge, 1 bottom edge), tone along it (dark at the ends, bright in the middle), double outline, ground 0.41. FR : bande 6 version 2, bouton.
+import hou, sys
+sys.path.insert(0, '/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/Scripts')
+import TrimNodes as T
+import BuildBand0V2 as V
+B = '/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/'
+V0, V1, CELLS = 0.837, 1.0, 3; P = 1.0 / CELLS; HC = V1 - V0; EDGE = 0.0012
+TOP = [(0.0, .282), (.11, .246), (.22, .201), (.33, .153), (.44, .108), (.55, .081), (.62, .075), (.72, .087), (.83, .135), (.94, .216), (1.0, .282)]      # top edge against s (lv units)
+BOT = [(0.0, .572), (.11, .599), (.22, .686), (.33, .737), (.44, .763), (.55, .778), (.62, .763), (.72, .754), (.78, .737), (.89, .686), (1.0, .572)]      # bottom edge
+QT = [(0.0, .59), (.05, .60), (.1, .72), (.15, .78), (.2, .73), (.25, .61), (.3, .43), (.35, .46), (.4, .49), (.45, .59), (.5, .68), (.55, .72), (.6, .59), (.65, .47), (.7, .44), (.75, .52), (.8, .61), (.85, .68), (.9, .68), (.95, .62), (1.0, .54)]   # tone across the bud
+ES = [(0.0, .45), (.1, .46), (.2, .49), (.3, .53), (.4, .60), (.5, .66), (.6, .68), (.7, .66), (.8, .58), (.9, .50), (1.0, .45)]                                  # mean tone along the bud
+UPTO = 99
+def build(net):
+    rx = T.node(net, 'ramp', 'A00_ramp__cycles_x', signature='f1', cycles=float(CELLS), method=1); ry = T.node(net, 'ramp', 'A01_ramp__down_y', signature='f1', rotation=90.0)
+    lv = T.lin(net, 'A03_band__lv_0_top_1_bottom', ry, V0, V1); one = T.const(net, 'A04_one', lv, 1.0); s = rx
+    top = T.curve(net, 'B01_top_edge', s, TOP, 1.0, 0.0, 1.0, T.SMOOTH); bot = T.curve(net, 'B02_bottom_edge', s, BOT, 1.0, 0.0, 1.0, T.SMOOTH)
+    d_top = T.mix(net, 'B03_inside_top', lv, top, 4); d_bot = T.mix(net, 'B04_inside_bottom', bot, lv, 4)
+    d_in = T.mix(net, 'B05_distance_inside', d_top, d_bot, 13)               # min of the two: >0 inside the bud, in lv units (band 0.163 of the canvas)
+    mask = T.smooth(net, 'B06_mask', d_in, -EDGE / HC, EDGE / HC)
+    span = T.mix(net, 'B07_span', bot, top, 4); q = T.node(net, 'clamp', 'B09_q', [T.mix(net, 'B08_q_raw', d_top, T.mix(net, 'B08a_floor', span, T.const(net, 'B08b', lv, 0.05), 12), 6)])
+    across = T.curve(net, 'C01_tone_across', q, QT, 1.0, 0.0, 1.0, T.SMOOTH); along = T.curve(net, 'C02_tone_along', s, [(x, (y - 0.5) / 0.5 + 0.5) for x, y in ES], 1.0, 0.0, 1.0, T.SMOOTH)
+    tone = T.mix(net, 'C03_tone', across, T.lin(net, 'C03a_along_delta', along, 0.0, 1.0, -0.36, 0.20), 3)
+    ground = T.const(net, 'C04_ground', lv, 0.41)
+    h = T.mix(net, 'C05_over_ground', ground, T.mix(net, 'C05a_delta_masked', T.mix(net, 'C05b_delta', tone, ground, 4), mask, 5), 3)
+    c = dict(lv=lv, s=s, one=one, mask=mask, q=q, d_in=d_in, d_top=d_top, d_bot=d_bot)
+    if UPTO >= 1: h = iteration1(net, h, c)
+    if UPTO >= 2: h = iteration2(net, h, c)
+    return h
+def iteration1(net, h, c):
+    """ITERATION 1 (64 nodes): outline and fibres. Double outline (bright rim, dark groove, second thin rim) at the two edges, dark creases between the lobes, fibres running along the bud that follow the outline (coordinate q), speckles, fine grain, contact shadow on the ground."""
+    lv, s, one, mask, q, d_in = c['lv'], c['s'], c['one'], c['mask'], c['q'], c['d_in']
+    n0 = len(net.children()); b = V.box(net, 'D', 'BAND 6 V2 ITERATION 1 : 64 nodes', (0.8, 1.0, 0.8))
+    soft = T.node(net, 'fractalnoise', 'D00_soft_phase_noise', [lv], amp=0.5, center=0.0, elementsize=0.16)
+    din = T.lin(net, 'D01_dist_lv_to_canvas', d_in, 0.0, 1.0, 0.0, HC)
+    rim = V.profile(net, 'D02_rim', din, [(-0.03, 0.0), (-0.012, -0.08), (-0.004, -0.14), (0.0, 0.0), (0.0008, 0.24), (0.003, 0.05), (0.006, -0.10), (0.009, 0.12), (0.014, 0.0), (0.04, 0.0)], -0.03, 0.04, -0.2, 0.3)
+    h = T.mix(net, 'D03_rim__added', h, rim, 3)
+    fm = T.mix(net, 'D04_fibre_mask', mask, V.modulation(net, 'D04a_modulation', lv, 0.08, 3.0, 0.5, 5.7, 0.25), 5)
+    h = V.lines_layer(net, 'D11_fibres_main', h, q, 60, soft, 0.12, 0.09, 0.30, fm, lv)
+    h = V.lines_layer(net, 'D12_fibres_fine', h, q, 190, soft, 0.12, 0.045, 0.45, fm, lv)
+    h = V.lines_layer(net, 'D13_fibres_bright', h, q, 120, soft, 0.12, -0.035, 0.40, fm, lv)
+    for tag, qc in (('D21_crease_a', 0.30), ('D22_crease_b', 0.48), ('D23_crease_c', 0.68)):
+        d = T.lin(net, tag + '_dist', q, qc - 0.05, qc + 0.05)
+        ln = T.curve(net, tag + '_profile', d, [(0.0, 0.0), (0.38, 0.0), (0.5, 1.0), (0.62, 0.0), (1.0, 0.0)], 1.0, 0.0, -0.13, T.SMOOTH)
+        h = T.mix(net, tag + '_added', h, T.mix(net, tag + '_masked', ln, mask, 5), 3)
+    h = V.dots_layer(net, 'D31_speckles', h, lv, mask, 0.0022, 6.6, 0.62, 0.10)
+    sh = V.profile(net, 'D41_contact', din, [(-0.05, 0.0), (-0.025, -0.05), (-0.01, -0.10), (-0.003, -0.06), (0.0, 0.0), (0.05, 0.0)], -0.05, 0.05, -0.15, 0.05)
+    h = T.mix(net, 'D43_contact__added', h, T.mix(net, 'D42_contact__outside', sh, T.lin(net, 'D42a', mask, 0.0, 1.0, 1.0, 0.0), 5), 3)
+    h = V.pads(net, 'D', h, n0); V.close(net, b, 'D', n0); return h
+def iteration2(net, h, c):
+    """ITERATION 2 (64 nodes): the fibrous skin. Matthieu: the bud must be perfect and seamless. The reference skin is made of fine fibres running along the bud, short and broken, plus pale veins in the lobes and small scuffs. Here: sparse seeds smeared along the bud axis with STREAK BLUR (a horizontal direction, tiled noise, wrapped border, so seamless), at three lengths, bright and dark, only inside the bud; a darker band along the two edges; a soft sheen where the lobe is highest."""
+    lv, s, one, mask, q, d_in = c['lv'], c['s'], c['one'], c['mask'], c['q'], c['d_in']
+    n0 = len(net.children()); b = V.box(net, 'E', 'BAND 6 V2 ITERATION 2 : 64 nodes, fibrous skin', (0.9, 0.85, 1.0))
+    hx = T.node(net, 'rgbatouv', 'E00_direction', [T.node(net, 'channeljoin', 'E00a_vector', [one, T.const(net, 'E00b_zero', lv, 0.0), T.const(net, 'E00c_zero', lv, 0.0)])])
+    def fibre(tag, size, seed, thr, length, gain, sign):
+        nz = T.node(net, 'fractalnoise', tag + '_noise', [lv], amp=0.5, center=0.5, elementsize=size, noisetype=1, offx=seed)
+        sd = T.curve(net, tag + '_cut', nz, [(0.0, 0.0), (thr, 0.0), (thr + 0.06, 1.0), (1.0, 1.0)], 1.0, 0.0, 1.0)
+        st = T.node(net, 'streakblur', tag + '_streak', [sd, hx], dirtype=1, normalizedir=1, units=1, length_pixels=length, border=4)
+        return T.mix(net, tag + '_added', h_cur[0], T.mix(net, tag + '_masked', T.lin(net, tag + '_gain', st, 0.0, 1.0, 0.0, gain), mask, 5), 3 if sign > 0 else 4)
+    h_cur = [h]
+    h = fibre('E11_fibres_long', 0.0016, 3.7, 0.70, 120, 1.7, 1); h_cur[0] = h
+    h = fibre('E12_fibres_mid', 0.0014, 8.2, 0.72, 55, 1.9, 1); h_cur[0] = h
+    h = fibre('E13_fibres_dark', 0.0014, 12.9, 0.66, 80, 1.0, -1); h_cur[0] = h
+    h = fibre('E14_scuffs', 0.0010, 17.5, 0.74, 22, 1.4, 1)
+    edge = V.profile(net, 'E21_edge_dark', T.lin(net, 'E21a_d', d_in, 0.0, 1.0, 0.0, HC), [(-0.02, 0.0), (0.0, 0.0), (0.004, -0.05), (0.016, -0.03), (0.04, 0.0), (0.08, 0.0)], -0.02, 0.08, -0.1, 0.05)
+    h = T.mix(net, 'E23_edge__added', h, T.mix(net, 'E22_edge__masked', edge, mask, 5), 3)
+    h = V.pads(net, 'E', h, n0); V.close(net, b, 'E', n0); return h
+def opacity(net, ry, rx):
+    """bud mask alone for the opacity map. FR : masque d'opacite du bouton."""
+    lv = T.lin(net, 'OP6_lv', ry, V0, V1); s = T.node(net, 'ramp', 'OP6_rx', signature='f1', cycles=float(CELLS), method=1)
+    top = T.curve(net, 'OP6_top', s, TOP, 1.0, 0.0, 1.0, T.SMOOTH); bot = T.curve(net, 'OP6_bot', s, BOT, 1.0, 0.0, 1.0, T.SMOOTH)
+    d = T.mix(net, 'OP6_d', T.mix(net, 'OP6_dt', lv, top, 4), T.mix(net, 'OP6_db', bot, lv, 4), 13)
+    return T.smooth(net, 'OP6_mask', d, -EDGE / HC * 0.6, EDGE / HC * 0.6)
+if __name__ == '__main__':
+    hou.hipFile.clear(suppress_save_prompt=True); net = hou.node('/obj').createNode('copnet', 'Band6V2_test'); res = int(sys.argv[3]) if len(sys.argv) > 3 else 2048
+    if len(sys.argv) > 4: UPTO = int(sys.argv[4])
+    out = build(net); T.export(net, out, B + ('previews/band6v2_nodes.png' if UPTO == 99 else 'previews/band6v2_it%d.png' % UPTO), res)
+    errs = [(cc.name(), [str(e)[:140] for e in cc.errors()]) for cc in net.children() if cc.errors()]
+    print('nodes', len(net.children()), 'errors', errs[:4])

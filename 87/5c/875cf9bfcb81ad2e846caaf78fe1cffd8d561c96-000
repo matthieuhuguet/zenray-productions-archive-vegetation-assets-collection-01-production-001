@@ -1,0 +1,17 @@
+# 5 October 2026: preserve hand-traced thin branches below the VDB voxel size.
+import hou,json
+from pathlib import Path
+n=hou.node('/obj/Eucalyptus');axis=n.node('C1_measured_axis');code=axis.parm('snippet').eval();needle='setprimattrib(0,"mat",pr,"bark","set");';assert needle in code;axis.parm('snippet').set(code.replace(needle,needle+'setprimattrib(0,"axis_id",pr,k,"set");'))
+major=n.createNode('blast','C1_major_wood_only');major.setInput(0,n.node('C1_sweep_forks'));major.parm('group').set('@axis_id=9 @axis_id=10');n.node('C1_union_sdf').setInput(0,major)
+fine=n.createNode('blast','C2_measured_fine_branches');fine.setInput(0,n.node('C1_sweep_forks'));fine.parm('group').set('@axis_id=9 @axis_id=10');fine.parm('negate').set(1);n.node('M_components').setInput(4,fine)
+# 5 October 2026: local leaf clusters attach to the two measured hanging branch curves.
+points=n.createNode('attribwrangle','C4_measured_hanging_leaf_points');points.parm('class').set(0);points.setInput(1,n.node('C1_axis_frame'));points.parm('snippet').set('''// 5 October 2026: native leaf placement follows traced thin branches, with visible phyllotaxis variation.
+float scale=ch("../tree_height")/8;
+int axes[]={9,10};foreach(int axis;axes)for(int k=0;k<85;k++){
+ float u=fit01(float(k)/84,.30,1);vector p=primuv(1,"P",axis,set(u,0,0)),tangent=normalize(primuv(1,"axis_tangent",axis,set(u,0,0)));
+ float angle=k*2.39996;vector side=normalize(cross(tangent,{0,0,1})),other=normalize(cross(tangent,side));vector radial=side*cos(angle)+other*sin(angle);
+ vector direction=normalize(radial*.5+set(0,-1,0));int pt=addpoint(0,p+radial*.008*scale);
+ vector4 orientation=dihedral(set(0,1,0),direction);setpointattrib(0,"orient",pt,orientation,"set");setpointattrib(0,"pscale",pt,ch("../leaf_length")*fit01(rand(k*13.7+axis),.7,1.1)*scale,"set");
+}''')
+merged=n.createNode('merge','C4_all_leaf_points');merged.setInput(0,n.node('C4_attached_leaf_points'));merged.setInput(1,points);n.node('C4_copy_leaves').setInput(1,merged)
+n.parm('leaf_length').set(.045);n.parm('leaves_per_shoot').set(85);n.node('OUT_eucalyptus').cook(force=True);errors=[(c.name(),c.errors()) for c in n.allSubChildren() if c.errors()];assert not errors,errors;n.layoutChildren();hou.hipFile.save();result={'errors':errors,'fine_branch_faces':len(fine.geometry().prims()),'measured_leaves':len(points.geometry().points())}

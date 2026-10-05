@@ -1,0 +1,8 @@
+#!/bin/zsh
+# 5 October 2026 : save ONE SCREEN PER ITERATION of a band, side by side with the reference, in versions/<band>/. Usage: SaveIterations.sh <v1|v2> <last iteration>. FR : une image par iteration, rangee en local.
+HY=/Users/zenray/Create/Build/Houdini22/Houdini22.0.368/Frameworks/Houdini.framework/Versions/Current/Resources/bin/hython
+P=/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01
+cd $P/Scripts
+if [ "$1" = "v1" ]; then SCRIPT=BuildTrimBand0.py; PRE=band0_v1_it; DIR=band0_v1; FIRST=1; else SCRIPT=BuildBand0V2.py; PRE=band0v2_it; DIR=band0_v2; FIRST=0; fi
+for i in $(seq $FIRST $2); do ( $HY $SCRIPT x x 2048 $i >/dev/null 2>&1; python3 CmpBand.py ../previews/${PRE}$i.png 0.193 ../versions/$DIR/Iteration$(printf %02d $i)_ref_over_generated.png ) & done; wait
+echo "saved $(ls ../versions/$DIR | wc -l) screens in versions/$DIR"

@@ -1,0 +1,18 @@
+# 5 October 2026 14:27 Europe/Paris: reference sheet composed exclusively from unchanged raw pixels.
+from pathlib import Path
+from PIL import Image,ImageDraw,ImageFont
+import json,hashlib
+W=Path('/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01');D=W/'refs/tree-materials';D.mkdir(exist_ok=True)
+source=W/'refs/raw/3-eucalyptus/02_erwan-gaudichon-eucalyptus-02.jpg';raw=Image.open(source).convert('RGB')
+CONFIG={'source':str(source),'regions':[{'id':'M1','name':'Ecorce claire et lisse','role':'smooth_bark','box':[1370,690,1550,1030]},{'id':'M2','name':'Ecorce ancienne, fibres brunes','role':'fibrous_bark','box':[1170,1400,1310,1720]},{'id':'M3','name':'Pelage et raccord des ecorces','role':'bark_transition_mask','box':[1190,980,1410,1280]},{'id':'M4','name':'Feuilles lanceolees vertes','role':'green_leaf','box':[2200,740,2530,1060]}]}
+font=lambda s:ImageFont.truetype('/System/Library/Fonts/Supplemental/Arial.ttf',s)
+canvas=Image.new('RGB',(2100,1440),'#171b20');d=ImageDraw.Draw(canvas);d.text((35,25),'EUCALYPTUS | Decoupes du raw 02 | 5 October 2026',font=font(32),fill='white')
+preview=raw.copy();pd=ImageDraw.Draw(preview)
+for item in CONFIG['regions']:
+ b=item['box'];pd.rectangle(b,outline='#ff6c62',width=8);pd.rectangle((b[0],b[1]-65,b[0]+110,b[1]),fill='#ff6c62');pd.text((b[0]+12,b[1]-56),item['id'],font=font(48),fill='black')
+preview.thumbnail((1260,1080));canvas.paste(preview,(35,180))
+for i,item in enumerate(CONFIG['regions']):
+ x,y=1330,100+i*305;crop=raw.crop(item['box']);crop.save(D/(item['id']+'-raw-crop.png'));crop.thumbnail((250,250));canvas.paste(crop,(x,y+35));d.text((x,y),item['id']+' '+item['name'],font=font(23),fill='white');d.text((x+270,y+85),item['role'],font=font(20),fill='#c1c9ce')
+ if item['id']=='M3':d.text((x+270,y+115),'Masque de transition',font=font(20),fill='#c1c9ce')
+d.text((35,1280),'Pixels originaux : reperes et crops uniquement. Aucun materiau genere.',font=font(26),fill='white');d.text((35,1325),'M1/M2 : variantes d ecorce | M3 : raccord, pas une matiere supplementaire | M4 : feuillage',font=font(25),fill='#c1c9ce');canvas.save(D/'EucalyptusRawMaterials-v001.png')
+CONFIG['source_sha256']=hashlib.sha256(source.read_bytes()).hexdigest();CONFIG['date']='5 October 2026';CONFIG['kind']='raw reference crops, not procedural or PBR outputs';(D/'MaterialsRegions-v001.json').write_text(json.dumps(CONFIG,indent=2));print(D/'EucalyptusRawMaterials-v001.png')

@@ -1,0 +1,12 @@
+# 5 October 2026 : error of the generated band 1 canonical cell against the reference arch cell (arch 1 / 4 average, mirrored about its axis). Generated cell: the first of 4 (centre 0.125), mirrored. Usage: CellError1.py <png> [sheet]. FR : ecart de la cellule de la bande 1.
+import sys, numpy as np
+from PIL import Image
+from scipy import ndimage as ndi
+N = 2048; g = np.asarray(Image.open(sys.argv[1]).convert('L'), np.float64) / 255; H = int(0.195 * N); G = g[int(0.193 * N):int(0.193 * N) + H]
+ref = np.load('/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/ref-maps/band1_cell.npy'); W = (ref.shape[1] - 1) // 2
+c = int(0.375 * N); K = int(0.125 * N); gc = G[:, c - K:c + K + 1]; gc = (gc + gc[:, ::-1]) / 2; rf = ref[:gc.shape[0], W - K:W + K + 1]
+sg = 4 * N / 2048; es = np.abs(ndi.gaussian_filter(gc, sg) - ndi.gaussian_filter(rf, sg)); hp = lambda x: x - ndi.gaussian_filter(x, 3)
+ed = np.abs(ndi.gaussian_filter(hp(gc), 1.2) - ndi.gaussian_filter(hp(rf), 1.2))
+print('band 1 cell: structure err %.3f detail err %.3f mean ref %.3f gen %.3f  detail energy ref %.4f gen %.4f' % (es.mean(), ed.mean(), rf.mean(), gc.mean(), np.abs(np.diff(rf, axis=1)).mean() + np.abs(np.diff(rf, axis=0)).mean(), np.abs(np.diff(gc, axis=1)).mean() + np.abs(np.diff(gc, axis=0)).mean()))
+if len(sys.argv) > 2:
+    s = Image.new('L', (gc.shape[1] * 2 + 10, gc.shape[0]), 255); s.paste(Image.fromarray((rf * 255).astype(np.uint8)), (0, 0)); s.paste(Image.fromarray((np.clip(gc, 0, 1) * 255).astype(np.uint8)), (gc.shape[1] + 10, 0)); s.save(sys.argv[2])

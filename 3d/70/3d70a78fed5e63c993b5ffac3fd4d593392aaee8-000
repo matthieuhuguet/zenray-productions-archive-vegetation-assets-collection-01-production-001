@@ -1,0 +1,122 @@
+# 5 October 2026 : BANDS 2 TO 6 of the lily trim sheet height (stamens, calyx, stem, leaf, bud), real Copernicus nodes only, canonical PERIODIC cell per band so every band is seamless by construction: stamens 3 cells, calyx 7 cells, stem a tiling noise, leaf 2 cells, bud 3 cells. Numbers measured on the reference (MeasureBands.py: period by autocorrelation of the mask columns, tone of the background 0.34 to 0.37 and of the objects 0.53 to 0.68) and checked by side by side sheets. The reference never enters the graph. FR : bandes 2 a 6.
+import hou, sys
+sys.path.insert(0, '/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/Scripts')
+import TrimNodes as T
+import BuildBand0V2 as V
+B = '/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/'
+BANDS = {2: ('stamens', 0.388, 0.507, 3), 3: ('calyx', 0.507, 0.609, 7), 4: ('stem', 0.609, 0.725, 1), 5: ('leaf', 0.725, 0.837, 2), 6: ('bud', 0.837, 1.0, 3)}
+EDGE = 0.0015
+def prelude(net, k):
+    name, v0, v1, cells = BANDS[k]; Hc = v1 - v0; P = 1.0 / cells
+    rx = T.node(net, 'ramp', 'A00_ramp__cycles_x', signature='f1', cycles=float(cells), method=1); ry = T.node(net, 'ramp', 'A01_ramp__down_y', signature='f1', rotation=90.0)
+    lv = T.lin(net, 'A03_band__lv_0_top_1_bottom', ry, v0, v1)
+    soft = T.node(net, 'fractalnoise', 'A09_soft_phase_noise', [lv], amp=0.5, center=0.0, elementsize=0.16)
+    return dict(rx=rx, lv=lv, soft=soft, Hc=Hc, P=P, cells=cells)
+def ellipse(net, tag, c, h, x0, y0, rx_c, ry_lv, tone_keys, shear=0.0, edge=0.04):
+    """a vertical ellipse of the periodic cell: centre (x0 cell local canvas fraction, y0 lv), half axes rx_c (canvas) and ry_lv (lv units), domed tone against r, composited over h. 8 nodes (+2 with shear). Returns (h, mask)."""
+    P, Hc = c['P'], c['Hc']
+    dx = T.lin(net, '%s_dx' % tag, c['rx'], 0.0, 1.0, (-P / 2 - x0) / rx_c, (P / 2 - x0) / rx_c)
+    dy = T.lin(net, '%s_dy' % tag, c['lv'], 0.0, 1.0, -y0 / ry_lv, (1 - y0) / ry_lv)
+    if shear: dx = T.mix(net, '%s_dx_sheared' % tag, dx, T.lin(net, '%s_shear' % tag, dy, -4.0, 4.0, -4.0 * shear, 4.0 * shear), 4)
+    r = T.mix(net, '%s_r' % tag, dx, dy, 8)
+    mask = T.smooth(net, '%s_mask' % tag, r, 1 - edge, 1 + edge, 1.0, 0.0)
+    tone = T.curve(net, '%s_tone' % tag, r, tone_keys, 1.4, 0.0, 1.0, T.SMOOTH)
+    return T.mix(net, '%s_composited' % tag, h, T.mix(net, '%s_delta_masked' % tag, T.mix(net, '%s_delta' % tag, tone, h, 4), mask, 5), 3), mask
+def background(net, c, level, streak=0.03):
+    g = T.const(net, 'B00_background', c['lv'], level)
+    return V.grain(net, 'B01_background_streaks', g, c['lv'], T.const(net, 'B02_one', c['lv'], 1.0), 0.05, 1.7, streak, 0.15, 3.0)
+ANTHER = [(0.0, 0.72), (0.45, 0.70), (0.8, 0.60), (1.0, 0.42), (1.4, 0.30)]      # domed tone against r for an anther: bright body, darker edge
+FILAMENT = [(0.0, 0.62), (0.6, 0.58), (1.0, 0.42), (1.4, 0.30)]
+def stamens(net):
+    c = prelude(net, 2); h = background(net, c, 0.34)
+    # cell local objects, canvas fractions from the stigma (measured on the reference, scaled by 0.907 to the 1/3 cell)
+    for i, (x, tilt) in enumerate([(-0.0894, 0.10), (-0.0499, -0.12), (0.0612, 0.0), (0.0975, 0.08)]): h, m = ellipse(net, 'C1%d_anther' % i, c, h, x, 0.42, 0.0150, 0.34, ANTHER, tilt)
+    for i, (x, tilt) in enumerate([(-0.0272, 0.05), (0.0295, -0.05), (0.1397, 0.0), (-0.1300, 0.0)]): h, m = ellipse(net, 'C2%d_filament' % i, c, h, x, 0.70, 0.0048, 0.33, FILAMENT, tilt)
+    h, m = ellipse(net, 'C30_stigma_head', c, h, 0.0, 0.22, 0.0215, 0.14, [(0.0, 0.66), (0.5, 0.62), (0.9, 0.5), (1.0, 0.4), (1.4, 0.3)], 0.0)
+    h, m = ellipse(net, 'C31_stigma_stem', c, h, 0.0, 0.62, 0.0150, 0.50, [(0.0, 0.50), (0.6, 0.52), (0.9, 0.46), (1.0, 0.36), (1.4, 0.30)], 0.0)
+    h = V.grain(net, 'C40_spongy', h, c['lv'], T.lin(net, 'C40b_obj', h, 0.45, 0.8, 0.0, 1.0), 0.0030, 6.3, 0.14)
+    h = V.dots_layer(net, 'C42_bumps', h, c['lv'], T.lin(net, 'C42a_obj', h, 0.45, 0.8, 0.0, 1.0), 0.0045, 3.3, 0.52, 0.18)
+    h = V.dots_layer(net, 'C43_pits', h, c['lv'], T.lin(net, 'C43a_obj', h, 0.45, 0.8, 0.0, 1.0), 0.0035, 8.3, 0.55, -0.16)
+    h = V.grain(net, 'C41_fine', h, c['lv'], T.lin(net, 'C41a_obj', h, 0.45, 0.8, 0.0, 1.0), 0.0018, 2.9, 0.04)
+    return h
+def calyx(net):
+    c = prelude(net, 3); P = c['P']; lv, rx = c['lv'], c['rx']
+    cx = T.lin(net, 'A04_cell__cx', rx, 0.0, 1.0, -P / 2, P / 2); ax = T.mix(net, 'A05_cell__abs', cx, T.const(net, 'A06_zero', lv, 0.0), 9)
+    wA = T.curve(net, 'B10_arch__halfwidth', lv, [(0.0, 0.0), (0.05, 0.012), (0.2, 0.032), (0.4, 0.045), (0.62, 0.0505), (1.0, 0.0514)], 1.0, 0.0, 0.0714 * 1.0, T.SMOOTH) if False else T.curve(net, 'B10_arch__halfwidth', lv, [(0.0, 0.0), (0.2, 0.28), (0.4, 0.50), (0.62, 0.67), (1.0, 0.72)], 1.0, 0.0, 0.0714, T.SMOOTH)
+    d_arch = T.mix(net, 'B11_arch__distance', ax, T.mix(net, 'B11a_funnel_halfwidth', T.const(net, 'B11b_half_cell', lv, P / 2), wA, 4), 4)   # >0 inside the arch (|cx| > funnel half width)
+    ma = T.smooth(net, 'B12_arch__mask', d_arch, -EDGE, EDGE)
+    wf = T.mix(net, 'B13_funnel__halfwidth', T.const(net, 'B13a_half_cell', lv, P / 2), wA, 4)
+    t = T.node(net, 'clamp', 'B14_funnel__ratio', [T.mix(net, 'B14a_ax_over_wf', ax, T.mix(net, 'B14b_wf_floor', wf, T.const(net, 'B14c_floor', lv, 0.01), 12), 6)])
+    arch_tone = T.mix(net, 'C10_arch__tone', T.curve(net, 'C10a_arch_vertical', lv, [(0.0, 0.46), (0.5, 0.40), (1.0, 0.34)], 1.0), T.curve(net, 'C10b_arch_across', T.lin(net, 'C10c_arch_t', d_arch, 0.0, 0.07, 0.0, 1.0), [(0.0, 0.46), (1.0, 0.5)], 1.0, -0.1, 0.1), 3) if False else T.curve(net, 'C10a_arch_vertical', lv, [(0.0, 0.46), (0.5, 0.40), (1.0, 0.34)], 1.0)
+    fun_tone = T.mix(net, 'C11_funnel__tone', T.curve(net, 'C11a_funnel_vertical', lv, [(0.0, 0.58), (0.6, 0.62), (0.65, 0.54), (1.0, 0.52)], 1.0), T.curve(net, 'C11b_funnel_across', t, [(0.0, 0.55), (0.6, 0.5), (0.9, 0.62), (1.0, 0.7)], 1.0, -0.1, 0.1, T.SMOOTH), 3)
+    h = T.mix(net, 'C12_composition', fun_tone, T.mix(net, 'C12a_arch_delta', T.mix(net, 'C12b_delta', arch_tone, fun_tone, 4), ma, 5), 3)
+    h = V.lines_layer(net, 'D10_funnel_fibre', h, t, 18, c['soft'], 0.2, 0.07, 0.35, T.lin(net, 'D10a_not_arch', ma, 0.0, 1.0, 1.0, 0.0), lv)
+    h = V.lines_layer(net, 'D11_funnel_fibre_fine', h, t, 60, c['soft'], 0.2, 0.03, 0.5, T.lin(net, 'D11a_not_arch', ma, 0.0, 1.0, 1.0, 0.0), lv)
+    rim = V.profile(net, 'D20_arch_rim', d_arch, [(-0.02, 0.0), (-0.004, 0.10), (-0.001, 0.22), (0.001, -0.06), (0.006, -0.10), (0.02, 0.0)], -0.02, 0.03, -0.15, 0.25)
+    h = T.mix(net, 'D21_rim_added', h, rim, 3)
+    block = T.lin(net, 'D30_base_block_zone', T.smooth(net, 'D30a', lv, 0.60, 0.64), 0.0, 1.0, 0.0, 1.0)
+    h = V.grain(net, 'D40_grain', h, lv, T.lin(net, 'D40a_funnel', ma, 0.0, 1.0, 1.0, 0.0), 0.0025, 3.3, 0.05)
+    return h
+def stem(net):
+    """STEM: hairs. Tone profile (darker top and bottom edges), tiling streak noise, two crossing families of thin oblique hair lines made of Ramp-based coordinates (period exact, so the band tiles), sparse bright bumps."""
+    c = prelude(net, 4); lv = c['lv']; rx = c['rx']; one = T.const(net, 'B02_one', lv, 1.0)
+    h = T.curve(net, 'B00_tone_vertical', lv, [(0.0, 0.28), (0.08, 0.40), (0.2, 0.46), (0.8, 0.44), (0.95, 0.36), (1.0, 0.30)], 1.0)
+    for i, (size, amp, sx, sy, seed) in enumerate([(0.03, 0.05, 1.0, 0.4, 2.2), (0.012, 0.05, 1.0, 0.3, 5.5), (0.004, 0.05, 1.0, 0.25, 9.1)]): h = V.grain(net, 'C1%d_streaks' % i, h, lv, one, size, seed, amp, sx, sy)
+    dens = V.modulation(net, 'C20_hair_density', lv, 0.03, 0.5, 0.5, 7.7, 0.1)
+    for i, (sl, cnt, depth) in enumerate([(0.9, 380, 0.10), (-0.9, 330, 0.09), (0.35, 520, 0.07)]):
+        coord = T.mix(net, 'C3%d_hair_coord' % i, T.lin(net, 'C3%da_x' % i, rx, 0.0, 1.0, 0.0, 1.0), T.lin(net, 'C3%db_y' % i, lv, 0.0, 1.0, 0.0, sl * c['Hc']), 3)
+        h = V.lines_layer(net, 'C4%d_hair_lines' % i, h, coord, cnt, c['soft'], 0.8, depth, 0.30, dens, lv)
+    h = V.dots_layer(net, 'C50_bumps', h, lv, one, 0.006, 4.1, 0.60, 0.22)
+    return h
+def leaf(net):
+    c = prelude(net, 5); lv, rx = c['lv'], c['rx']; P = c['P']; one = T.const(net, 'A06_one', lv, 1.0)
+    hw = T.curve(net, 'B10_leaf__halfwidth', rx, [(0.0, 0.0), (0.04, 0.20), (0.15, 0.54), (0.3, 0.76), (0.5, 0.86), (0.7, 0.76), (0.85, 0.54), (0.96, 0.20), (1.0, 0.0)], 1.0, 0.0, 0.5, T.SMOOTH)
+    wav = V.grain(net, 'B11_edge_wave', T.const(net, 'B11a_zero', lv, 0.0), lv, one, 0.05, 3.7, 0.025, 1.0, 1.0)
+    hw = T.mix(net, 'B12_leaf__halfwidth_wavy', hw, wav, 3)
+    dy = T.mix(net, 'B13_dy', lv, T.const(net, 'B13a_half', lv, 0.5), 9)
+    d_in = T.mix(net, 'B14_inside', hw, dy, 4)
+    m = T.smooth(net, 'B15_mask', d_in, -0.012, 0.012)
+    v = T.node(net, 'clamp', 'B16_v', [T.mix(net, 'B16a_dy_over_hw', dy, T.mix(net, 'B16b_hw_floor', hw, T.const(net, 'B16c_floor', lv, 0.02), 12), 6)])
+    tone = T.mix(net, 'C10_tone', T.curve(net, 'C10a_across', v, [(0.0, 0.50), (0.3, 0.55), (0.8, 0.50), (1.0, 0.40)], 1.0), T.curve(net, 'C10b_along', rx, [(0.0, 0.0), (0.2, 0.5), (0.5, 0.6), (0.8, 0.5), (1.0, 0.0)], 1.0, -0.1, 0.1), 3)
+    bg = T.const(net, 'C11_background', lv, 0.35)
+    h = T.mix(net, 'C12_over_background', bg, T.mix(net, 'C12a_delta_masked', T.mix(net, 'C12b_delta', tone, bg, 4), m, 5), 3)
+    rib = V.profile(net, 'D10_midrib', dy, [(0.0, 0.0), (0.004, -0.08), (0.010, 0.12), (0.020, 0.04), (0.04, -0.03), (0.08, 0.0)], 0.0, 0.08, -0.15, 0.2)
+    h = T.mix(net, 'D11_rib_added', h, T.mix(net, 'D11a_rib_masked', rib, m, 5), 3)
+    h = V.lines_layer(net, 'D20_veins', h, T.mix(net, 'D20a_oblique', T.lin(net, 'D20b_dy_scaled', dy, 0.0, 0.5, 0.0, 0.5), T.lin(net, 'D20c_x_scaled', rx, 0.0, 1.0, 0.0, 0.0), 3) if False else T.mix(net, 'D20a_oblique', v, T.lin(net, 'D20c_x', rx, 0.0, 1.0, -0.4, 0.4), 3), 12, c['soft'], 0.3, 0.05, 0.4, m, lv)
+    h = V.lines_layer(net, 'D21_veins_fine', h, v, 40, c['soft'], 0.3, 0.025, 0.5, m, lv)
+    rim = V.profile(net, 'D30_rim', d_in, [(-0.05, 0.0), (-0.01, -0.10), (-0.002, -0.14), (0.0, 0.0), (0.004, 0.20), (0.012, 0.02), (0.05, 0.0)], -0.05, 0.05, -0.2, 0.3)
+    h = T.mix(net, 'D31_rim_added', h, rim, 3)
+    h = V.grain(net, 'D40_grain', h, lv, m, 0.003, 4.4, 0.04)
+    return h
+def leaf_opacity(net, ry, rx):
+    """leaf lens mask alone for the opacity map. FR : masque d'opacite de la feuille."""
+    lv = T.lin(net, 'OP5_lv', ry, 0.725, 0.837); r2 = T.node(net, 'ramp', 'OP5_rx', signature='f1', cycles=2.0, method=1)
+    hw = T.curve(net, 'OP5_hw', r2, [(0.0, 0.0), (0.04, 0.20), (0.15, 0.54), (0.3, 0.76), (0.5, 0.86), (0.7, 0.76), (0.85, 0.54), (0.96, 0.20), (1.0, 0.0)], 1.0, 0.0, 0.5, T.SMOOTH)
+    dy = T.mix(net, 'OP5_dy', lv, T.const(net, 'OP5_half', lv, 0.5), 9)
+    return T.smooth(net, 'OP5_mask', T.mix(net, 'OP5_d', hw, dy, 4), -0.008, 0.008)
+def bud(net):
+    c = prelude(net, 6); lv, rx = c['lv'], c['rx']; one = T.const(net, 'A06_one', lv, 1.0)
+    hw = T.curve(net, 'B10_bud__halfwidth', rx, [(0.0, 0.0), (0.03, 0.30), (0.2, 0.46), (0.5, 0.70), (0.72, 0.86), (0.86, 0.70), (0.96, 0.32), (1.0, 0.0)], 1.0, 0.0, 0.5, T.SMOOTH)
+    cy = T.curve(net, 'B11_bud__centre', rx, [(0.0, 0.5), (1.0, 0.5)], 1.0, 0.0, 1.0)
+    dy = T.mix(net, 'B13_dy', lv, T.const(net, 'B13a_half', lv, 0.52), 9)
+    d_in = T.mix(net, 'B14_inside', hw, dy, 4)
+    m = T.smooth(net, 'B15_mask', d_in, -0.012, 0.012)
+    v = T.node(net, 'clamp', 'B16_v', [T.mix(net, 'B16a_dy_over_hw', dy, T.mix(net, 'B16b_hw_floor', hw, T.const(net, 'B16c_floor', lv, 0.02), 12), 6)])
+    tone = T.mix(net, 'C10_tone', T.curve(net, 'C10a_across', v, [(0.0, 0.66), (0.3, 0.70), (0.7, 0.60), (1.0, 0.42)], 1.0), T.curve(net, 'C10b_along', rx, [(0.0, 0.0), (0.4, 0.05), (0.72, 0.08), (1.0, -0.15)], 1.0, -0.2, 0.2), 3)
+    bg = T.const(net, 'C11_background', lv, 0.36)
+    h = T.mix(net, 'C12_over_background', bg, T.mix(net, 'C12a_delta_masked', T.mix(net, 'C12b_delta', tone, bg, 4), m, 5), 3)
+    ridges = V.lines_layer(net, 'D10_ridges', h, v, 1.7, c['soft'], 0.15, 0.20, 0.5, m, lv)
+    h = V.lines_layer(net, 'D11_ridge_grooves', ridges, v, 3.4, c['soft'], 0.15, 0.10, 0.5, m, lv)
+    h = V.lines_layer(net, 'D12_fibres', h, v, 50, c['soft'], 0.2, 0.03, 0.5, m, lv)
+    rim = V.profile(net, 'D30_rim', d_in, [(-0.05, 0.0), (-0.01, -0.10), (-0.002, -0.14), (0.0, 0.0), (0.004, 0.20), (0.012, 0.02), (0.05, 0.0)], -0.05, 0.05, -0.2, 0.3)
+    h = T.mix(net, 'D31_rim_added', h, rim, 3)
+    h = V.grain(net, 'D40_grain', h, lv, m, 0.003, 4.4, 0.04)
+    h = V.dots_layer(net, 'D41_spots', h, lv, m, 0.005, 6.6, 0.60, 0.10)
+    return h
+BUILD = {2: stamens, 3: calyx, 4: stem, 5: leaf, 6: bud}
+if __name__ == '__main__':
+    k = int(sys.argv[1]); res = int(sys.argv[3]) if len(sys.argv) > 3 else 2048
+    hou.hipFile.clear(suppress_save_prompt=True); net = hou.node('/obj').createNode('copnet', 'Band%d_test' % k)
+    out = BUILD[k](net); T.export(net, out, B + 'previews/band%d_nodes.png' % k, res)
+    errs = [(cc.name(), [str(e)[:140] for e in cc.errors()]) for cc in net.children() if cc.errors()]
+    print('band', k, 'nodes', len(net.children()), 'errors', errs[:4])

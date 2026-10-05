@@ -1,0 +1,136 @@
+# 5 October 2026 14:02 Europe/Paris: measured component anchors build editable native SOP geometry.
+import hou,json
+from pathlib import Path
+BASE=Path('/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01')
+WORK=Path('/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01')
+node=hou.node('/obj/Eucalyptus');node.allowEditingOfContents()
+assert node.node('C1_measured_axis') is None
+# 5 October 2026: measured front pixel coordinates and side-depth correspondences; hidden positions remain an interpretation.
+anchors=[
+('trunk',.31,[(124,486,581),(117,452,565),(120,416,560),(133,380,569),(145,350,585),(168,322,604),(194,291,632),(221,261,650),(251,227,657),(266,185,668),(266,141,661),(277,107,657)]),
+('left_fork',.19,[(145,350,585),(134,319,592),(110,285,582),(92,250,580),(86,213,563),(97,180,552),(114,150,549)]),
+('center_fork',.16,[(194,291,632),(179,260,624),(179,223,619),(199,190,613),(222,157,607),(230,116,602),(233,80,605)]),
+('far_left',.105,[(134,319,592),(103,308,579),(69,288,564),(44,259,538),(35,221,520),(50,185,510)]),
+('right_crown',.125,[(221,261,650),(269,252,655),(304,232,670),(330,213,690),(364,194,712),(384,157,730)]),
+('lower_right',.135,[(168,322,604),(218,305,615),(264,295,641),(306,279,667),(341,265,693),(382,234,715),(399,208,734)]),
+('rear_fork',.13,[(194,291,632),(213,257,591),(245,230,559),(259,204,529),(252,172,502),(267,140,478)]),
+('front_fork',.11,[(145,350,585),(176,324,552),(211,295,524),(246,266,493),(270,239,471)]),
+('upper_left',.08,[(179,223,619),(148,201,595),(135,161,577),(155,120,562),(176,90,550)]),
+('upper_right',.07,[(251,227,657),(285,199,648),(307,159,652),(324,119,658),(328,93,662)]),
+('far_rear',.075,[(110,285,582),(117,250,541),(124,210,513),(147,165,475),(185,130,452)]),
+('dead_low',.045,[(145,350,585),(153,367,574),(177,373,568),(184,397,561)]),
+('dead_left',.035,[(133,380,569),(106,378,560),(95,392,553),(84,411,550)])]
+positions=[];radii=[];starts=[];ends=[]
+for name,r,pts in anchors:
+ starts.append(len(positions));positions.extend([((x-124)*8/464,(486-y)*8/464,(z-581)*8/435) for x,y,z in pts]);radii.append(r);ends.append(len(positions))
+(WORK/'measurements/tree/component-anchors-v006.json').write_text(json.dumps({'date':'5 October 2026','anchors':anchors,'source':'front and side measured anchors; occluded depth interpreted'},indent=2))
+folder=hou.FolderParmTemplate('measured_tree','HDA Measured Tree',folder_type=hou.folderType.Simple)
+controls=[('tree_height',8.,4.,14.),('wood_radius_scale',1.,.5,1.8),('shoot_count',1500,200,4000),('leaves_per_shoot',20,4,40),('leaf_length',.22,.10,.40),('crown_depth_scale',1.,.6,1.5),('crown_width_scale',1.,.6,1.5),('crown_height_offset',0.,-.5,.5)]
+for name,val,lo,hi in controls:folder.addParmTemplate((hou.IntParmTemplate if isinstance(val,int) else hou.FloatParmTemplate)(name,name.replace('_',' ').title(),1,default_value=(val,),min=lo,max=hi))
+ptg=node.parmTemplateGroup();ptg.append(folder);node.setParmTemplateGroup(ptg)
+def wrangle(name,code,input_node=None,detail=False):
+ n=node.createNode('attribwrangle',name)
+ if input_node:n.setInput(0,input_node)
+ if detail:n.parm('class').set(0)
+ n.parm('snippet').set('// 5 October 2026 14:02: native procedural component, measured controls on master.\n'+code)
+ return n
+def vex_array(values):return '{'+','.join(str(x) for x in values)+'}'
+pv='{'+','.join('{'+','.join(str(round(x,5)) for x in p)+'}' for p in positions)+'}'
+code='vector pos[]='+pv+';int starts[]='+vex_array(starts)+';int ends[]='+vex_array(ends)+';float radii[]='+vex_array(radii)+';\n'
+code+='''float scale=ch("../tree_height")/8;
+for(int k=0;k<len(starts);k++){
+ int pr=addprim(0,"polyline");
+ for(int j=starts[k];j<ends[k];j++){
+  int p=addpoint(0,pos[j]*scale);addvertex(0,pr,p);
+  float t=float(j-starts[k])/(ends[k]-starts[k]-1);
+  float radius=radii[k]*pow(1-t,.8)+.014;
+  if(k==0)radius*=1+.45*exp(-t*14);
+  setpointattrib(0,"pscale",p,radius*scale*ch("../wood_radius_scale"),"set");
+  setpointattrib(0,"trunk_t",p,t,"set");
+ }
+ setprimattrib(0,"part",pr,k==0?"trunk":"branch","set");setprimattrib(0,"mat",pr,"bark","set");
+}'''
+axis=wrangle('C1_measured_axis',code,detail=True)
+resample=node.createNode('resample','C1_resample_skeleton');resample.setInput(0,axis);resample.parm('length').set(.045);resample.parm('treatpolysas').set(1);resample.parm('docurveuattr').set(1)
+sweep=node.createNode('sweep::2.0','C1_sweep_forks');sweep.setInput(0,resample);sweep.parm('surfaceshape').set(1);sweep.parm('radius').set(1);sweep.parm('cols').set(32);sweep.parm('endcaptype').set(1);sweep.parm('reversecrosssections').set(1);sweep.parm('computeuvs').set(1)
+normal=node.createNode('normal','C1_point_normals');normal.setInput(0,sweep);normal.parm('type').set(0)
+# 5 October 2026: reuse the prior native Point VOP definition, now on the measured forks as well as trunk.
+vop=node.node('TRUNK_point_vop');vop.setInput(0,normal)
+node.parm('trunk_warp').set(.10);node.parm('trunk_grain').set(.024);node.parm('trunk_frequency').set(4.5)
+relief=wrangle('C1_growth_ridges','''vector uv=vertex(0,"uv",pointvertex(0,@ptnum));
+float angle=uv.x*2*$PI;
+float amplitude=.027*ch("../wood_radius_scale")*(.45+pow(1-f@trunk_t,2));
+@P+=normalize(@N)*amplitude*sin(angle*7+f@trunk_t*11);
+v@Cd=set(.62,.57,.47);''',vop)
+# 5 October 2026: measured foliage cross-sections are numerical constraints, never image inputs.
+measure=json.loads((WORK/'measurements/tree/four-view-measures.json').read_text())
+rows=measure['profiles'];front=rows['front']['rows'];side=rows['side']['rows']
+profiles='float fl[]='+vex_array([round(x[1],5) for x in front])+';float fr[]='+vex_array([round(x[2],5) for x in front])+';float sl[]='+vex_array([round(x[1],5) for x in side])+';float sr[]='+vex_array([round(x[2],5) for x in side])+';'
+code=profiles+'''
+int count=chi("../shoot_count");float scale=ch("../tree_height")/8;
+for(int i=0;i<count;i++){
+ float y=fit01(rand(i*17.1+7),2.2,7.95), t=y/8*48;int row=clamp(int(t),0,47);float blend=t-row;
+ float l=lerp(fl[row],fl[row+1],blend), r=lerp(fr[row],fr[row+1],blend);
+ float b=lerp(sl[row],sl[row+1],blend), f=lerp(sr[row],sr[row+1],blend);
+ if(r-l<.2 || f-b<.2)continue;
+ float u=rand(i*23.7+19), v=rand(i*12.3+31);
+ float x=lerp(l,r,u),z=lerp(b,f,v);
+ if(pow((u-.5)*2,2)+pow((v-.5)*2,2)>1.2)continue;
+ vector end=set(x*ch("../crown_width_scale"),y+ch("../crown_height_offset"),z*ch("../crown_depth_scale"))*scale;
+ int nearest=nearpoint(1,end);vector root=point(1,"P",nearest);
+ vector direction=normalize(end-root);vector start=lerp(root,end,.45);
+ int pr=addprim(0,"polyline");
+ for(int k=0;k<7;k++){
+  float t=float(k)/6;vector p=lerp(start,end,t)+set(0,.20*sin(t*$PI),0)*scale;
+  int pt=addpoint(0,p);addvertex(0,pr,pt);setpointattrib(0,"pscale",pt,lerp(.012,.0025,t)*scale,"set");
+ }
+ setprimattrib(0,"part",pr,"twig","set");setprimattrib(0,"mat",pr,"twig","set");
+ // Connection stays visible and editable as native curve geometry.
+ int link=addprim(0,"polyline");int a=addpoint(0,root),bpt=addpoint(0,start);addvertex(0,link,a);addvertex(0,link,bpt);
+ setpointattrib(0,"pscale",a,.022*scale,"set");setpointattrib(0,"pscale",bpt,.012*scale,"set");
+ setprimattrib(0,"part",link,"branchlet","set");setprimattrib(0,"mat",link,"twig","set");
+}'''
+shoots=wrangle('C3_measured_shoots',code,detail=True);shoots.setInput(1,resample)
+small=node.createNode('sweep::2.0','C3_sweep_twigs');small.setInput(0,shoots);small.parm('surfaceshape').set(1);small.parm('radius').set(1);small.parm('cols').set(5);small.parm('endcaptype').set(1);small.parm('reversecrosssections').set(1)
+small_color=wrangle('C3_twig_colour','v@Cd=set(.43,.40,.31);',small)
+leaf_points=wrangle('C4_attached_leaf_points','''int count=chi("../leaves_per_shoot");
+for(int pr=0;pr<nprimitives(1);pr+=2){
+ for(int k=0;k<count;k++){
+  float t=fit01(float(k)/max(1,count-1),.4,1);
+  vector p=primuv(1,"P",pr,set(t,0,0));vector prior=primuv(1,"P",pr,set(max(0,t-.05),0,0));
+  vector tangent=normalize(p-prior);vector side=normalize(cross(tangent,{0,1,0}));
+  if(length(side)<.1)side={1,0,0};
+  float angle=k*2.399963+rand(pr*7.1)*6.28;
+  vector radial=qrotate(quaternion(angle,tangent),side);
+  vector direction=normalize(radial*.8+set(0,-.8,0)+tangent*.12);
+  int pt=addpoint(0,p+radial*.035);
+  vector4 orientation=dihedral({0,1,0},direction);setpointattrib(0,"orient",pt,orientation,"set");
+  setpointattrib(0,"pscale",pt,ch("../leaf_length")*fit01(rand(pr*21.3+k*5.7),.7,1.15)*ch("../tree_height")/8,"set");
+  float shade=fit01(rand(pr*9.7+k*3.1),.65,1.15);setpointattrib(0,"Cd",pt,set(.32,.40,.23)*shade,"set");
+ }
+}''',detail=True);leaf_points.setInput(1,shoots)
+leaf=wrangle('C4_lanceolate_leaf','''int pts[];
+for(int row=0;row<9;row++){
+ float t=float(row)/8;float w=.075*pow(sin($PI*t),.8);
+ for(int col=0;col<3;col++){
+  vector p=set((col-1)*w,t,.08*sin($PI*t)+abs(col-1)*.025*sin($PI*t));
+  append(pts,addpoint(0,p));
+ }
+}
+for(int r=0;r<8;r++)for(int c=0;c<2;c++){
+ int pr=addprim(0,"poly");int corners[]=array(pts[r*3+c],pts[r*3+c+1],pts[(r+1)*3+c+1],pts[(r+1)*3+c]);foreach(int pt;corners)addvertex(0,pr,pt);
+ setprimattrib(0,"part",pr,"leaf","set");setprimattrib(0,"mat",pr,"leaf","set");
+}''',detail=True)
+copy=node.createNode('copytopoints::2.0','C4_copy_leaves');copy.setInput(0,leaf);copy.setInput(1,leaf_points)
+merge=node.node('M_components');merge.setInput(0,relief);merge.setInput(1,small_color);merge.setInput(2,copy);merge.setInput(3,None)
+for n in ['C2_branches','C3_twigs','C4_leaf_cards','TRUNK_vex_backbone','TRUNK_sweep_volume','TRUNK_outward_normals','TRUNK_buttress_ridges','TRUNK_final_normals']:
+ if node.node(n):node.node(n).destroy()
+node.layoutChildren()
+for b in node.networkBoxes():b.destroy()
+for index,names in enumerate([['C1_measured_axis','C1_resample_skeleton','C1_sweep_forks','C1_point_normals','TRUNK_point_vop','C1_growth_ridges'],['C3_measured_shoots','C3_sweep_twigs','C3_twig_colour'],['C4_attached_leaf_points','C4_lanceolate_leaf','C4_copy_leaves']]):
+ box=node.createNetworkBox('component_'+str(index));box.setComment(['C1 / C2 measured trunk and forks','C3 attached shoots','C4 fine lanceolate leaves'][index]);box.setColor(hou.Color((.4,.46,.38)))
+ for name in names:box.addItem(node.node(name))
+ box.fitAroundContents()
+node.displayNode().cook(force=True);geo=node.displayNode().geometry();assert geo is not None;errors=[(n.path(),n.errors()) for n in node.allSubChildren() if n.errors()];assert not errors,errors
+result={'faces':len(geo.prims()),'points':len(geo.points()),'leaf_points':len(leaf_points.geometry().points()),'shoots':len(shoots.geometry().prims()),'errors':errors}
+hou.hipFile.save();(WORK/'measurements/tree/rebuild-v006-report.json').write_text(json.dumps(result,indent=2))

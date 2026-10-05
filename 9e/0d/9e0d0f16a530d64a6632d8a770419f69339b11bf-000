@@ -1,0 +1,19 @@
+# 5 October 2026 14:10 Europe/Paris: use measured coarse occupancy to retain gaps between foliage masses.
+import hou,json
+from pathlib import Path
+w=Path('/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01');d=json.loads((w/'measurements/tree/four-view-measures.json').read_text());n=hou.node('/obj/Eucalyptus');shoot=n.node('C3_measured_shoots');code=shoot.parm('snippet').eval()
+arr=lambda a:'{'+','.join(str(x) for x in a)+'}'
+code='float fd[]='+arr(d['profiles']['front']['density'])+';float sd[]='+arr(d['profiles']['side']['density'])+';\n'+code
+needle='if(pow((u-.5)*2,2)+pow((v-.5)*2,2)>1.2)continue;'
+assert needle in code
+code=code.replace(needle,needle+'''
+ int iy=clamp(int(y/8*48),0,47),ix=clamp(int((x+3)/9*48),0,47),iz=clamp(int((z+3)/9*48),0,47);
+ float density=fd[iy*48+ix]*sd[iy*48+iz];
+ if(rand(i*81.4+113)>pow(density,.65))continue;
+''')
+code=code.replace('set(0,.20*sin(t*$PI),0)','set(0,.28*sin(t*$PI),0)')
+code=code.replace('lerp(.012,.0025,t)','lerp(.006,.0012,t)').replace('.022*scale','.008*scale').replace('.012*scale','.004*scale')
+shoot.parm('snippet').set(code);n.parm('shoot_count').set(4000);n.parm('leaves_per_shoot').set(16);n.parm('leaf_length').set(.18)
+for name in ['C3_measured_shoots','C3_sweep_twigs','C3_twig_colour','C4_attached_leaf_points','C4_lanceolate_leaf','C4_copy_leaves','M_components','N_normals','OUT_eucalyptus']:n.node(name).cook(force=True)
+assert not [(x.name(),x.errors()) for x in n.allSubChildren() if x.errors()]
+g=n.displayNode().geometry();result={'faces':len(g.prims()),'leaves':len(n.node('C4_attached_leaf_points').geometry().points())};hou.hipFile.save()

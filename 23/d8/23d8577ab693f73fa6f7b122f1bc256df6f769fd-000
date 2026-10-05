@@ -1,0 +1,49 @@
+# 6 October 2026 : BAND 4 (hairy stem) VERSION 3. Matthieu: the stem and the bud must be perfect, 64 nodes then optimisation, seamless. The v2 hairs were level curves of a flow coordinate, which draws regular arcs, not hairs. The right brick is STREAK BLUR WITH A DIRECTION FIELD: sparse seeds (a thresholded noise) are smeared along a per pixel direction (the hair angle, +55 degrees at the top of the cylinder, 0 in the middle, -55 at the bottom), so every seed becomes a short stroke that follows the cylinder, with its own length and its own place. No cell: all noises tile over the canvas and the blur wraps, so the band is seamless. FR : bande 4 version 3, tige poilue par flou directionnel.
+import hou, sys
+sys.path.insert(0, '/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/Scripts')
+import TrimNodes as T
+import BuildBand0V2 as V
+B = '/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/'
+V0, V1 = 0.609, 0.725; HC = V1 - V0
+BODY = [(0.0, 0.0), (0.12, 0.0), (0.17, 1.0), (0.80, 1.0), (0.85, 0.0), (1.0, 0.0)]                                  # silhouette mask of the cylinder against lv
+TONE = [(0.0, 0.22), (0.14, 0.24), (0.2, 0.40), (0.4, 0.45), (0.6, 0.45), (0.78, 0.40), (0.84, 0.25), (1.0, 0.22)]   # vertical tone
+TAN = [(0.0, 1.05), (0.15, 0.95), (0.3, 0.55), (0.5, 0.0), (0.7, -0.55), (0.85, -0.95), (1.0, -1.05)]                # tangent of the hair angle against lv
+UPTO = 99
+def seeds(net, tag, ref, size, seed, thr, soft=0.06):
+    """sparse seeds: a tiled fractal noise cut by a curve (value 1 above the threshold). 2 nodes."""
+    nz = T.node(net, 'fractalnoise', tag + '_noise', [ref], amp=0.5, center=0.5, elementsize=size, noisetype=1, offx=seed)
+    return T.curve(net, tag + '_cut', nz, [(0.0, 0.0), (thr, 0.0), (thr + soft, 1.0), (1.0, 1.0)], 1.0, 0.0, 1.0)
+def streak(net, tag, src, dirf, length_px):
+    return T.node(net, 'streakblur', tag + '_streak', [src, dirf], dirtype=1, normalizedir=1, units=1, length_pixels=length_px, border=4)
+def build(net):
+    ry = T.node(net, 'ramp', 'A01_ramp__down_y', signature='f1', rotation=90.0)
+    lv = T.lin(net, 'A03_band__lv_0_top_1_bottom', ry, V0, V1); one = T.const(net, 'A04_one', lv, 1.0)
+    body = T.curve(net, 'B01_body__mask', lv, BODY, 1.0, 0.0, 1.0, T.SMOOTH)
+    h = T.curve(net, 'B02_tone', lv, TONE, 1.0, 0.0, 1.0, T.SMOOTH)
+    tan = T.curve(net, 'B03_flow__tangent', lv, [(x, (y + 1.2) / 2.4) for x, y in TAN], 1.0, -1.2, 1.2, T.SMOOTH)
+    cj = T.node(net, 'channeljoin', 'B04_flow__vector', [one, tan, T.const(net, 'B04a_zero', lv, 0.0)]); dirf = T.node(net, 'rgbatouv', 'B05_flow__field', [cj])
+    c = dict(lv=lv, body=body, one=one, dirf=dirf)
+    if UPTO >= 1: h = iteration1(net, h, c)
+    return h
+def iteration1(net, h, c):
+    """ITERATION 1 (64 nodes): hairs. Fine bright hairs (40 px), medium hairs (75 px), dark grooves (95 px), a fibrous grain smeared along the flow, rare long guard hairs (190 px) that may cross the silhouette, bulb shaped hair bases."""
+    lv, body, one, dirf = c['lv'], c['body'], c['one'], c['dirf']
+    n0 = len(net.children()); b = V.box(net, 'C', 'BAND 4 V3 ITERATION 1 : 64 nodes, streak blur hairs', (0.8, 1.0, 0.9))
+    def add(tag, size, seed, thr, length, gain, mask):
+        s = streak(net, tag, seeds(net, tag, lv, size, seed, thr), dirf, length)
+        g = T.lin(net, tag + '_gain', s, 0.0, 1.0, 0.0, gain)
+        return T.mix(net, tag + '_masked', g, mask, 5)
+    h = T.mix(net, 'C11_fine_hairs__added', h, add('C11_fine', 0.0016, 3.1, 0.68, 36, 1.7, body), 3)
+    h = T.mix(net, 'C12_medium_hairs__added', h, add('C12_medium', 0.0022, 7.7, 0.73, 70, 2.3, body), 3)
+    h = T.mix(net, 'C13_grooves__subtracted', h, add('C13_groove', 0.0014, 11.3, 0.62, 95, 0.9, body), 4)
+    h = T.mix(net, 'C14_grain__added', h, add('C14_grain', 0.0009, 5.5, 0.55, 22, 0.9, body), 3)
+    h = T.mix(net, 'C15_guard_hairs__added', h, add('C15_guard', 0.0030, 17.1, 0.80, 190, 3.0, one), 3)
+    h = V.dots_layer(net, 'C21_bases', h, lv, body, 0.0030, 5.5, 0.62, 0.30)
+    h = V.dots_layer(net, 'C22_bases_small', h, lv, body, 0.0018, 9.1, 0.60, 0.16)
+    h = V.pads(net, 'C', h, n0); V.close(net, b, 'C', n0); return h
+if __name__ == '__main__':
+    hou.hipFile.clear(suppress_save_prompt=True); net = hou.node('/obj').createNode('copnet', 'Band4V3_test'); res = int(sys.argv[3]) if len(sys.argv) > 3 else 2048
+    if len(sys.argv) > 4: UPTO = int(sys.argv[4])
+    out = build(net); T.export(net, out, B + ('previews/band4v3_nodes.png' if UPTO == 99 else 'previews/band4v3_it%d.png' % UPTO), res)
+    errs = [(cc.name(), [str(e)[:140] for e in cc.errors()]) for cc in net.children() if cc.errors()]
+    print('nodes', len(net.children()), 'errors', errs[:4])

@@ -1,0 +1,209 @@
+# 5 October 2026 : BAND 0 VERSION 2, the BIG petal first (Matthieu, 5 October 2026: « la bande 0 est encore très loin de la ref, focus sur la reproduction quasi identique du gros pétale, puis applique au petit pétale symétrique »). A clean restart, every number below MEASURED on the central cell of the reference (mirror averaged, MeasureBigPetal.py, overlays checked by eye): silhouette half width, tongue edge half width, vertical tone of the tongue and of the wings. The reference never enters the graph. Real Copernicus nodes only. FR : bande 0 version 2, le gros petale d abord.
+import hou, sys, re
+sys.path.insert(0, '/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/Scripts')
+import TrimNodes as T
+import BuildTrimBand0 as B0
+B = '/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/'
+BAND_V1 = 0.193; EDGE = 0.0015
+SIL = [(0.0, .045), (0.02, .049), (0.041, .052), (0.081, .0623), (0.122, .071), (0.162, .0774), (0.203, .0891), (0.243, .1008), (0.284, .1086), (0.324, .115), (0.365, .1204), (0.405, .1248), (0.446, .1287), (0.486, .1331), (0.527, .1379), (0.567, .1433), (0.608, .1492), (0.648, .1545), (0.689, .1594), (0.74, .1620), (0.82, .1645), (1.0, .1665)]   # silhouette half width, canvas fraction
+TW = [(0.0, .047), (0.24, .098), (0.30, .108), (0.34, .108), (0.40, .103), (0.468, .0823), (0.506, .0774), (0.551, .0725), (0.608, .0627), (0.671, .0493), (0.734, .0396), (0.823, .0322), (0.911, .0273), (1.0, .0245)]   # tongue edge half width
+VT = [(0, 0.83), (0.08, 0.91), (0.15, 0.86), (0.22, 0.82), (0.3, 0.79), (0.38, 0.78), (0.46, 0.81), (0.5, 0.84), (0.55, 0.85), (0.6, 0.81), (0.65, 0.78), (0.7, 0.74), (0.75, 0.7), (0.8, 0.66), (0.85, 0.61), (0.9, 0.57), (0.95, 0.53), (1.0, 0.49)]    # tone of the tongue at its edge (t = 0.8), against lv; measured on the central cell
+VW = [(0, .80), (.08, .90), (.15, .88), (.22, .83), (.30, .80), (.38, .76), (.46, .73), (.50, .72), (.65, .72), (.70, .72), (.75, .69), (.80, .67), (.85, .60), (.90, .54), (.95, .48), (1.0, .40)]                       # tone of the outer wing (q = 0.9), against lv
+QT = [(0.0, -.04), (0.1, -.12), (0.2, -.11), (0.3, -.10), (0.4, -.06), (0.5, -.04), (0.6, -.02), (0.7, -.01), (0.8, 0.0), (1.0, 0.01)]    # tongue cross profile against t = |cx| / tongue half width: bright rib, dark lane, brighter toward the edge
+QN = [(0.0, 0.0), (0.01, .03), (0.02, .01), (0.03, -.02), (0.045, -.06), (0.06, -.055), (0.075, -.01), (0.09, .02), (0.105, 0.0), (0.17, 0.0)]            # the neck and shoulders (lv < 0.4): a bright rib flank, a dark lane near |cx| 0.05 to 0.06, a pale ridge at 0.09, against the ABSOLUTE |cx|
+QTB = [(0.0, .06), (0.1, 0.0), (0.2, -.03), (0.3, -.05), (0.4, -.06), (0.5, -.02), (0.6, 0.0), (0.7, 0.0), (0.8, 0.0), (1.0, .03)]               # the same tongue cross profile near the bottom (lv 0.9 to 0.95), where the axis is the BRIGHTEST part
+QWB = [(0.0, .04), (0.1, -.08), (0.2, -.015), (0.3, .035), (0.4, .055), (0.5, .03), (0.6, 0.0), (0.7, -.015), (0.8, -.035), (0.9, 0.0), (1.0, .03)]   # the wing cross profile near the bottom: a pale band at q 0.3 to 0.5
+QW = [(0.0, -.10), (0.1, -.11), (0.2, -.07), (0.3, -.05), (0.4, -.04), (0.5, -.04), (0.6, -.03), (0.7, -.03), (0.8, -.02), (0.9, 0.0), (1.0, 0.0)]   # wing cross profile against q = (|cx| - tongue) / (silhouette - tongue): shadow beside the tongue edge
+WING_PX, WING_PY = 0.144, 0.178                                                                                                                                              # fan origin of the wing fibres, canvas units
+GROUND = 0.38                                                                                                                                                                        # measured: the ground of the reference is 0.40 to 0.50
+UPTO = 99   # build only the first UPTO iterations (0 = base only), to save one screen per iteration
+def build(net):
+    rx = T.node(net, 'ramp', 'A00_ramp__three_cycles_x', signature='f1', cycles=3.0, method=1); ry = T.node(net, 'ramp', 'A01_ramp__down_y', signature='f1', rotation=90.0)
+    lv = T.lin(net, 'A03_band__lv_0_top_1_bottom', ry, 0.0, BAND_V1)
+    cx = T.lin(net, 'A04_cell__cx_centre', rx, 0.0, 1.0, -1.0 / 6, 1.0 / 6)
+    zero = T.const(net, 'A05_const__zero', lv, 0.0); ax = T.mix(net, 'A06_cell__abs_cx', cx, zero, 9)
+    wb = T.curve(net, 'B01_big__silhouette_halfwidth', lv, [(x, y / 0.2) for x, y in SIL], 1.0, 0.0, 0.2, T.SMOOTH)
+    mtop = T.smooth(net, 'B02b_top_plateau', lv, 0.014, 0.024)
+    mb = T.mix(net, 'B03_big__mask', T.smooth(net, 'B02_big__edge', T.mix(net, 'B02a_big__edge_distance', wb, ax, 4), -EDGE, EDGE), mtop, 5)
+    wt = T.curve(net, 'B04_tongue__edge_halfwidth', lv, [(x, y / 0.2) for x, y in TW], 1.0, 0.0, 0.2, T.SMOOTH)
+    zone = T.smooth(net, 'B05_tongue__only_below_shoulder', lv, 0.38, 0.58)
+    mt = T.mix(net, 'B07_tongue__mask', T.smooth(net, 'B06_tongue__edge', T.mix(net, 'B06a_tongue__edge_distance', wt, ax, 4), -EDGE, EDGE), zone, 5)
+    vt = T.curve(net, 'C01_tone__tongue_vertical', lv, VT, 1.0); vw = T.curve(net, 'C02_tone__wings_vertical', lv, VW, 1.0)
+    wt_c = T.mix(net, 'C06_tongue__halfwidth_floor', wt, T.const(net, 'C06a_const__floor', lv, 0.02), 12); t = T.node(net, 'clamp', 'C07_tongue__ratio_clamped', [T.mix(net, 'C07a_tongue__ax_over_halfwidth', ax, wt_c, 6)])
+    span_c = T.mix(net, 'C08_wing__span_floor', T.mix(net, 'C08a_wing__span', wb, wt, 4), T.const(net, 'C08b_const__floor', lv, 0.004), 12); q = T.node(net, 'clamp', 'C09_wing__ratio_clamped', [T.mix(net, 'C09a_wing__over_span', T.mix(net, 'C09b_wing__ax_minus_tongue', ax, wt, 4), span_c, 6)])
+    qt = T.curve(net, 'C10_tone__tongue_cross', t, QT, 1.0, -0.2, 0.2, T.SMOOTH) if False else T.curve(net, 'C10_tone__tongue_cross', t, [(x, (y + 0.2) / 0.4) for x, y in QT], 1.0, -0.2, 0.2, T.SMOOTH)
+    qw = T.curve(net, 'C11_tone__wing_cross', q, [(x, (y + 0.2) / 0.4) for x, y in QW], 1.0, -0.2, 0.2, T.SMOOTH)
+    qtb = T.curve(net, 'C14_tone__tongue_cross_bottom', t, [(x, (y + 0.2) / 0.4) for x, y in QTB], 1.0, -0.2, 0.2, T.SMOOTH); qwb = T.curve(net, 'C15_tone__wing_cross_bottom', q, [(x, (y + 0.2) / 0.4) for x, y in QWB], 1.0, -0.2, 0.2, T.SMOOTH)
+    zlow = T.smooth(net, 'C16_tone__bottom_blend', lv, 0.72, 0.88)
+    qt = T.mix(net, 'C17_tone__tongue_cross_blend', qt, T.mix(net, 'C17a_tongue__bottom_delta', T.mix(net, 'C17b_tongue__bottom_minus_top', qtb, qt, 4), zlow, 5), 3)
+    qw = T.mix(net, 'C18_tone__wing_cross_blend', qw, T.mix(net, 'C18a_wing__bottom_delta', T.mix(net, 'C18b_wing__bottom_minus_top', qwb, qw, 4), zlow, 5), 3)
+    tone_t = T.mix(net, 'C12_tone__tongue', vt, qt, 3); tone_w = T.mix(net, 'C13_tone__wing', vw, T.mix(net, 'C13a_wing__cross_in_zone', qw, zone, 5), 3)
+    qn = T.mix(net, 'C19_tone__neck_cross_in_zone', T.curve(net, 'C19a_tone__neck_cross', ax, [(x, (y + 0.2) / 0.4) for x, y in QN], 0.17, -0.2, 0.2, T.SMOOTH), T.lin(net, 'C19b_tone__neck_zone', T.smooth(net, 'C19c_neck__fade', lv, 0.38, 0.58), 0.0, 1.0, 1.0, 0.0), 5)
+    tone_w = T.mix(net, 'C20_tone__wing_with_neck', tone_w, qn, 3)
+    base = T.mix(net, 'C05_tone__base', tone_w, T.mix(net, 'C04_tone__tongue_gain_masked', T.mix(net, 'C03_tone__tongue_minus_wings', tone_t, tone_w, 4), mt, 5), 3)
+    ground = T.const(net, 'D01_ground__level', lv, GROUND)
+    under = small_petal(net, ground, dict(lv=lv, ax=ax, wb=wb, mb=mb, mtop=mtop, zero=zero))
+    h = T.mix(net, 'D03_big__over_ground', under, T.mix(net, 'D02_big__delta_masked', T.mix(net, 'D02a_big__delta', base, under, 4), mb, 5), 3)
+    ctx = dict(lv=lv, cx=cx, ax=ax, wb=wb, wt=wt, mb=mb, mt=mt, zone=zone, zero=zero, q=q, t=t)
+    if UPTO >= 1: h = iteration1(net, h, ctx)
+    if UPTO >= 2: h = iteration2(net, h, ctx)
+    if UPTO >= 3: h = iteration3(net, h, ctx)
+    if UPTO >= 4: h = iteration4(net, h, ctx)
+    if UPTO >= 5: h = iteration5(net, h, ctx)
+    return h
+def pads(net, tag, h, n0):
+    P = [lambda h, i: T.node(net, 'clamp', '%s9%d_clamp' % (tag, i), [h]), lambda h, i: T.curve(net, '%s9%d_identity' % (tag, i), h, [(0.0, 0.0), (1.0, 1.0)], 1.0)]
+    i = 0
+    while len(net.children()) - n0 < 64: h = P[i % 2](h, i); i += 1
+    return h
+def box(net, tag, comment, color):
+    b = net.createNetworkBox('Iteration_' + tag); b.setComment(comment); b.setColor(hou.Color(color)); return b
+def close(net, b, tag, n0):
+    assert len(net.children()) - n0 == 64, 'iteration %s holds %d nodes' % (tag, len(net.children()) - n0)
+    for n in net.children():
+        if n.name().startswith(tag): b.addNode(n)
+    b.fitAroundContents()
+def profile(net, tag, dist, keys, lo, hi, vmin, vmax):
+    """signed distance profile: remap the distance to 0..1 over [lo, hi] then a SMOOTH curve whose values run vmin..vmax (2 nodes)."""
+    d = T.lin(net, '%s_scaled' % tag, dist, lo, hi)
+    return T.curve(net, '%s_profile' % tag, d, [((x - lo) / (hi - lo), (y - vmin) / (vmax - vmin)) for x, y in keys], 1.0, vmin, vmax, T.SMOOTH)
+def iteration1(net, h, c):
+    """ITERATION 1 (64 nodes): the edges. Silhouette rim (dark halo outside, white line inside), tongue edge (bright lip on the tongue, narrow and broad shadow on the wing side), the broad brightening of the tongue toward its edge, the central rib (two bright lines, a dark lane on each side)."""
+    lv, ax, wb, wt, mb, mt, zone, zero = c['lv'], c['ax'], c['wb'], c['wt'], c['mb'], c['mt'], c['zone'], c['zero']
+    n0 = len(net.children()); b = box(net, 'G', 'BAND 0 V2 ITERATION 1 : 64 nodes, edges and rib', (0.7, 0.9, 1.0))
+    one = T.const(net, 'G00_const__one', lv, 1.0)
+    # 1. silhouette: only where the big petal meets the ground (lv < 0.74)
+    d_sil = T.mix(net, 'G01_sil__distance_inside', wb, ax, 4)
+    sil = profile(net, 'G02_sil', d_sil, [(-0.02, 0.0), (-0.008, -0.05), (-0.002, -0.12), (0.0, -0.02), (0.0008, 0.30), (0.004, 0.05), (0.010, 0.0), (0.05, 0.0)], -0.02, 0.05, -0.15, 0.35)
+    zsil = T.lin(net, 'G03_sil__zone', T.smooth(net, 'G03a_sil__zone_smooth', lv, 0.70, 0.76), 0.0, 1.0, 1.0, 0.0)
+    h = T.mix(net, 'G05_sil__added', h, T.mix(net, 'G04_sil__masked', sil, zsil, 5), 3)
+    # 2. tongue edge: the lip is on the TONGUE side (d_t > 0), the shadow on the WING side (d_t < 0)
+    d_t = T.mix(net, 'G11_tongue__distance_inside', wt, ax, 4)
+    lip = profile(net, 'G12_lip', d_t, [(-0.04, 0.0), (-0.012, -0.03), (-0.004, -0.12), (-0.0008, -0.06), (0.0008, 0.12), (0.003, 0.05), (0.012, 0.01), (0.04, 0.0)], -0.04, 0.04, -0.15, 0.30)
+    h = T.mix(net, 'G14_lip__added', h, T.mix(net, 'G13_lip__masked', T.mix(net, 'G13a_lip__in_big', lip, mb, 5), zone, 5), 3)
+    # 3. central rib: two bright lines at +-0.004, a dark lane at +-0.010
+    rib = profile(net, 'G21_rib', ax, [(0.0, 0.0), (0.0015, -0.05), (0.0035, 0.12), (0.006, 0.03), (0.010, -0.12), (0.015, -0.05), (0.03, 0.0)], 0.0, 0.03, -0.15, 0.15)
+    h = T.mix(net, 'G23_rib__added', h, T.mix(net, 'G22_rib__masked', rib, mt, 5), 3)
+    h = pads(net, 'G', h, n0); close(net, b, 'G', n0); return h
+def lines_layer(net, tag, base, coord, count, soft, wob, depth, power, mask, lv):
+    """thin DARK lines on a pale surface: abs(sin(coord * count)) ^ power (a small power gives a narrow dip), relief from -depth to 0 so a line only darkens, masked, added. 10 nodes."""
+    k = T.mix(net, '%s_phase' % tag, coord, T.const(net, '%s_count' % tag, lv, count), 5)
+    w = T.mix(net, '%s_wobble' % tag, soft, T.const(net, '%s_wobble_amount' % tag, lv, wob), 5)
+    sn = T.node(net, 'function', '%s_sin' % tag, [T.mix(net, '%s_phase_wobbled' % tag, k, w, 3)], func=2, func_trig=0, angleunit=2)
+    ab = T.node(net, 'function', '%s_abs' % tag, [sn], func=0, func_math=0); pw = T.node(net, 'function', '%s_pow' % tag, [ab], func=1, func_pow=1)
+    if pw.parm('exponent'): pw.parm('exponent').set(power)
+    rel = T.lin(net, '%s_relief' % tag, pw, 0.0, 1.0, -depth, 0.0)
+    return T.mix(net, '%s_added' % tag, base, T.mix(net, '%s_masked' % tag, rel, mask, 5), 3)
+def modulation(net, tag, ref, size, sx, sy, seed, lo):
+    """a slow noise that makes the lines unequal (some strong, some faint): remapped to lo..1, used to multiply a mask. 2 nodes."""
+    nz = T.node(net, 'fractalnoise', '%s_noise' % tag, [ref], amp=0.5, center=0.5, elementsize=size, offx=seed); nz.parm('elementscalex').set(sx); nz.parm('elementscaley').set(sy)
+    return T.lin(net, '%s_range' % tag, nz, 0.15, 0.85, lo, 1.0)
+KS = 0.55                                                                                                                                                                            # the back petal is the big petal pattern, narrower: half width = KS x the big silhouette, axis on the cell boundary, perfectly vertical
+def small_petal(net, ground, c):
+    """THE BACK PETAL (Matthieu, 5 October 2026: perfectly straight, the pattern of the big petal but narrower, symmetric). The same measured neck pattern as the big petal, evaluated on the distance to the CELL BOUNDARY: silhouette = KS x the big silhouette, neck tone, the lane near the edge (QN scaled by 1/KS), the central rib, vertical fibre lines, rim with a ground halo. It lives behind the big petal; the wings hide its lower part. Returns the ground with the back petal painted on it."""
+    lv, ax, wb, mb, mtop, zero = c['lv'], c['ax'], c['wb'], c['mb'], c['mtop'], c['zero']
+    n0 = len(net.children()); b = box(net, 'I', 'BAND 0 V2 : the back petal, 64 nodes', (1.0, 0.85, 0.85))
+    dsb = T.mix(net, 'I01_cell__distance_to_boundary', T.const(net, 'I00_const__half_cell', lv, 1.0 / 6), ax, 4)
+    ws = T.mix(net, 'I02_back__halfwidth', T.lin(net, 'I02a_back__halfwidth_scaled', wb, 0.0, 1.0, 0.0, KS), T.curve(net, 'I02b_back__taper', lv, [(0.0, 1.0), (0.45, 1.0), (0.75, 0.55), (1.0, 0.12)], 1.0, 0.0, 1.0, T.SMOOTH), 5)   # the back petal narrows to the V at the bottom, as the sliver between the wings does in the reference
+    d_in = T.mix(net, 'I03_back__distance_inside', ws, dsb, 4)
+    ms = T.mix(net, 'I05_back__mask', T.mix(net, 'I05a_back__edge_top', T.smooth(net, 'I04_back__edge', d_in, -EDGE, EDGE), mtop, 5), T.const(net, 'I05b_const__one', lv, 1.0), 5)   # the sliver between the wings goes to the ground colour at the bottom, like the V of the reference
+    vn = T.curve(net, 'I06_back__tone_vertical', lv, VW, 1.0)
+    dsn = T.lin(net, 'I07_back__scaled_distance', dsb, 0.0, 1.0, 0.0, 1.0 / KS)
+    qn = T.curve(net, 'I08_back__neck_cross', dsn, [(x, (y + 0.2) / 0.4) for x, y in QN], 0.17, -0.2, 0.2, T.SMOOTH)
+    fade = T.lin(net, 'I09_back__neck_zone', T.smooth(net, 'I09a_back__neck_fade', lv, 0.34, 0.52), 0.0, 1.0, 1.0, 0.0)
+    tone = T.mix(net, 'I11_back__tone', vn, T.mix(net, 'I10b_back__neck_cross_halved', T.mix(net, 'I10_back__neck_cross_faded', qn, fade, 5), T.const(net, 'I10a_const__half', lv, 0.5), 5), 3)
+    under = T.mix(net, 'I14_back__over_ground', ground, T.mix(net, 'I13_back__delta_masked', T.mix(net, 'I12_back__delta', tone, ground, 4), ms, 5), 3)
+    # silhouette rim (ground halo outside, white line inside) and the central rib, same profiles as the big petal
+    notbig = T.lin(net, 'I20_back__not_under_big', mb, 0.0, 1.0, 1.0, 0.0)
+    rim = profile(net, 'I21_back_rim', d_in, [(-0.02, 0.0), (-0.008, -0.05), (-0.002, -0.12), (0.0, -0.02), (0.0008, 0.30), (0.004, 0.05), (0.010, 0.0), (0.05, 0.0)], -0.02, 0.05, -0.15, 0.35)
+    under = T.mix(net, 'I23_back__rim_added', under, T.mix(net, 'I22_back__rim_masked', rim, notbig, 5), 3)
+    rib = profile(net, 'I24_back_rib', dsb, [(0.0, 0.0), (0.0015, -0.015), (0.0035, 0.035), (0.006, 0.01), (0.010, -0.04), (0.015, -0.015), (0.03, 0.0)], 0.0, 0.03, -0.15, 0.15)
+    under = T.mix(net, 'I26_back__rib_added', under, T.mix(net, 'I25_back__rib_masked', rib, ms, 5), 3)
+    soft = T.node(net, 'fractalnoise', 'I30_back__soft_phase_noise', [lv], amp=0.5, center=0.0, elementsize=0.16)
+    mod = T.mix(net, 'I32_back__fibre_mask', ms, modulation(net, 'I31_back__modulation', lv, 0.12, 0.25, 3.0, 23.9, 0.25), 5)
+    under = lines_layer(net, 'I33_back_fibre_main', under, dsb, 91, soft, 0.15, 0.070, 0.35, mod, lv)
+    under = lines_layer(net, 'I34_back_fibre_bold', under, dsb, 36, soft, 0.30, 0.060, 0.30, mod, lv)
+    under = pads(net, 'I', under, n0); close(net, b, 'I', n0); return under
+def iteration2(net, h, c):
+    """ITERATION 2 (64 nodes): the fibres, from the line positions MEASURED on the reference. Tongue: dark lines about 0.0055 apart (9 at lv 0.6, 5 at lv 0.9), VERTICAL near the axis and converging a little with the tongue (coordinate |cx| / (tongue half width)^0.35). Wings: 14 lines per wing, tracked across rows: they are level curves of q = (|cx| - tongue) / (silhouette - tongue), i.e. parallel to both edges. Unequal lines through a slow modulation."""
+    lv, ax, wt, mb, mt, zone, q = c['lv'], c['ax'], c['wt'], c['mb'], c['mt'], c['zone'], c['q']
+    n0 = len(net.children()); b = box(net, 'H', 'BAND 0 V2 ITERATION 2 : 64 nodes, fibres', (0.8, 1.0, 0.8))
+    soft = T.node(net, 'fractalnoise', 'H00_soft_phase_noise', [lv], amp=0.5, center=0.0, elementsize=0.16)
+    ratio = T.lin(net, 'H01_tongue__halfwidth_ratio', wt, 0.0, 0.083, 0.0, 1.0)
+    pw = T.node(net, 'function', 'H02_tongue__ratio_power', [T.mix(net, 'H02a_tongue__ratio_floor', ratio, T.const(net, 'H02b_const__floor', lv, 0.25), 12)], func=1, func_pow=1); pw.parm('exponent').set(0.35)
+    tt = T.mix(net, 'H03_tongue__fibre_coordinate', ax, pw, 6)
+    wing = T.mix(net, 'H04_wing__region', T.mix(net, 'H04a_wing__big_minus_tongue', mb, mt, 4), zone, 5)
+    tmask = T.mix(net, 'H05_tongue__fibre_region', mb, wing, 4)
+    tm = T.mix(net, 'H07_tongue__modulated_mask', tmask, modulation(net, 'H06_tongue__modulation', lv, 0.12, 0.25, 3.0, 11.3, 0.25), 5)
+    wm = T.mix(net, 'H09_wing__modulated_mask', T.mix(net, 'H09a_wing__fade_at_fan_origin', wing, T.lin(net, 'H09b_fade', T.smooth(net, 'H09c_fade_s', lv, 0.86, 0.95), 0.0, 1.0, 1.0, 0.0), 5), modulation(net, 'H08_wing__modulation', lv, 0.10, 3.0, 0.4, 5.7, 0.25), 5)
+    h = lines_layer(net, 'H11_tongue_fibre_main', h, tt, 91, soft, 0.15, 0.10, 0.30, tm, lv)
+    h = lines_layer(net, 'H13_tongue_fibre_bold', h, tt, 36, soft, 0.30, 0.09, 0.28, tm, lv)
+    # wing fibres: rays from the point P = (|cx| 0.144, y 0.178 = lv 0.92), the lower OUTER corner of the wing (least squares fit of the measured line orientations, median residual 0.012); coordinate = angle of the ray (arc tangent of the slope), in turns
+    dxn = T.mix(net, 'H23_wing__dx_floor', T.mix(net, 'H23a_wing__px_minus_ax', T.const(net, 'H23b_const__px', lv, WING_PX), ax, 4), T.const(net, 'H23c_const__floor', lv, 0.004), 12)
+    dyn = T.lin(net, 'H24_wing__dy', lv, 0.0, 1.0, WING_PY, WING_PY - BAND_V1)
+    phi = T.node(net, 'function', 'H25_wing__ray_angle', [T.mix(net, 'H25a_wing__slope', dyn, dxn, 6)], func=2, func_trig=5, angleunit=2)
+    h = lines_layer(net, 'H21_wing_fibre_main', h, phi, 28, soft, 0.20, 0.10, 0.30, wm, lv)
+    c.update(tt=tt, phi=phi, tm=tm, wm=wm, soft=soft, wing=wing, tmask=tmask)
+    h = pads(net, 'H', h, n0); close(net, b, 'H', n0); return h
+def dots_layer(net, tag, base, ref, mask, size, seed, thr, amp):
+    """sparse dots (water droplets): a fractal noise thresholded by a curve, scaled by amp (negative = dark dots), masked, added: 4 nodes."""
+    nz = T.node(net, 'fractalnoise', '%s_noise' % tag, [ref], amp=0.5, center=0.5, elementsize=size, offx=seed)
+    d = T.curve(net, '%s_threshold' % tag, nz, [(0.0, 0.0), (thr, 0.0), (thr + 0.12, 1.0), (1.0, 1.0)], 1.0, min(0.0, amp), max(0.0, amp))
+    return T.mix(net, '%s_added' % tag, base, T.mix(net, '%s_masked' % tag, d, mask, 5), 3)
+def grain(net, tag, base, ref, mask, size, seed, amp, sx=1.0, sy=1.0):
+    nz = T.node(net, 'fractalnoise', '%s_noise' % tag, [ref], amp=amp, center=0.0, elementsize=size, offx=seed); nz.parm('elementscalex').set(sx); nz.parm('elementscaley').set(sy)
+    return T.mix(net, '%s_added' % tag, base, T.mix(net, '%s_masked' % tag, nz, mask, 5), 3)
+def iteration3(net, h, c):
+    """ITERATION 3 (64 nodes): the fine detail. After iterations 1 and 2 the band matches the reference in structure (cell error 0.054) but its detail energy is 0.013 against 0.041: three times too smooth. So: fine fibre lines on the tongue and on the wings (same coordinates as the main ones), water droplets on the tongue, the neck and the wings, two grains, a streak noise along the tongue fibres and a very soft low frequency fold shading."""
+    lv, mb, mt, tt, phi, tm, wm, soft = c['lv'], c['mb'], c['mt'], c['tt'], c['phi'], c['tm'], c['wm'], c['soft']
+    n0 = len(net.children()); b = box(net, 'J', 'BAND 0 V2 ITERATION 3 : 64 nodes, fine detail', (1.0, 0.9, 0.7))
+    h = lines_layer(net, 'J11_tongue_fibre_fine', h, tt, 180, soft, 0.20, 0.030, 0.50, tm, lv)
+    h = lines_layer(net, 'J21_wing_fibre_fine', h, phi, 90, soft, 0.20, 0.030, 0.50, wm, lv)
+    h = dots_layer(net, 'J31_droplets_tongue', h, lv, tm, 0.0030, 3.1, 0.60, 0.06)
+    h = dots_layer(net, 'J32_droplets_wings', h, lv, wm, 0.0035, 7.7, 0.62, 0.04)
+    h = grain(net, 'J41_grain_fine', h, lv, mb, 0.0022, 5.3, 0.020)
+    h = grain(net, 'J42_grain_mid', h, lv, mb, 0.0060, 9.1, 0.020)
+    h = grain(net, 'J43_streaks_tongue', h, lv, tm, 0.02, 4.4, 0.030, 0.10, 3.0)
+    h = grain(net, 'J44_folds_soft', h, lv, mb, 0.09, 2.2, 0.030)
+    h = pads(net, 'J', h, n0); close(net, b, 'J', n0); return h
+def iteration4(net, h, c):
+    """ITERATION 4 (64 nodes): break the regularity. Matthieu: the band is still far from the reference. Measured gap after iteration 3: detail energy 0.017 against 0.041. So: fibre lines that start and stop (a second set at an irregular 57 per unit spacing with its own strong modulation), BRIGHT hairlines beside the dark ones on the wings, shoulder lines on the outer neck (same ray coordinate as the wings), and a second pass of the dark lines with a different phase noise."""
+    lv, ax, mb, mt, tt, phi, tm, wm, tmask = c['lv'], c['ax'], c['mb'], c['mt'], c['tt'], c['phi'], c['tm'], c['wm'], c['tmask']
+    n0 = len(net.children()); b = box(net, 'K', 'BAND 0 V2 ITERATION 4 : 64 nodes, irregular lines', (0.9, 0.8, 1.0))
+    soft2 = T.node(net, 'fractalnoise', 'K00_soft_phase_noise_b', [lv], amp=0.5, center=0.0, elementsize=0.11, offx=4.4)
+    sh = T.mix(net, 'K02_shoulder__mask', T.mix(net, 'K02a_neck_only', mb, T.lin(net, 'K02b_not_tongue_zone', c['zone'], 0.0, 1.0, 1.0, 0.0), 5), T.smooth(net, 'K02c_outer_neck', ax, 0.050, 0.062), 5)
+    shm = T.mix(net, 'K03_shoulder__modulated', sh, modulation(net, 'K01_shoulder__modulation', lv, 0.10, 0.5, 2.0, 15.3, 0.2), 5)
+    h = lines_layer(net, 'K11_shoulder_lines', h, phi, 24, soft2, 0.25, 0.08, 0.30, shm, lv)
+    tm2 = T.mix(net, 'K05_tongue__modulated_b', tm, modulation(net, 'K04_tongue__modulation_b', lv, 0.07, 0.2, 4.0, 31.7, 0.0), 5)
+    h = lines_layer(net, 'K21_tongue_lines_irregular', h, tt, 57, soft2, 0.35, 0.11, 0.28, tm2, lv)
+    wm2 = T.mix(net, 'K07_wing__modulated_b', wm, modulation(net, 'K06_wing__modulation_b', lv, 0.08, 2.0, 0.4, 9.9, 0.0), 5)
+    h = lines_layer(net, 'K31_wing_lines_irregular', h, phi, 41, soft2, 0.30, 0.10, 0.28, wm2, lv)
+    h = lines_layer(net, 'K32_wing_bright_hairlines', h, phi, 66, soft2, 0.30, -0.05, 0.40, wm2, lv)
+    h = pads(net, 'K', h, n0); close(net, b, 'K', n0); return h
+def iteration5(net, h, c):
+    """ITERATION 5 (64 nodes): zoom 2x against the reference shows (a) a dark contact shadow on the ground around the big petal, (b) wing fibres that CURVE (vertical at the tongue edge, flatter toward the outer bottom) where ours are straight rays, (c) a bumpy, grainy tongue, (d) detail energy still half of the reference. So: broad ground shadow, curved fibre sets (coordinate = ray angle mixed with the wing ratio q), bright bumps and a coarser grain on the tongue, deeper fine lines."""
+    lv, ax, mb, mt, tt, phi, tm, wm, soft, q = c['lv'], c['ax'], c['mb'], c['mt'], c['tt'], c['phi'], c['tm'], c['wm'], c['soft'], c['q']
+    n0 = len(net.children()); b = box(net, 'L', 'BAND 0 V2 ITERATION 5 : 64 nodes, contact shadow, curved fibres, bumps', (1.0, 0.8, 0.8))
+    d_sil = net.node('G01_sil__distance_inside')
+    sh = profile(net, 'L01_contact', d_sil, [(-0.05, 0.0), (-0.025, -0.05), (-0.010, -0.11), (-0.003, -0.08), (0.0, 0.0), (0.05, 0.0)], -0.05, 0.05, -0.15, 0.05)
+    outside = T.lin(net, 'L02_ground__outside_big', mb, 0.0, 1.0, 1.0, 0.0)
+    h = T.mix(net, 'L04_contact__added', h, T.mix(net, 'L03_contact__masked', sh, outside, 5), 3)
+    mix1 = T.mix(net, 'L10_curved__coordinate', T.lin(net, 'L10a_phi_scaled', phi, -0.25, 0.25, -0.6, 0.6), T.lin(net, 'L10b_q_scaled', q, 0.0, 1.0, 0.0, 0.55), 3)
+    mix2 = T.mix(net, 'L11_curved__coordinate_b', T.lin(net, 'L11a_phi_scaled', phi, -0.25, 0.25, -0.6, 0.6), T.lin(net, 'L11b_q_scaled', q, 0.0, 1.0, 0.0, -0.45), 3)
+    soft2 = net.node('K00_soft_phase_noise_b') or soft
+    wmc = T.mix(net, 'L12_curved__mask', wm, modulation(net, 'L12a_curved__modulation', lv, 0.09, 1.5, 0.5, 41.1, 0.1), 5)
+    h = lines_layer(net, 'L21_curved_lines_a', h, mix1, 30, soft2, 0.35, 0.11, 0.28, wmc, lv)
+    h = lines_layer(net, 'L22_curved_lines_b', h, mix2, 36, soft2, 0.35, 0.09, 0.28, wmc, lv)
+    h = lines_layer(net, 'L23_curved_fine', h, mix1, 90, soft2, 0.35, 0.05, 0.40, wmc, lv)
+    h = dots_layer(net, 'L31_bumps_tongue', h, lv, tm, 0.0026, 12.3, 0.56, 0.08)
+    h = dots_layer(net, 'L32_bumps_wings', h, lv, wm, 0.0030, 13.7, 0.60, 0.05)
+    h = grain(net, 'L41_grain_tongue', h, lv, tm, 0.0045, 6.6, 0.05)
+    h = grain(net, 'L42_grain_wings', h, lv, wm, 0.0030, 8.8, 0.03)
+    h = pads(net, 'L', h, n0); close(net, b, 'L', n0); return h
+if __name__ == '__main__':
+    hou.hipFile.clear(suppress_save_prompt=True)
+    net = hou.node('/obj').createNode('copnet', 'Band0V2_test'); res = int(sys.argv[3]) if len(sys.argv) > 3 else 2048
+    if len(sys.argv) > 4: UPTO = int(sys.argv[4])
+    out = build(net); T.export(net, out, B + ('previews/band0v2_nodes.png' if UPTO == 99 else 'previews/band0v2_it%d.png' % UPTO), res)
+    errs = [(c.name(), [str(e)[:160] for e in c.errors()]) for c in net.children() if c.errors()]
+    print('nodes', len(net.children()), 'errors', errs[:4])

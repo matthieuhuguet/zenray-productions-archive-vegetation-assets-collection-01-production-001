@@ -1,0 +1,37 @@
+# 6 October 2026 : rebuild the EVOLUTION OF THE WHOLE HEIGHT MAP, 1:1 (2048 x 2048), from the per band comparison images that were saved separately. Metadata = the time of every image (the transcript time of the Read, recovered_from_conversation/INDEX.md) and the band number in the name of the file that was read. For each event, the latest known generated strip of every band at that time is pasted at its true place (band edges of the sheet), bands not yet built are flat grey. The last frame is the current height. Output: versions/height_evolution/NNN_<date>_<time>_band<k>_<label>.png + INDEX.md + contact_sheet.png. Usage: python3 BuildHeightEvolution.py. FR : evolution de la height complete.
+import os, re, glob
+from PIL import Image, ImageDraw
+B = '/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/'
+REC = B + 'versions/recovered_from_conversation/'; OUT = B + 'versions/height_evolution/'; os.makedirs(OUT, exist_ok=True)
+EDGES = [(0.0, 0.193), (0.193, 0.388), (0.388, 0.507), (0.507, 0.609), (0.609, 0.725), (0.725, 0.837), (0.837, 1.0)]; N = 2048
+events = []
+for line in open(REC + 'INDEX.md'):
+    if not line.startswith('| 0'): continue
+    f, ts, tool, origin = [c.strip() for c in line.strip().strip('|').split('|')[:4]]
+    base = os.path.basename(origin)
+    m = re.match(r'band(\d)(v\d)?_cmp\.png$', base)
+    if m:
+        k = int(m.group(1)); im = Image.open(REC + f).convert('L'); a, b = EDGES[k]; sc = im.size[0] / float(N); h = (b - a) * N * sc      # the transcript keeps images at most 2000 px wide
+        hh = int(round(h)); tot = im.size[1]
+        if abs(tot - (2 * h + 6 * sc)) <= 6 * sc + 3: events.append((ts, k, 'band%d%s' % (k, m.group(2) or ''), im.crop((0, tot - hh, im.size[0], tot)).resize((N, round((b - a) * N)))))
+    elif base == 'bands2to6_cmp.png':
+        im = Image.open(REC + f).convert('L'); sc = im.size[0] / float(N); y = 0.0
+        for k in range(2, 7):
+            a, b = EDGES[k]; h = (b - a) * N * sc
+            if y + 2 * h + 4 * sc <= im.size[1] + 4: events.append((ts, k, 'band%d_pass_bands2to6' % k, im.crop((0, int(round(y + h + 4 * sc)), im.size[0], int(round(y + 2 * h + 4 * sc)))).resize((N, round((b - a) * N)))))
+            y += 2 * h + 8 * sc
+events.sort(key=lambda e: e[0]); state = {}; rows = []; frames = []
+for i, (ts, k, label, strip) in enumerate(events, 1):
+    state[k] = strip; sheet = Image.new('L', (N, N), 100)
+    for kk, st in state.items():
+        a, b = EDGES[kk]; sheet.paste(st.resize((N, round((b - a) * N))), (0, round(a * N)))
+    d = ImageDraw.Draw(sheet); d.rectangle((6, 6, 700, 30), fill=0); d.text((12, 12), '%d  %s  UTC  %s' % (i, ts[:19].replace('T', ' '), label), fill=255)
+    fn = '%03d_%s_%s.png' % (i, ts[:19].replace(':', '').replace('-', '').replace('T', '_'), label); sheet.save(OUT + fn); frames.append((fn, sheet)); rows.append((fn, ts, k, label))
+cur = B + 'maps/trim/lily_trim_height.png'
+if os.path.exists(cur):
+    im = Image.open(cur).convert('L'); fn = '%03d_CURRENT_lily_trim_height.png' % (len(rows) + 1); im.save(OUT + fn); frames.append((fn, im)); rows.append((fn, 'now', -1, 'current height of the sheet'))
+cols = 8; th = 220; rws = (len(frames) + cols - 1) // cols; cs = Image.new('L', (cols * th, rws * th), 255)
+for j, (fn, im) in enumerate(frames): cs.paste(im.resize((th - 4, th - 4)), ((j % cols) * th, (j // cols) * th))
+cs.save(OUT + 'contact_sheet.png')
+open(OUT + 'INDEX.md', 'w').write('# Evolution of the full height map, 1:1 (6 October 2026)\n\nEach frame is the whole 2048 x 2048 sheet at the time of the event: the band named in the file is the one that changed, every other band is in its latest known state. Times are UTC (transcript time of the image). Bands not built yet are flat grey. Source of the strips: versions/recovered_from_conversation. FR : evolution de la height.\n\n| Frame | Time (UTC) | Band changed | Label |\n|---|---|---|---|\n' + '\n'.join('| %s | %s | %s | %s |' % r for r in rows) + '\n')
+print('frames', len(frames), 'events', len(events))

@@ -1,0 +1,31 @@
+# 5 October 2026 : how far is the generated CENTRAL big petal from the reference one? The reference is mirror averaged about x = 0.5 (it is mirror symmetric), cell 2 only. Prints the mean absolute error of the blurred images (structure) and of the detail (high pass) overall and by region (tongue, wings, ground), and writes a side by side sheet. Usage: python3 CellError.py <generated png> [sheet.png]. FR : ecart au grand petale central.
+import sys, numpy as np
+from PIL import Image
+from scipy import ndimage as ndi
+B = '/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/'
+g = Image.open(sys.argv[1]).convert('L'); N = g.size[0]; H = int(0.193 * N)
+G = np.asarray(g, np.float32)[:H] / 255
+R = np.asarray(Image.open('/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/refs/flower-sheets/trimsheet-height-flower.png').convert('L').resize((N, N), Image.LANCZOS), np.float32)[:H] / 255
+R = (R + R[:, ::-1]) / 2
+a, b = N // 3, 2 * N // 3 + 1
+Gc, Rc = G[:, a:b], R[:, a:b]; W = Gc.shape[1]; c0 = (W - 1) / 2; yy, xx = np.mgrid[0:H, 0:W]; lv = yy / H; cx = np.abs(xx - c0) / N
+def blur(x, s): return ndi.gaussian_filter(x, s)
+S = 4 * N / 2048
+err_s = np.abs(blur(Gc, S) - blur(Rc, S)); hp = lambda x: x - blur(x, 3 * N / 2048)
+err_d = np.abs(blur(hp(Gc), 1.2) - blur(hp(Rc), 1.2))
+# regions from the reference itself (measurement only): ground = dark and smooth, tongue = inside the measured tongue edge, wings = the rest of the petal
+TW = [(0.0, .17), (0.30, .13), (0.40, .100), (0.468, .0823), (0.506, .0774), (0.551, .0725), (0.608, .0627), (0.671, .0493), (0.734, .0396), (0.823, .0322), (0.911, .0273), (1.0, .0245)]
+wt = np.interp(lv[:, 0], [p[0] for p in TW], [p[1] for p in TW])[:, None]
+ground = blur(Rc, 3) < 0.52
+tongue = (cx < wt) & ~ground & (lv > 0.47); wings = ~ground & ~tongue
+print('overall  structure err %.3f  detail err %.3f' % (err_s.mean(), err_d.mean()))
+for nm, m in (('ground', ground), ('tongue', tongue), ('wings', wings)): print('%-7s  frac %.2f  structure err %.3f  detail err %.3f   mean ref %.2f gen %.2f' % (nm, m.mean(), err_s[m].mean(), err_d[m].mean(), Rc[m].mean(), Gc[m].mean()))
+print('by lv band (ref/gen):  tongue | wings(+neck)')
+for k in range(10):
+    b0, b1 = k / 10, (k + 1) / 10; band = (lv >= b0) & (lv < b1); out = []
+    for m in (tongue, wings):
+        mm = m & band
+        out.append('%.2f/%.2f' % (Rc[mm].mean(), Gc[mm].mean()) if mm.sum() > 50 else '   -   ')
+    print('  lv %.1f-%.1f   %s | %s' % (b0, b1, out[0], out[1]))
+if len(sys.argv) > 2:
+    s = Image.new('L', (W * 2 + 10, H), 255); s.paste(Image.fromarray((Rc * 255).astype(np.uint8)), (0, 0)); s.paste(Image.fromarray((np.clip(Gc, 0, 1) * 255).astype(np.uint8)), (W + 10, 0)); s.save(sys.argv[2])

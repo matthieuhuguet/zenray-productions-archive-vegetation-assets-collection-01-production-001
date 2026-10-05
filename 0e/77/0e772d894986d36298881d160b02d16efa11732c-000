@@ -1,0 +1,21 @@
+# 5 October 2026 14:44 Europe/Paris: align camera by the measured wood mask, keeping source geometry fixed.
+from pathlib import Path
+import json
+import numpy as np
+from PIL import Image,ImageDraw,ImageFilter
+from scipy.optimize import differential_evolution,minimize
+W=Path('/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01');D=W/'measurements/tree/raw02';skeleton=json.loads((W/'measurements/tree/live-skeleton-v006.json').read_text());p=np.asarray(skeleton['positions']);r=np.asarray(skeleton['radii']);prims=skeleton['prims'];size=(512,288)
+a=np.asarray(Image.open(D/'TricolorMask-v001.png').resize(size,Image.Resampling.NEAREST));ref=(a[:,:,0]>200)|(a[:,:,2]>200);ref=np.asarray(Image.fromarray(ref.astype('uint8')*255).filter(ImageFilter.MaxFilter(3)))>0
+segments=[]
+for ids in prims:
+ for i,j in zip(ids,ids[1:]):segments.append((i,j))
+def render(v):
+ yaw,pitch,scale,cx,cy,rs=v;right=p[:,0]*np.cos(yaw)-p[:,2]*np.sin(yaw);depth=p[:,0]*np.sin(yaw)+p[:,2]*np.cos(yaw);up=p[:,1]*np.cos(pitch)-depth*np.sin(pitch);x=(cx+right*scale)/4;y=(cy-up*scale)/4;image=Image.new('L',size);draw=ImageDraw.Draw(image)
+ for i,j in segments:
+  if (min(x[i],x[j])>size[0]+20) or (max(x[i],x[j])<-20) or (min(y[i],y[j])>size[1]+20) or (max(y[i],y[j])<-20):continue
+  draw.line([(x[i],y[i]),(x[j],y[j])],fill=255,width=max(1,round((r[i]+r[j])*scale*rs/4)))
+ return np.asarray(image)>0
+def loss(v):
+ m=render(v);return 1-(m&ref).sum()/max(1,(m|ref).sum())
+bounds=[(-.9,.9),(-.3,.3),(190,450),(200,950),(1150,2000),(.7,2.0)]
+fit=differential_evolution(loss,bounds,popsize=6,maxiter=35,tol=.003,seed=17,polish=False);local=minimize(loss,fit.x,method='Powell',bounds=bounds,options={'maxiter':10,'xtol':.005,'ftol':.0005});v=local.x if local.fun<fit.fun else fit.x;m=render(v);overlay=np.zeros(m.shape+(3,),dtype=np.uint8);overlay[m&ref]=(240,240,235);overlay[m&~ref]=(245,65,65);overlay[ref&~m]=(55,220,120);Image.fromarray(overlay).resize((1536,864)).save(D/'WoodCameraOverlay-v001.png');report={'date':'5 October 2026','camera':dict(zip(['yaw','pitch','scale','cx','cy','wood_radius_scale'],v.tolist())),'wood_proxy_iou':float(1-loss(v)),'limit':'axis-and-radius proxy, camera fit against estimated mask; does not prove actual final geometry overlap'};(D/'WoodCameraFit-v001.json').write_text(json.dumps(report,indent=2));print(json.dumps(report))

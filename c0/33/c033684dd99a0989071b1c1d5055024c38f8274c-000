@@ -1,0 +1,18 @@
+# 5 October 2026: actual viewport silhouettes compared to an estimated raw mask, with explicit limits.
+from pathlib import Path
+from PIL import Image,ImageDraw,ImageFont
+import numpy as np,json
+w=Path('/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01');d=w/'measurements/tree/raw02';size=(2048,1152)
+raw=Image.open(w/'refs/raw/3-eucalyptus/02_erwan-gaudichon-eucalyptus-02.jpg').convert('RGB').resize(size)
+ref=Image.open(d/'TricolorMask-v001.png').convert('RGB').resize(size,Image.Resampling.NEAREST);a=np.asarray(ref);rwood=(a[:,:,0]>200)|(a[:,:,2]>200);rleaf=a[:,:,1]>200
+native=Image.open(d/'Viewport-lookdev-v016.png').convert('RGBA');bg=Image.new('RGBA',size,(135,135,135,255));bg.alpha_composite(native);model=bg.convert('RGB');model.save(d/'Viewport-lookdev-matte-v016.png')
+mask=np.asarray(Image.open(d/'Viewport-tricolor-v016.png').convert('RGBA'));rgb=mask[:,:,:3].astype(float);opaque=mask[:,:,3]>128
+mwood=opaque&((rgb[:,:,0]>rgb[:,:,1]*1.2)|(rgb[:,:,2]>rgb[:,:,1]*1.2));mleaf=opaque&(rgb[:,:,1]>rgb[:,:,0]*1.2)&(rgb[:,:,1]>rgb[:,:,2]*1.2)
+iou=lambda x,y:float(np.count_nonzero(x&y)/max(1,np.count_nonzero(x|y)))
+report={'date':'5 October 2026','wood_iou':iou(rwood,mwood),'leaf_iou':iou(rleaf,mleaf),'foreground_iou':iou(rwood|rleaf,mwood|mleaf),'method':'Actual native viewport with occlusion, fixed approximate camera, alpha threshold 128, RGB semantic classification.','limits':['Raw mask is estimated and editable.','Camera is manually registered, not recovered from source metadata.','Packed leaf source color remains dark green.','Scores are silhouette overlap, not artistic validation.']};(d/'PositionProof-v016.json').write_text(json.dumps(report,indent=2))
+over=np.zeros((1152,2048,3),dtype=np.uint8);over[rwood&mwood]=[225,225,225];over[rwood&~mwood]=[50,220,95];over[mwood&~rwood]=[255,50,50]
+canvas=Image.new('RGB',(2200,1360),(27,29,31));draw=ImageDraw.Draw(canvas);font=ImageFont.truetype('/System/Library/Fonts/Supplemental/Arial.ttf',26)
+for x,y,im,label in [(40,90,raw,'RAW 02, référence'),(1120,90,model,'Géométrie Houdini v016, même cadrage'),(40,735,ref,'Masque estimé : tronc rouge, branches bleues, feuilles vertes'),(1120,735,Image.fromarray(over),'Bois : commun blanc, absent vert, en trop rouge')]:
+ canvas.paste(im.resize((1040,585)),(x,y));draw.text((x,y-36),label,font=font,fill='white')
+draw.text((40,20),'5 October 2026 : preuve de placement, comparaison encore partielle',font=font,fill='white')
+draw.text((40,1320),f"Recouvrement bois : {report['wood_iou']:.1%}. Masque estimé et caméra approchée, aucune validation artistique.",font=font,fill='white');canvas.save(d/'PositionSheet-v016.png');print(json.dumps(report))

@@ -1,0 +1,8 @@
+// 5 October 2026: two flat alpha cards crossed in X; local Y follows leaf attachment direction.
+for(int card=0;card<2;card++){
+ float angle=(card==0?-.25:.25)*3.1415926535897932384;vector side=set(cos(angle),0,sin(angle));
+ vector positions[]=array(-side*.10,side*.10,side*.10+set(0,1,0),-side*.10+set(0,1,0));
+ vector uvs[]=array(set(0,0,0),set(1,0,0),set(1,1,0),set(0,1,0));int pr=addprim(0,"poly");
+ for(int k=0;k<4;k++){int pt=addpoint(0,positions[k]);addvertex(0,pr,pt);setpointattrib(0,"uv",pt,uvs[k],"set");setpointattrib(0,"Cd",pt,set(.15,.23,.09),"set");}
+ setprimattrib(0,"part",pr,"leaf","set");setprimattrib(0,"material_role",pr,"green_leaf","set");
+}

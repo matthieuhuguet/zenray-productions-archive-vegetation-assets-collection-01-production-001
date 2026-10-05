@@ -1,0 +1,4 @@
+# 5 October 2026: four explicitly positioned native hanging clusters from raw02 measured image coordinates.
+import hou,json
+from pathlib import Path
+n=hou.node('/obj/Eucalyptus');node=n.node('C3_raw_hanging_clusters') or n.createNode('attribwrangle','C3_raw_hanging_clusters');node.parm('class').set(0);node.setInput(1,n.node('C1_axis_frame'));node.parm('snippet').set(Path(__file__).with_name('RawHangingClusters.vfl').read_text());merge=n.node('C3_all_measured_shoots') or n.createNode('merge','C3_all_measured_shoots');merge.setInput(0,n.node('C3_measured_shoots'));merge.setInput(1,node);n.node('C3_curved_shoots').setInput(0,merge);n.node('OUT_eucalyptus').cook(force=True);errors=[(c.name(),c.errors()) for c in n.allSubChildren() if c.errors()];assert not errors,errors;n.layoutChildren();hou.hipFile.save();result={'raw_cluster_curves':len(node.geometry().prims()),'errors':errors}

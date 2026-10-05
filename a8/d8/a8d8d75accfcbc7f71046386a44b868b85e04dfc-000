@@ -1,0 +1,25 @@
+// 5 October 2026: projected reference centers and extents, interpreted depth kept editable by the master.
+vector raw_centers[]={{390,1015,-.5},{1070,820,.45},{1190,540,.9},{210,400,-.9}};
+vector extents[]={{45,75,0},{60,70,0},{170,180,0},{180,170,0}};
+float scale=ch("../tree_height")/8,yaw=ch("../raw_yaw"),pitch=ch("../raw_pitch"),pixel_scale=ch("../raw_scale");
+for(int cluster=0;cluster<4;cluster++)for(int j=0;j<110;j++){
+ float angle=rand(cluster*121+j*4.73)*2*3.1415926535897932384,rad=sqrt(rand(j*7.93+cluster));vector center=raw_centers[cluster],extent=extents[cluster];
+ float rx=center.x+cos(angle)*rad*extent.x,ry=center.y+sin(angle)*rad*extent.y,z=center.z+fit01(rand(j*12.1),-.2,.2);
+ float x=((rx-ch("../raw_cx"))/pixel_scale+z*sin(yaw))/cos(yaw);
+ float y=((ch("../raw_cy")-ry)/pixel_scale+(x*sin(yaw)+z*cos(yaw))*sin(pitch))/cos(pitch);
+ vector end=set(x,y,z)*scale;int pr;vector uv;xyzdist(1,end,pr,uv);vector root=primuv(1,"P",pr,uv);
+ float center_x=((center.x-ch("../raw_cx"))/pixel_scale+center.z*sin(yaw))/cos(yaw);
+float center_y=((ch("../raw_cy")-center.y)/pixel_scale+(center_x*sin(yaw)+center.z*cos(yaw))*sin(pitch))/cos(pitch);
+vector crown_center=set(center_x,center_y,center.z)*scale;
+if(j==0){int backbone=addprim(0,"polyline");for(int k=0;k<7;k++){float t=float(k)/6;int pt=addpoint(0,lerp(root,crown_center,t)+set(0,.12*sin(t*3.1415926535897932384),0)*scale);addvertex(0,backbone,pt);setpointattrib(0,"pscale",pt,lerp(.012,.003,t)*scale,"set");}setprimattrib(0,"part",backbone,"branchlet","set");int companion=addprim(0,"polyline");for(int k=0;k<2;k++){int pt=addpoint(0,crown_center+set(0,.005*k,0)*scale);addvertex(0,companion,pt);setpointattrib(0,"pscale",pt,.001*scale,"set");}}
+float attach=fit01(rand(j*6.37),.60,1.);root=lerp(root,crown_center,attach)+set(0,.12*sin(attach*3.1415926535897932384),0)*scale;
+vector start=lerp(root,end,.25);start.y+=.02*scale;
+ int shoot=addprim(0,"polyline");for(int k=0;k<7;k++){
+  float t=float(k)/6;vector p=lerp(start,end,t)+set(0,.06*sin(t*3.1415926535897932384),0)*scale;int pt=addpoint(0,p);addvertex(0,shoot,pt);setpointattrib(0,"pscale",pt,lerp(.002,.0005,t)*scale,"set");
+ }
+ setprimattrib(0,"part",shoot,"twig","set");
+ int link=addprim(0,"polyline");for(int k=0;k<4;k++){
+  float t=float(k)/3;int pt=addpoint(0,lerp(root,start,t)+set(0,.07*sin(t*3.1415926535897932384),0)*scale);addvertex(0,link,pt);setpointattrib(0,"pscale",pt,lerp(.003,.0015,t)*scale,"set");
+ }
+ setprimattrib(0,"part",link,"branchlet","set");
+}

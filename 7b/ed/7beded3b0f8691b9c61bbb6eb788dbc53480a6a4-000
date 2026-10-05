@@ -1,0 +1,18 @@
+# 5 October 2026 : the UV CHECK. Exports the lily like ExportGeo.py but colours every polygon with the TRIM SHEET BASE COLOUR sampled at its UV (average over its points), so that a software preview shows exactly what the material shows, without Karma. Also prints the UV range per part and the share of points outside 0..1. Usage: hython ExportGeoUV.py <hip> <node path> <out.npz> <basecolor.png>. FR : controle des UV par echantillonnage de la base color.
+import hou, sys, numpy as np
+from PIL import Image
+hou.hipFile.load(sys.argv[1], suppress_save_prompt=True, ignore_load_warnings=True)
+g = hou.node(sys.argv[2]).geometry(); pos = np.array([list(p.position()) for p in g.points()], np.float32)
+tex = np.asarray(Image.open(sys.argv[4]).convert('RGB'), np.float32) / 255; H, W = tex.shape[:2]
+def sample(u, v):
+    return tex[int(np.clip((1.0 - v) * H, 0, H - 1)), int(np.floor((u % 1.0) * W)) % W]       # u wraps (the sheet is seamless), v is clamped
+polys = [[v.point().number() for v in pr.vertices()] for pr in g.prims()]; mx = max(len(p) for p in polys)
+P = np.full((len(polys), mx), -1, np.int32)
+for i, p in enumerate(polys): P[i, :len(p)] = p
+col = np.array([np.mean([sample(*v.point().attribValue('uv')[:2]) for v in pr.vertices()], axis=0) for pr in g.prims()], np.float32); mat = np.array([pr.attribValue('mat') for pr in g.prims()])
+np.savez_compressed(sys.argv[3], pos=pos, polys=P, col=col, mat=mat)
+uvs = {}
+for pr in g.prims():
+    for v in pr.vertices(): uvs.setdefault(pr.attribValue('mat'), []).append(v.point().attribValue('uv')[:2])
+for m, a in uvs.items():
+    a = np.array(a); print('%-8s u %.3f..%.3f v %.3f..%.3f  outside v: %.1f percent' % (m, a[:, 0].min(), a[:, 0].max(), a[:, 1].min(), a[:, 1].max(), 100 * ((a[:, 1] < 0) | (a[:, 1] > 1)).mean()))

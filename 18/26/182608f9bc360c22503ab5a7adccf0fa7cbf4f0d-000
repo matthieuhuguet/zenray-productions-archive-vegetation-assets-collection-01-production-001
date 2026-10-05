@@ -1,0 +1,17 @@
+# 5 October 2026 : band by band look. Builds the graph at 1024, exports the height, and writes previews/band_<i>.png = reference band over generated band at full width, plus the mask IoU. Usage: python3 BandLab.py <band 0..6>. FR : comparaison d'une bande.
+import subprocess, sys, numpy as np
+from PIL import Image
+sys.path.insert(0, '/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/Scripts')
+import TrimMask as M
+B = '/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/'
+HY = '/Users/zenray/Create/Build/Houdini22/Houdini22.0.368/Frameworks/Houdini.framework/Versions/Current/Resources/bin/hython'
+BANDS = [(0.0, 0.193), (0.193, 0.388), (0.388, 0.507), (0.507, 0.609), (0.609, 0.725), (0.725, 0.837), (0.837, 1.0)]
+bi = int(sys.argv[1]); RES = 1024
+subprocess.run(['cp', B + 'hip/VegetationCollection01.hiplc', '/tmp/veg_fit.hiplc'])
+subprocess.run([HY, B + 'Scripts/BuildLilyTrim.py', '/tmp/veg_fit.hiplc', '/tmp/veg_fit.hiplc', str(RES)], capture_output=True)
+subprocess.run([HY, '/tmp/fit_export.py'], capture_output=True)
+ref = np.asarray(Image.open('/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/refs/flower-sheets/trimsheet-height-flower.png').convert('L').resize((RES, RES), Image.LANCZOS), np.float32) / 255
+gen = np.asarray(Image.open(B + 'maps/trim/lily_trim_height.png').convert('L').resize((RES, RES), Image.LANCZOS), np.float32) / 255
+a, b = BANDS[bi]; y0, y1 = int(a * RES) + 3, int(b * RES) - 3; R, G = ref[y0:y1], gen[y0:y1]
+print('band', bi, 'mask IoU %.3f' % M.iou(M.seg(G), M.seg(R)), 'mean ref/gen %.2f/%.2f std %.2f/%.2f' % (R.mean(), G.mean(), R.std(), G.std()))
+Image.fromarray((np.clip(np.concatenate([R, np.ones((6, RES), np.float32), G], 0), 0, 1) * 255).astype(np.uint8)).save(B + 'previews/band_%d.png' % bi)

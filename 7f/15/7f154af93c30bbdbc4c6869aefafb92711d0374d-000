@@ -1,0 +1,77 @@
+# 5 October 2026 : BAND 2 (stamens) version 2, same protocol as bands 0 and 1. The sheet is mirror symmetric about the stigma, so ONE half cell is built on |cx| and the other half is free. The reference stigma spacing is 0.369 (2.7 cells in a width of 1), so it cannot tile: it is REGULARISED to 3 cells of 0.3333 (protocol: regularise toward the canonical cell). Offsets measured on a 2x zoom of the central cell (4090 px per canvas unit): thin tubes at |dx| 0.0435 and 0.140, anthers at 0.0665 (vertical) and 0.1075 (leaning 11 degrees, top outward), an anther on the cell boundary, stigma head 0.029 wide. Tones: background 0.34, objects 0.62, contact shadow 0.25. FR : bande 2 version 2, etamines.
+import hou, sys, math
+sys.path.insert(0, '/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/Scripts')
+import TrimNodes as T
+import BuildBand0V2 as V
+B = '/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/'
+V0, V1, CELLS = 0.388, 0.507, 3; P = 1.0 / CELLS; HC = V1 - V0; EDGE = 0.0012
+BG = 0.34
+BODY = [(0.0, 0.66), (0.45, 0.64), (0.8, 0.54), (1.0, 0.40), (1.1, 0.28), (1.3, 0.31), (1.6, 0.34), (2.0, 0.34)]      # domed tone of a body against r, ending in the contact shadow
+TUBE = [(0.0, 0.60), (0.5, 0.58), (0.85, 0.50), (1.0, 0.40), (1.1, 0.27), (1.3, 0.30), (1.6, 0.34), (2.0, 0.34)]
+FIL = [(0.0, 0.60), (0.5, 0.58), (0.85, 0.52), (1.0, 0.44), (1.1, 0.40), (1.3, 0.37), (1.6, 0.34), (2.0, 0.34)]      # filament: no dark ring, or it would stain the anther it joins
+UPTO = 99
+def prelude(net):
+    rx = T.node(net, 'ramp', 'A00_ramp__cycles_x', signature='f1', cycles=float(CELLS), method=1); ry = T.node(net, 'ramp', 'A01_ramp__down_y', signature='f1', rotation=90.0)
+    lv = T.lin(net, 'A03_band__lv_0_top_1_bottom', ry, V0, V1)
+    cx = T.lin(net, 'A04_cell__cx', rx, 0.0, 1.0, -P / 2, P / 2); ax = T.mix(net, 'A06_cell__abs_cx', cx, T.const(net, 'A05_zero', lv, 0.0), 9)
+    return lv, ax
+def body(net, tag, c, h, ox, y0, a, b_lv, tilt_deg, keys, reach=True):
+    """a tilted ellipse on |cx|: centre (ox, y0), half axes a (canvas) and b_lv (lv units), tilt in degrees (top leaning OUTWARD when positive), domed tone against r, composited over h with its contact shadow. 14 nodes."""
+    lv, ax = c['lv'], c['ax']; th = math.radians(tilt_deg); cs, sn = math.cos(th), math.sin(th); b = b_lv * HC
+    # Remap does not extrapolate negative inputs, so every subtraction and scaling is a Blend with a constant node
+    K = lambda n, val: T.const(net, '%s_k_%s' % (tag, n), lv, val)
+    dx = T.mix(net, '%s_dx' % tag, ax, K('ox', ox), 4); dy = T.mix(net, '%s_dy' % tag, lv, K('y0', y0), 4)
+    u = T.mix(net, '%s_u' % tag, T.mix(net, '%s_ucos' % tag, dx, K('ucos', cs / a), 5), T.mix(net, '%s_usin' % tag, dy, K('usin', -sn * HC / a), 5), 3)
+    v = T.mix(net, '%s_v' % tag, T.mix(net, '%s_vsin' % tag, dx, K('vsin', sn / b), 5), T.mix(net, '%s_vcos' % tag, dy, K('vcos', cs * HC / b), 5), 3)
+    r = T.mix(net, '%s_r' % tag, u, v, 8)
+    mask = T.smooth(net, '%s_mask' % tag, r, 1.0 - 0.05, 1.0 + 0.05, 1.0, 0.0)
+    tone = T.curve(net, '%s_tone' % tag, r, [(x / 2.0, y) for x, y in keys], 1.0, 0.0, 1.0, T.SMOOTH) if False else T.curve(net, '%s_tone' % tag, T.lin(net, '%s_rs' % tag, r, 0.0, 2.0, 0.0, 1.0), [(x / 2.0, y) for x, y in keys], 1.0, 0.0, 1.0, T.SMOOTH)
+    area = T.lin(net, '%s_inside_reach' % tag, T.smooth(net, '%s_reach_s' % tag, r, 1.5, 1.9, 1.0, 0.0), 0.0, 1.0, 0.0, 1.0) if reach else mask
+    return T.mix(net, '%s_composited' % tag, h, T.mix(net, '%s_delta_masked' % tag, T.mix(net, '%s_delta' % tag, tone, h, 4), area, 5), 3), mask
+def build(net):
+    lv, ax = prelude(net); c = dict(lv=lv, ax=ax)
+    h = T.const(net, 'B00_background', lv, BG)
+    # stigma stem: half width curve against lv, flaring toward the head
+    wst = T.curve(net, 'C01_stem__halfwidth', lv, [(0.0, 0.0), (0.2, 0.40), (0.3, 0.30), (0.5, 0.215), (0.8, 0.22), (1.0, 0.25)], 1.0, 0.0, 0.06, T.SMOOTH)
+    ds = T.mix(net, 'C02_stem__distance', wst, ax, 4); ms = T.mix(net, 'C03_stem__mask', T.smooth(net, 'C03a', ds, -EDGE, EDGE), T.smooth(net, 'C03b_below_head', lv, 0.22, 0.30), 5)
+    stem_tone = T.curve(net, 'C04_stem__tone', T.mix(net, 'C04a_ratio', ax, T.mix(net, 'C04b_floor', wst, T.const(net, 'C04c', lv, 0.004), 12), 6), [(0.0, 0.62), (0.7, 0.60), (1.0, 0.42), (1.2, 0.30)], 1.2, 0.0, 1.0, T.SMOOTH)
+    h = T.mix(net, 'C05_stem__over', h, T.mix(net, 'C05a_delta_masked', T.mix(net, 'C05b_delta', stem_tone, h, 4), ms, 5), 3)
+    h, mhead = body(net, 'C10_stigma_head', c, h, 0.0, 0.20, 0.0295, 0.14, 0.0, BODY)
+    stage = {}
+    h, mt1 = body(net, 'C20_tube_a', c, h, 0.0435, 0.80, 0.0034, 0.62, -3.0, TUBE)
+    h, mt1t = body(net, 'C21_tube_a_tip', c, h, 0.0430, 0.24, 0.0062, 0.07, -3.0, TUBE)
+    h, ma1 = body(net, 'C23_anther_a', c, h, 0.0665, 0.405, 0.0128, 0.28, -3.0, BODY)
+    h, ma2 = body(net, 'C25_anther_b', c, h, 0.1075, 0.405, 0.0128, 0.28, 11.0, BODY)
+    h, mt2 = body(net, 'C26_tube_b', c, h, 0.1400, 0.80, 0.0034, 0.62, 1.0, TUBE)
+    h, mt2t = body(net, 'C27_tube_b_tip', c, h, 0.1400, 0.24, 0.0062, 0.07, 1.0, TUBE)
+    h, ma3 = body(net, 'C29_anther_c', c, h, 0.1667, 0.40, 0.0128, 0.28, 0.0, BODY)
+    h, mf1 = body(net, 'C22_filament_a', c, h, 0.0670, 0.95, 0.0046, 0.32, -1.0, FIL, False)
+    h, mf2 = body(net, 'C24_filament_b', c, h, 0.1030, 0.95, 0.0046, 0.32, -8.0, FIL, False)
+    h, mf3 = body(net, 'C28_filament_c', c, h, 0.1667, 0.95, 0.0048, 0.32, 0.0, FIL, False)
+    anthers = T.mix(net, 'C30_anthers_mask', T.mix(net, 'C30a', T.mix(net, 'C30b', ma1, ma2, 12), ma3, 12), mhead, 12)
+    c.update(h=h, anthers=anthers, mhead=mhead, ms=ms, ma1=ma1, ma2=ma2, ma3=ma3, mt1=mt1, mt2=mt2)
+    if UPTO >= 1: h = iteration1(net, h, c)
+    return h
+def iteration1(net, h, c):
+    """ITERATION 1 (64 nodes): the spongy surface. Anthers and stigma head are covered by a network of bright bumps separated by dark pits (about 0.0045 canvas), plus a dark central groove down each anther, a fine grain on the stem, a bright ridge line along each tube and filament."""
+    lv, ax, anthers, ms = c['lv'], c['ax'], c['anthers'], c['ms']
+    n0 = len(net.children()); b = V.box(net, 'D', 'BAND 2 V2 ITERATION 1 : 64 nodes, spongy surface', (0.8, 1.0, 0.8))
+    def maze(tag, size, radius_px, seed, mask, lo, hi):
+        """a labyrinth of ridges and crevices: tiled noise fed to Turing Patterns (a real Copernicus node), remapped to lo..hi, masked, added. 5 nodes."""
+        nz = T.node(net, 'fractalnoise', '%s_seed' % tag, [lv], amp=0.5, center=0.5, elementsize=size, noisetype=1, offx=seed, tilesizex=2.0 / CELLS)   # the seed tiles once per cell, so the labyrinth repeats with the cells
+        tp = T.node(net, 'turingpatterns', '%s_turing' % tag, [nz], iterations=40, radius_pixel=radius_px, units=1)
+        bl = T.node(net, 'blur', '%s_soften' % tag, [tp], units=1, size_pixel=1.6)
+        return T.mix(net, '%s_added' % tag, h_cur[0], T.mix(net, '%s_masked' % tag, T.lin(net, '%s_range' % tag, bl, 0.0, 1.0, lo, hi), mask, 5), 3)
+    h_cur = [h]
+    h = maze('D11_maze_big', 0.010, 4.2, 3.3, anthers, -0.16, 0.22)
+    h_cur[0] = h; h = maze('D12_maze_fine', 0.006, 2.4, 8.8, anthers, -0.05, 0.08)
+    h_cur[0] = h; h = maze('D14_maze_stem', 0.004, 2.0, 5.5, ms, -0.08, 0.14)
+    h_cur[0] = h; h = maze('D13_maze_head', 0.012, 5.0, 13.3, c['mhead'], -0.10, 0.16)
+    h = V.grain(net, 'D21_grain_anthers', h, lv, anthers, 0.0016, 6.1, 0.07)
+    h = V.pads(net, 'D', h, n0); V.close(net, b, 'D', n0); return h
+if __name__ == '__main__':
+    hou.hipFile.clear(suppress_save_prompt=True); net = hou.node('/obj').createNode('copnet', 'Band2V2_test'); res = int(sys.argv[3]) if len(sys.argv) > 3 else 2048
+    if len(sys.argv) > 4: UPTO = int(sys.argv[4])
+    out = build(net); T.export(net, out, B + ('previews/band2v2_nodes.png' if UPTO == 99 else 'previews/band2v2_it%d.png' % UPTO), res)
+    errs = [(cc.name(), [str(e)[:140] for e in cc.errors()]) for cc in net.children() if cc.errors()]
+    print('nodes', len(net.children()), 'errors', errs[:4])

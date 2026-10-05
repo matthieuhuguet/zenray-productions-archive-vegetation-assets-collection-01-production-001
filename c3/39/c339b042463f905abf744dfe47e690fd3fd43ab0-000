@@ -1,0 +1,27 @@
+# 5 October 2026 : measure the canonical cell of band 1 (tepal outer) on the reference: the sheet is mirror symmetric about x = 0.5 so arch 1 and arch 4 are averaged; the arch centre is found by maximising the symmetry; the cell is then mirrored about the arch axis. Prints the arch half width against lv, the dark band edges, and tone tables against |dx| per lv. Writes ref-maps/band1_cell.npy. FR : cellule canonique de la bande 1.
+import numpy as np
+from PIL import Image
+from scipy import ndimage as ndi
+N = 2048; V0, V1 = 0.193, 0.388; H = int((V1 - V0) * N)
+R = np.asarray(Image.open('/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/refs/flower-sheets/trimsheet-height-flower.png').convert('L').resize((N, N), Image.LANCZOS), np.float64)[int(V0 * N):int(V0 * N) + H] / 255
+M = (R + R[:, ::-1]) / 2
+S = ndi.gaussian_filter(M, 3)
+# arch centre near 0.175: the column of the symmetry maximum of the bottom rows
+best = None
+for c in range(int(0.15 * N), int(0.20 * N)):
+    w = int(0.10 * N); a = S[int(0.5 * H):, c - w:c]; b = S[int(0.5 * H):, c + 1:c + 1 + w][:, ::-1]
+    e = np.abs(a - b).mean(); best = (e, c) if best is None or e < best[0] else best
+c = best[1]; print('arch centre x = %.4f (px %d) asymmetry %.3f' % (c / N, c, best[0]))
+W = int(0.135 * N); cell = M[:, c - W:c + W + 1]; sym = (cell + cell[:, ::-1]) / 2; np.save('/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/ref-maps/band1_cell.npy', sym)
+Ss = ndi.gaussian_filter(sym, 2.5); half = W
+# arch edge by the gradient energy (smooth region)
+gx = ndi.sobel(sym, axis=1); gy = ndi.sobel(sym, axis=0); g = ndi.uniform_filter(np.hypot(gx, gy), 9)
+print('arch half width against lv (smooth region, canvas fraction):')
+for lv in (0.05, 0.1, 0.2, 0.3, 0.45, 0.6, 0.75, 0.9, 0.98):
+    y = int(lv * H); row = g[y, half:]            # right half
+    thr = np.percentile(g[int(0.3 * H):], 40); e = np.argmax(row > thr) if (row > thr).any() else len(row)
+    print('  lv %.2f  half width %.4f' % (lv, e / N))
+xs = [0.002, 0.01, 0.02, 0.03, 0.04, 0.05, 0.06, 0.07, 0.08, 0.09, 0.10, 0.11, 0.12, 0.13]
+print('tone against |dx| (canvas fraction)'); print('lv    ' + ' '.join('%5.3f' % x for x in xs))
+for lv in (0.03, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.97):
+    y = int(lv * H); print('%.2f  ' % lv + ' '.join('%5.2f' % Ss[y, half + int(x * N)] for x in xs))

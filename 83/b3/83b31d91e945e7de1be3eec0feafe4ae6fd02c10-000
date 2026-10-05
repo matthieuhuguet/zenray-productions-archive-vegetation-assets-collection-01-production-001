@@ -1,0 +1,19 @@
+# 5 October 2026 : stack the seven band images into the full trim sheet height (2048) with a 4 pixel smoothstep between bands, save it, and save a reference over generated sheet. Usage: python3 AssembleTrim.py <tag>. FR : assemblage de la trim sheet complete.
+import sys, numpy as np
+from PIL import Image
+B = '/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/'
+V = [(0.0, 0.193), (0.193, 0.388), (0.388, 0.507), (0.507, 0.609), (0.609, 0.725), (0.725, 0.837), (0.837, 1.0)]
+FILES = ['previews/band0v2_nodes.png', 'previews/band1_nodes.png'] + ['previews/band%d_nodes.png' % k for k in range(2, 7)]
+N = 2048; out = np.zeros((N, N), np.float32)
+imgs = [np.asarray(Image.open(B + f).convert('L'), np.float32) / 255 for f in FILES]
+w = np.zeros((7, N), np.float32); y = np.arange(N) + 0.5
+for i, (a, b) in enumerate(V):
+    ya, yb = a * N, b * N; e = 3.0
+    s = lambda t: np.clip(t, 0, 1) ** 2 * (3 - 2 * np.clip(t, 0, 1))
+    w[i] = s((y - ya) / (2 * e) + 0.5) * s((yb - y) / (2 * e) + 0.5) if 0 < i < 6 else (s((yb - y) / (2 * e) + 0.5) if i == 0 else s((y - ya) / (2 * e) + 0.5))
+w /= w.sum(0, keepdims=True) + 1e-9
+for i in range(7): out += imgs[i] * w[i][:, None]
+res = Image.fromarray((np.clip(out, 0, 1) * 255).astype(np.uint8)); tag = sys.argv[1]
+res.save(B + 'maps/trim/lily_trim_height_%s.png' % tag); res.save(B + 'maps/trim/lily_trim_height.png')
+R = Image.open('/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/refs/flower-sheets/trimsheet-height-flower.png').convert('L').resize((1024, 1024), Image.LANCZOS)
+s = Image.new('L', (2058, 1024), 255); s.paste(R, (0, 0)); s.paste(res.resize((1024, 1024), Image.LANCZOS), (1034, 0)); s.save(B + 'versions/full_trim/full_%s_ref_left_generated_right.png' % tag); print('saved', tag)

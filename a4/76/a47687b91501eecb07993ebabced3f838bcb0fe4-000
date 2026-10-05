@@ -1,0 +1,21 @@
+# 5 October 2026: reject native shoot connections crossing measured empty spaces.
+import hou,json
+from pathlib import Path
+n=hou.node('/obj/Eucalyptus');data=json.loads(Path('/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/measurements/tree/raw02/StructureOccupancy-v011.json').read_text());node=n.node('C3_measured_shoots');code=node.parm('snippet').eval();needle='vector direction=normalize(end-root);vector start=lerp(root,end,.45);';assert needle in code
+array='float structure_density[]={'+','.join(map(str,data['density']))+'};\n'
+check="""
+int empty=0,visible=0;
+for(int j=1;j<16;j++){
+ vector p=lerp(root,end,float(j)/16)/scale;
+ float yaw=ch("../raw_yaw"),pitch=ch("../raw_pitch");
+ float right=p.x*cos(yaw)-p.z*sin(yaw),depth=p.x*sin(yaw)+p.z*cos(yaw);
+ float rx=ch("../raw_cx")+right*ch("../raw_scale"),ry=ch("../raw_cy")-(p.y*cos(pitch)-depth*sin(pitch))*ch("../raw_scale");
+ if(rx>=0&&rx<2048&&ry>=0&&ry<1152){visible++;int ix=clamp(int(rx/2048*48),0,47),iy=clamp(int(ry/1152*27),0,26);if(structure_density[iy*48+ix]<.12)empty++;}
+}
+if(visible>0&&float(empty)/visible>.20&&rand(i*4.177)<ch("../raw_mask_strength"))continue;
+"""
+node.parm('snippet').set(array+code.replace(needle,check+needle));n.node('C1_union_mesh').parm('adaptivity').set(.02)
+peel=n.node('C1_peeling_bark');code=peel.parm('snippet').eval();needle='foreach(int pt;corners)addvertex(0,pr,pt);';assert needle in code
+code=code.replace(needle,'vector pa=point(0,"P",corners[0]),pb=point(0,"P",corners[1]),pc=point(0,"P",corners[2]);if(dot(cross(pb-pa,pc-pa),outward)<0)reverse(corners);'+needle);peel.parm('snippet').set(code)
+leaf=n.node('C4_attached_leaf_points');code=leaf.parm('snippet').eval();assert 'p+radial*.035' in code;leaf.parm('snippet').set(code.replace('p+radial*.035','p+radial*.012'))
+n.node('OUT_eucalyptus').cook(force=True);errors=[(c.name(),c.errors()) for c in n.allSubChildren() if c.errors()];assert not errors,errors;hou.hipFile.save();result={'leaves':len(n.node('C4_copy_leaves').geometry().prims()),'shoot_curves':len(node.geometry().prims()),'errors':errors}

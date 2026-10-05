@@ -1,0 +1,98 @@
+# 5 October 2026 : BAND 1 of the lily trim sheet, TEPAL OUTER, real Copernicus nodes only. Measured on the reference band (gradient energy segmentation, ref-maps/band1_arch_profile.json): smooth dark ARCHES (the back of the petal, apex at the top, widening downward, a lighter midrib stripe in the middle) alternate with bright RIDGED petals whose fibres hug the arch edge, and a dark textured BAND with a thin bright line on each side lies on every cell boundary. The reference is a mirror (arches at 0, .17, .43, .575, .83 of the width, spacing .17 to .26); the canonical cell is 1/5 of the width with the arch at its centre, so the band repeats and is seamless by construction. FR : bande 1, tepale exterieur.
+import hou, sys, json
+sys.path.insert(0, '/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/Scripts')
+import TrimNodes as T
+import BuildTrimBand0 as B0
+B = '/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/'
+V0, V1, CELLS = 0.193, 0.388, 5
+DB = 0.070                                   # |cx| where the dark boundary band starts (cell half width is 0.1)
+EDGE = 0.0015                                # half width of every mask edge, smoothstep
+WA = [(0.0, 0.0), (0.01, 0.007), (0.03, 0.0115), (0.15, 0.0195), (0.30, 0.028), (0.50, 0.0386), (0.70, 0.050), (0.85, 0.0595), (1.0, 0.066)]   # arch half width against lv: mean of the 4 measured arches (smooth mask by gradient energy), scaled by 0.93 to the 1/5 cell
+def build(net):
+    rx = T.node(net, 'ramp', 'A00_ramp__five_cycles_x', signature='f1', cycles=float(CELLS), method=1); ry = T.node(net, 'ramp', 'A01_ramp__down_y', signature='f1', rotation=90.0)
+    lv = T.lin(net, 'A03_band__lv_0_top_1_bottom', ry, V0, V1)
+    cx = T.lin(net, 'A04_cell__cx_centre', rx, 0.0, 1.0, -0.5 / CELLS, 0.5 / CELLS)
+    zero = T.const(net, 'A05_const__zero', lv, 0.0); one = T.const(net, 'A06_const__one', lv, 1.0)
+    ax = T.mix(net, 'A07_cell__abs_cx', cx, zero, 9)
+    wA = T.curve(net, 'B01_arch__halfwidth', lv, [(x, y / 0.1) for x, y in WA], 1.0, 0.0, 0.1, T.SMOOTH)
+    d_arch = T.mix(net, 'B02_arch__edge_distance', wA, ax, 4); ma = T.smooth(net, 'B03_arch__mask', d_arch, -EDGE, EDGE)
+    d_band = T.mix(net, 'B04_band__edge_distance', ax, T.const(net, 'B04a_const__band_edge', lv, DB), 4); mdk = T.smooth(net, 'B05_band__mask', d_band, -EDGE, EDGE)
+    ml = T.node(net, 'clamp', 'B08_ridged__mask', [T.mix(net, 'B07_ridged__minus_band', T.mix(net, 'B06_ridged__one_minus_arch', one, ma, 4), mdk, 4)])
+    d_out = T.mix(net, 'B09_arch__outside_distance', ax, wA, 4)             # >0 outside the arch edge
+    wAc = T.mix(net, 'B10_arch__halfwidth_floor', wA, T.const(net, 'B10a_const__floor', lv, 0.004), 12); t = T.node(net, 'clamp', 'B11_arch__across_ratio', [T.mix(net, 'B11a_arch__ax_over_halfwidth', ax, wAc, 6)])
+    wn = T.node(net, 'fractalnoise', 'B12_phase_noise', [lv], amp=0.5, center=0.0, elementsize=0.05)
+    # arch tone: lighter at the midrib and the apex, darker at the edge and the bottom; midrib stripe
+    across = T.curve(net, 'C01_arch__tone_across', t, [(0.0, 0.44), (0.5, 0.37), (0.85, 0.30), (1.0, 0.27)], 1.0)
+    vert = T.curve(net, 'C02_arch__tone_vertical', lv, [(0.0, 0.6), (0.5, 0.4), (1.0, 0.3)], 1.0, -0.1, 0.15)
+    stripe = T.curve(net, 'C03_arch__midrib_profile', ax, [(0.0, 1.0), (0.004, 0.9), (0.008, 0.3), (0.012, 0.0), (0.02, 0.0)], 0.02, 0.0, 0.10)
+    h_arch = T.mix(net, 'C04_arch__tone', T.mix(net, 'C04a_arch__tone_vertical', across, vert, 3), stripe, 3)
+    # ridged petal: base tone, brighter near the arch edge
+    near = T.curve(net, 'D01_ridged__tone_near_arch', d_out, [(0.0, 0.0), (0.01, 0.55), (0.03, 0.40), (0.08, 0.35)], 0.08, 0.0, 0.2)
+    h_ridged = T.mix(net, 'D02_ridged__tone', T.const(net, 'D02a_const__base', lv, 0.56), near, 3)
+    h_band = T.const(net, 'E01_band__tone', lv, 0.30)
+    comp = T.mix(net, 'F03_composition', T.mix(net, 'F02_composition_ridged_band', T.mix(net, 'F01a_arch_masked', h_arch, ma, 5), T.mix(net, 'F01b_ridged_masked', h_ridged, ml, 5), 3), T.mix(net, 'F01c_band_masked', h_band, mdk, 5), 3)
+    ctx = dict(lv=lv, cx=cx, ax=ax, wA=wA, ma=ma, ml=ml, mdk=mdk, d_arch=d_arch, d_out=d_out, d_band=d_band, t=t, wn=wn, one=one, zero=zero)
+    out = iteration1(net, comp, ctx)
+    out = iteration2(net, out, ctx)
+    return out
+def iteration1(net, h, c):
+    """ITERATION 1 of band 1: exactly 64 nodes. Lips and grooves along the arch edge, fibres that hug the arch edge, vertical fibres farther out, the two thin bright lines of the dark boundary band, a sparse bold fibre layer."""
+    lv, ax, ma, ml, mdk, d_arch, d_out, d_band, wn = c['lv'], c['ax'], c['ma'], c['ml'], c['mdk'], c['d_arch'], c['d_out'], c['d_band'], c['wn']
+    n0 = len(net.children()); box = net.createNetworkBox('Iteration_01'); box.setComment('BAND 1 ITERATION 1 : 64 nodes'); box.setColor(hou.Color((0.7, 0.9, 1.0)))
+    # edge lip: dark line inside the arch edge, bright lip just outside, dark groove beside it
+    ds = T.lin(net, 'G01_lip__distance_scaled', d_out, -0.012, 0.03)
+    LIP = [(-0.012, 0.0), (-0.004, -0.10), (-0.001, -0.04), (0.0007, 0.12), (0.003, 0.20), (0.005, 0.05), (0.008, -0.10), (0.013, -0.02), (0.03, 0.0)]
+    lip = T.curve(net, 'G02_lip__profile', ds, [((x + 0.012) / 0.042, (y + 0.15) / 0.40) for x, y in LIP], 1.0, -0.15, 0.25, T.SMOOTH)
+    nodark = T.mix(net, 'G03_lip__not_in_band', lip, T.mix(net, 'G03a_not_band', c['one'], mdk, 4), 5)
+    h = T.mix(net, 'G04_lip__added', h, nodark, 3)
+    # band edge lines: thin bright line on each side of the dark band
+    bs = T.lin(net, 'G11_bandline__distance_scaled', d_band, -0.012, 0.012)
+    bl = T.curve(net, 'G12_bandline__profile', bs, [(0.0, 0.5), (0.30, 0.5), (0.45, 0.78), (0.50, 0.58), (0.55, 0.78), (0.70, 0.5), (1.0, 0.5)], 1.0, -0.2, 0.2, T.SMOOTH)
+    h = T.mix(net, 'G13_bandline__added', h, bl, 3)
+    # fibres that hug the arch edge (coordinate = distance outside the arch) and vertical fibres (coordinate = |cx|)
+    near_fade = T.curve(net, 'H01_hug__fade_with_distance', d_out, [(0.0, 1.0), (0.02, 0.8), (0.05, 0.2), (0.08, 0.0)], 0.08)
+    far_fade = T.curve(net, 'H02_vert__fade_near_arch', d_out, [(0.0, 0.0), (0.02, 0.3), (0.05, 0.9), (0.08, 1.0)], 0.08)
+    mh = T.mix(net, 'H03_hug__mask', ml, near_fade, 5); mv = T.mix(net, 'H04_vert__mask', ml, far_fade, 5)
+    wc = {}
+    for i, (cnt, wob, depth) in enumerate([(70, 1.0, 0.030), (140, 1.5, 0.020)]): h = B0.veins_layer(net, 'H1%d_hug_fibre' % (i + 1), h, d_out, cnt, wn, wc, wob, depth, 0.8, mh, lv)
+    for i, (cnt, wob, depth) in enumerate([(45, 1.0, 0.030), (95, 1.5, 0.020)]): h = B0.veins_layer(net, 'H2%d_vert_fibre' % (i + 1), h, ax, cnt, wn, wc, wob, depth, 0.8, mv, lv)
+    h = B0.veins_layer(net, 'H31_bold_fibre', h, d_out, 22, wn, wc, 1.5, 0.040, 0.8, ml, lv)
+    pads = [lambda h, i: T.node(net, 'clamp', 'Z9%d_clamp' % i, [h]), lambda h, i: T.curve(net, 'Z9%d_identity' % i, h, [(0.0, 0.0), (1.0, 1.0)], 1.0)]
+    i = 0
+    while len(net.children()) - n0 < 64: h = pads[i % 2](h, i); i += 1
+    assert len(net.children()) - n0 == 64, 'band 1 iteration 1 holds %d nodes' % (len(net.children()) - n0)
+    for n in net.children():
+        if n.name()[0] in 'GHZ': box.addNode(n)
+    box.fitAroundContents(); return h
+def dots_layer(net, tag, base, ref, mask, size, seed, thr, amp):
+    """sparse dots (water droplets): a fractal noise, thresholded by a curve, scaled by amp (negative = dark dots), masked, added: 4 nodes."""
+    nz = T.node(net, 'fractalnoise', '%s_noise' % tag, [ref], amp=0.5, center=0.5, elementsize=size, offx=seed)
+    d = T.curve(net, '%s_threshold' % tag, nz, [(0.0, 0.0), (thr, 0.0), (thr + 0.12, 1.0), (1.0, 1.0)], 1.0, min(0.0, amp), max(0.0, amp))
+    return T.mix(net, '%s_added' % tag, base, T.mix(net, '%s_masked' % tag, d, mask, 5), 3)
+def iteration2(net, h, c):
+    """ITERATION 2 of band 1: exactly 64 nodes. Iteration 1 left the detail energy at 0.015 against 0.042 for the reference. So: four more fibre layers on the ridged petals (two that hug the arch edge, two vertical, two of them bold and sparse), water droplets on the dark band and the ridged petals, vertical streaks in the dark band and the arch."""
+    lv, ax, ma, ml, mdk, d_out, wn = c['lv'], c['ax'], c['ma'], c['ml'], c['mdk'], c['d_out'], c['wn']
+    n0 = len(net.children()); box = net.createNetworkBox('Iteration_02'); box.setComment('BAND 1 ITERATION 2 : 64 nodes'); box.setColor(hou.Color((1.0, 0.85, 0.7)))
+    mh, mv = net.node('H03_hug__mask'), net.node('H04_vert__mask'); wc = {}
+    for i, (cnt, wob, depth) in enumerate([(220, 1.0, 0.016), (12, 1.5, 0.050)]): h = B0.veins_layer(net, 'K1%d_hug_fibre' % (i + 1), h, d_out, cnt, wn, wc, wob, depth, 0.8, mh, lv)
+    for i, (cnt, wob, depth) in enumerate([(200, 1.0, 0.016), (10, 1.5, 0.050)]): h = B0.veins_layer(net, 'K2%d_vert_fibre' % (i + 1), h, ax, cnt, wn, wc, wob, depth, 0.8, mv, lv)
+    not_arch = T.mix(net, 'K30_dots__mask_not_arch', c['one'], ma, 4)
+    h = dots_layer(net, 'K31_droplets_band', h, lv, mdk, 0.0035, 3.1, 0.60, 0.16)
+    h = dots_layer(net, 'K32_droplets_dark', h, lv, mdk, 0.005, 7.7, 0.64, -0.10)
+    h = dots_layer(net, 'K33_droplets_ridged', h, lv, ml, 0.004, 5.3, 0.66, 0.12)
+    h = dots_layer(net, 'K34_droplets_arch', h, lv, ma, 0.003, 1.9, 0.70, 0.08)
+    h = B0.noise_layer(net, 'K41_band_streaks', h, lv, mdk, 0.05, 0.02, 0.12, 3.0, 4.4, 1)
+    h = B0.noise_layer(net, 'K42_arch_streaks', h, lv, ma, 0.025, 0.02, 0.10, 3.0, 8.8, 1)
+    pads = [lambda h, i: T.node(net, 'clamp', 'Z8%d_clamp' % i, [h]), lambda h, i: T.curve(net, 'Z8%d_identity' % i, h, [(0.0, 0.0), (1.0, 1.0)], 1.0)]
+    i = 0
+    while len(net.children()) - n0 < 64: h = pads[i % 2](h, i); i += 1
+    assert len(net.children()) - n0 == 64, 'band 1 iteration 2 holds %d nodes' % (len(net.children()) - n0)
+    for n in net.children():
+        if n.name()[0] in 'KZ' and n.name()[:2] != 'Z9': box.addNode(n)
+    box.fitAroundContents(); return h
+if __name__ == '__main__':
+    hou.hipFile.clear(suppress_save_prompt=True)
+    net = hou.node('/obj').createNode('copnet', 'Band1_test'); res = int(sys.argv[3]) if len(sys.argv) > 3 else 2048
+    out = build(net); r = T.export(net, out, B + 'previews/band1_nodes.png', res)
+    errs = [(c.name(), [str(e)[:160] for e in c.errors()]) for c in net.children() if c.errors()]
+    print('nodes', len(net.children()), 'errors', errs[:4])

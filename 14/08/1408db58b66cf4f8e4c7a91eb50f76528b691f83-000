@@ -1,0 +1,33 @@
+# 5 October 2026 14:54 Europe/Paris: calibrated live OpenGL capture, temporary semantic display with complete state restoration.
+import hou,json,math
+from pathlib import Path
+W=Path('/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01');D=W/'measurements/tree/raw02';n=hou.node('/obj/Eucalyptus');c=json.loads((D/'CloseupCamera.json').read_text());viewer=hou.ui.paneTabOfType(hou.paneTabType.SceneViewer);oldpath=viewer.pwd();oldpin=viewer.isPin();oldcam=viewer.curViewport().camera();oldout=n.displayNode();states={o.path():o.isDisplayFlagSet() for o in hou.node('/obj').children() if hasattr(o,'isDisplayFlagSet')};s=viewer.curViewport().settings();old={key:getattr(s,key)() for key in ['lighting','displayTextures','showingMaterials','showingGeometryColor','displayBackgroundImage','displayEnvironmentBackgroundImage','displayOrthoGrid']};target=hou.ui.curDesktop().name()+"."+viewer.name()+".world."+viewer.curViewport().name();oldoptions=hou.hscript("viewdisplay "+target)[0];paths=[];guides={key:s.guideEnabled(getattr(hou.viewportGuide,key)) for key in ["XZPlane","XYPlane","YZPlane"]};oldwire=s.wireOverPackedGeo();planes={"construction":viewer.constructionPlane().isVisible(),"reference":viewer.referencePlane().isVisible()};displaytypes=[hou.displaySetType.CurrentModel,hou.displaySetType.DisplayModel,hou.displaySetType.SceneObject];shading={t:s.displaySet(t).shadedMode() for t in displaytypes};dsstates={t:{"linked":s.displaySet(t).isToolbarLinked(),"profiles":s.displaySet(t).isShowingPrimProfiles(),"ghost":s.displaySet(t).isUsingGhostedLook(),"faded":s.displaySet(t).isUsingFadedLook()} for t in displaytypes}
+try:
+ viewer.setPin(False);viewer.setPwd(n);hou.hscript("viewdispopts -s off "+target)
+ hou.hscript("viewdisplay -g off -i off -T off -R off -H off "+target)
+ for key in guides:s.enableGuide(getattr(hou.viewportGuide,key),False)
+ s.setWireOverPackedGeo(False)
+ viewer.constructionPlane().setIsVisible(False);viewer.referencePlane().setIsVisible(False)
+ for t in displaytypes:
+  ds=s.displaySet(t);ds.setToolbarLinked(False);ds.setShadedMode(hou.glShadingType.Smooth);ds.showPrimProfiles(False);ds.useGhostedLook(False);ds.useFadedLook(False)
+ for path in states:hou.node(path).setDisplayFlag(path==n.path())
+ s.setDisplayTextures(False);s.showMaterials(False);s.showGeometryColor(True);s.setDisplayBackgroundImage(False);s.setDisplayEnvironmentBackgroundImage(False);s.setDisplayOrthoGrid(False)
+ cam=hou.node('/obj').createNode('cam','cam_raw02_measurement');yaw,pitch=c['yaw'],c['pitch'];right=hou.Vector3(math.cos(yaw),0,-math.sin(yaw));up=hou.Vector3(-math.sin(yaw)*math.sin(pitch),math.cos(pitch),-math.cos(yaw)*math.sin(pitch));direction=hou.Vector3(math.sin(yaw)*math.cos(pitch),math.sin(pitch),math.cos(yaw)*math.cos(pitch));center=right*((1024-c['cx'])/c['scale'])+up*((c['cy']-576)/c['scale']);center=center*n.worldTransform();eye=center+direction*100;cam.parmTuple('t').set(eye);cam.parmTuple('r').set(hou.hmath.buildRotateLookAt(eye,center,up).extractRotates());cam.parm('projection').set(1);cam.parm('orthowidth').set(2048/c['scale']);cam.parm('resx').set(2048);cam.parm('resy').set(1152);viewer.curViewport().setCamera(cam)
+ delete=n.createNode('attribdelete','RAW02_remove_display_color');delete.setInput(0,n.node('OUT_eucalyptus'));delete.parm('ptdel').set('Cd');delete.parm('vtxdel').set('Cd');delete.parm('primdel').set('Cd')
+ mask=n.createNode('attribwrangle','RAW02_semantic_display');mask.setInput(0,delete);mask.parm('class').set(1);mask.parm('snippet').set('// 5 October 2026 14:54: temporary category colors, never geometry changes.\nv@Cd=s@part=="trunk"?set(1,.196,.196):s@part=="leaf"?set(.196,.863,.372):set(.215,.51,1);')
+ for label,out,lighting in [('lookdev',n.node('OUT_eucalyptus'),old['lighting']),('tricolor',mask,hou.viewportLighting.Off)]:
+  out.setDisplayFlag(True);out.cook(force=True);s.setLighting(lighting);hou.hscript("viewdispset -w off -P off -s shade -r unique display "+target);hou.hscript("viewdispset -w off -P off -s shade -r unique current "+target);fb=viewer.flipbookSettings().stash();path=str(D/('Viewport-'+label+'-v015.png'));fb.output(path);fb.outputToMPlay(False);fb.useResolution(True);fb.resolution((2048,1152));fb.cropOutMaskOverlay(True);fb.frameRange((hou.frame(),hou.frame()));viewer.flipbook(viewer.curViewport(),fb);paths.append(path)
+finally:
+ oldout.setDisplayFlag(True);viewer.curViewport().setCamera(oldcam)
+ for key,value in guides.items():s.enableGuide(getattr(hou.viewportGuide,key),value)
+ s.setWireOverPackedGeo(oldwire)
+ viewer.constructionPlane().setIsVisible(planes["construction"]);viewer.referencePlane().setIsVisible(planes["reference"])
+ for t,value in shading.items():
+  ds=s.displaySet(t);ds.setShadedMode(value);ds.setToolbarLinked(dsstates[t]["linked"]);ds.showPrimProfiles(dsstates[t]["profiles"]);ds.useGhostedLook(dsstates[t]["ghost"]);ds.useFadedLook(dsstates[t]["faded"])
+ for name in ['RAW02_semantic_display','RAW02_remove_display_color']:
+  if n.node(name):n.node(name).destroy()
+ if hou.node('/obj/cam_raw02_measurement'):hou.node('/obj/cam_raw02_measurement').destroy()
+ for path,flag in states.items():
+  if hou.node(path):hou.node(path).setDisplayFlag(flag)
+ s.setLighting(old['lighting']);s.setDisplayTextures(old['displayTextures']);s.showMaterials(old['showingMaterials']);s.showGeometryColor(old['showingGeometryColor']);s.setDisplayBackgroundImage(old['displayBackgroundImage']);s.setDisplayEnvironmentBackgroundImage(old['displayEnvironmentBackgroundImage']);s.setDisplayOrthoGrid(old['displayOrthoGrid']);viewer.setPwd(oldpath);viewer.setPin(oldpin);hou.hscript(oldoptions)
+result={'captures':paths,'method':'native live OpenGL viewport','restored_display':all(hou.node(p).isDisplayFlagSet()==f for p,f in states.items() if hou.node(p))}

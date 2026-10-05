@@ -1,0 +1,22 @@
+# 5 October 2026 : tone tables of the central cell against normalised coordinates, for the reference (mirror averaged) and a generated image, side by side. Usage: python3 ProfileTables.py <generated png>. FR : tables de ton, reference contre graphe.
+import sys, re, numpy as np
+from PIL import Image
+from scipy import ndimage as ndi
+N = 2048; H = int(0.193 * N)
+src = open('/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/Scripts/BuildBand0V2.py').read()
+SIL = eval(re.search(r"SIL = (\[.*?\])", src).group(1)); TW = eval(re.search(r"TW = (\[.*?\])", src).group(1))
+wb = lambda v: np.interp(v, [p[0] for p in SIL], [p[1] for p in SIL]); wt = lambda v: np.interp(v, [p[0] for p in TW], [p[1] for p in TW])
+def load(path, mirror):
+    a = np.asarray(Image.open(path).convert('L').resize((N, N), Image.LANCZOS), np.float32)[:H] / 255
+    if mirror: a = (a + a[:, ::-1]) / 2
+    c = a[:, N // 3: 2 * N // 3 + 1]; return ndi.gaussian_filter(c, 4), (c.shape[1] - 1) / 2
+R, c0 = load('/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/refs/flower-sheets/trimsheet-height-flower.png', True); G, _ = load(sys.argv[1], False)
+qs = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
+for title, ys, fn in (('WINGS q = 0 tongue edge .. 1 silhouette', (0.5, 0.6, 0.7, 0.8, 0.9, 0.95), lambda lv, q: wt(lv) + q * (min(wb(lv), 0.1665) - wt(lv))), ('TONGUE t = 0 axis .. 1 edge', (0.5, 0.6, 0.7, 0.8, 0.9, 0.95), lambda lv, t: t * wt(lv))):
+    print(title); print('lv     ' + ' '.join('%4.1f' % q for q in qs))
+    for lv in ys:
+        y = int(lv * H); print('%.2f R ' % lv + ' '.join('%4.2f' % R[y, int(c0 - fn(lv, q) * N)] for q in qs)); print('     G ' + ' '.join('%4.2f' % G[y, int(c0 - fn(lv, q) * N)] for q in qs))
+xs = [0.002, 0.01, 0.02, 0.03, 0.045, 0.06, 0.075, 0.09, 0.105, 0.12, 0.135]
+print('NECK AND SHOULDERS  columns |cx| (canvas fraction)'); print('lv       ' + ' '.join('%5.3f' % x for x in xs))
+for lv in (0.05, 0.1, 0.15, 0.22, 0.3, 0.38, 0.44):
+    y = int(lv * H); print('%.2f R  ' % lv + ' '.join('%5.2f' % R[y, int(c0 - x * N)] for x in xs)); print('     G  ' + ' '.join('%5.2f' % G[y, int(c0 - x * N)] for x in xs))

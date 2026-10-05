@@ -1,0 +1,121 @@
+# 5 October 2026 : BAND 1 (tepal outer) version 2, same protocol as band 0 version 2 (Matthieu: band 0 is about 80 percent good, go on with the next band at the same quality). Canonical PERIODIC cell: 4 cells of 0.25, the arch (smooth dark petal back) at the centre, the dark textured band on the cell boundary, a bright ridged petal between them. Every number MEASURED on the arch 1 / arch 4 average of the reference, mirrored about the arch axis (MeasureBand1.py): the arch edge is a near straight V (half width 0.1 x lv, 0.082 at the bottom), a bright lip at q 0.2 to 0.4, bright ridges at q 0.4 and 0.75, the dark band at |dx| 0.103 to 0.147. Real nodes only; the reference never enters the graph. FR : bande 1 version 2.
+import hou, sys
+sys.path.insert(0, '/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/Scripts')
+import TrimNodes as T
+import BuildBand0V2 as V
+B = '/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/'
+V0, V1, CELLS = 0.193, 0.388, 3; P = 1.0 / CELLS; HC = V1 - V0; EDGE = 0.0015
+DBC = [(0.0, 0.134), (0.3, 0.1367), (0.5, 0.1407), (0.7, 0.1473), (0.85, 0.1513), (1.0, 0.1533)]   # inner edge of the dark band against lv: it follows the converging ribbons, measured on the symmetrised cell (5 October 2026)
+PHASE = 0.5
+SCALE = 4.0 / 3.0                                                       # 6 October 2026 (Matthieu: band 0 and band 1 are 3 and 3): the cell is wider, every measured x distance grows by 4/3
+DB = 0.103 * SCALE                                                              # inner edge of the dark band, |dx| from the arch axis (cell half width 0.125)
+WA = [(0.0, 0.0), (0.06, 0.0147), (0.1, 0.0233), (0.2, 0.0413), (0.3, 0.052), (0.4, 0.0592), (0.5, 0.0677), (0.6, 0.0773), (0.7, 0.0867), (0.8, 0.0973), (0.9, 0.1107), (1.0, 0.118)]   # arch half width against lv from the strongest outward step per row of the symmetrised reference cell (5 October 2026, second reading)
+LEVEL = [(0.0, 0.637), (0.06, 0.639), (0.1, 0.655), (0.14, 0.669), (0.22, 0.681), (0.3, 0.687), (0.38, 0.670), (0.46, 0.644), (0.54, 0.612), (0.62, 0.576), (0.7, 0.529), (0.78, 0.495), (0.86, 0.474), (0.94, 0.44), (1.0, 0.413)]   # mean tone of the light petal against lv
+PROF = [(0.0, -0.3), (0.05, -0.12), (0.1, -0.068), (0.15, -0.059), (0.2, -0.023), (0.25, 0.04), (0.3, 0.053), (0.35, 0.045), (0.4, 0.058), (0.425, 0.014), (0.45, -0.073), (0.475, -0.1), (0.5, -0.089), (0.55, -0.013), (0.6, 0.042), (0.65, 0.077), (0.7, 0.103), (0.725, 0.11), (0.75, 0.102), (0.775, 0.076), (0.8, 0.014), (0.85, -0.07), (0.9, -0.094), (0.95, -0.117), (1.0, -0.148)]   # ribbon profile against q, mean over lv 0.1 to 0.9 of the symmetrised cell
+QL = [(0.0, 0.34), (0.1, 0.34), (0.2, 0.58), (0.3, 0.67), (0.4, 0.75), (0.5, 0.65), (0.6, 0.67), (0.7, 0.78), (0.8, 0.76), (0.9, 0.55), (1.0, 0.40), (1.1, 0.38), (1.25, 0.40), (1.5, 0.45)]   # tone of the light petal and the dark band against q = (|dx| - wA) / (DB - wA)
+VD = [(0.0, 0.0), (0.45, -0.04), (0.55, -0.07), (0.65, -0.13), (0.75, -0.19), (0.85, -0.25), (0.95, -0.29), (1.0, -0.30)]   # darkening of the light petal toward the bottom
+AR = [(0.0, 0.46), (0.5, 0.43), (0.85, 0.36), (1.0, 0.27)]               # tone of the arch against r = |dx| / wA
+def build(net):
+    rx = T.node(net, 'ramp', 'A00_ramp__cycles_x', signature='f1', cycles=float(CELLS), method=1, phase=PHASE);   # PHASE 0.5 shifts the whole band by half a cell: the arch apex sits under the V between two petals of band 0 (Matthieu, 6 October 2026)
+    ry = T.node(net, 'ramp', 'A01_ramp__down_y', signature='f1', rotation=90.0)
+    lv = T.lin(net, 'A03_band__lv_0_top_1_bottom', ry, V0, V1)
+    cx = T.lin(net, 'A04_cell__cx_centre', rx, 0.0, 1.0, -P / 2, P / 2); zero = T.const(net, 'A05_const__zero', lv, 0.0); ax = T.mix(net, 'A06_cell__abs_cx', cx, zero, 9)
+    wA = T.curve(net, 'B01_arch__halfwidth', lv, [(x, y / 0.1) for x, y in WA], 1.0, 0.0, 0.1, T.SMOOTH)
+    d_arch = T.mix(net, 'B02_arch__distance_inside', wA, ax, 4); ma = T.smooth(net, 'B03_arch__mask', d_arch, -EDGE, EDGE)
+    span = T.mix(net, 'B04_light__span', T.curve(net, 'B04a_band_edge_curve', lv, [(x, y / 0.2) for x, y in DBC], 1.0, 0.0, 0.2, T.SMOOTH), wA, 4)
+    q = T.node(net, 'clamp', 'B06_light__q', [T.mix(net, 'B05_light__q_raw', T.mix(net, 'B05a_ax_minus_wa', ax, wA, 4), T.mix(net, 'B05b_span_floor', span, T.const(net, 'B05c_floor', lv, 0.004), 12), 6)])
+    q = T.mix(net, 'B07_light__q_limited', q, T.const(net, 'B07a_const__qmax', lv, 1.0), 13) if False else q
+    r = T.node(net, 'clamp', 'B08_arch__r', [T.mix(net, 'B08a_ax_over_wa', ax, T.mix(net, 'B08b_wa_floor', wA, T.const(net, 'B08c_floor', lv, 0.004), 12), 6)])
+    # tone of the outside (light petal and dark band) and of the arch, each from a measured table
+    # light petal = level(lv) + ribbon profile(q): the ribbons are level curves of q (row to row correlation 0.79 in q against 0.23 in |dx|, measured), tabulated on the symmetrised cell at 41 points; the dark band keeps the coarse table QL
+    lvl = T.curve(net, 'C01_light__level_vertical', lv, LEVEL, 1.0, 0.0, 1.0, T.SMOOTH)
+    pr = T.curve(net, 'C02_light__ribbons_q', q, [(x, (y + 0.3) / 0.5) for x, y in PROF], 1.0, -0.3, 0.2, T.SMOOTH)
+    light_t = T.mix(net, 'C03_light__tone_fine', lvl, pr, 3)
+    ql = T.curve(net, 'C03a_band__cross_coarse', T.lin(net, 'C03b_q_scaled', q, 0.0, 1.0, 0.0, 1.0 / 1.5), [(x / 1.5, y) for x, y in QL], 1.0, 0.0, 1.0, T.SMOOTH)
+    outside = T.mix(net, 'C03c_outside', light_t, T.mix(net, 'C03d_band_delta', T.mix(net, 'C03e_band_minus_light', ql, light_t, 4), T.smooth(net, 'C03f_band_blend', q, 0.93, 1.0), 5), 3)
+    arch = T.curve(net, 'C04_arch__tone', r, AR, 1.0, 0.0, 1.0, T.SMOOTH)
+    h = T.mix(net, 'C05_composition', outside, T.mix(net, 'C05a_arch_delta', T.mix(net, 'C05b_delta', arch, outside, 4), ma, 5), 3)
+    ctx = dict(lv=lv, ax=ax, wA=wA, ma=ma, q=q, r=r, d_arch=d_arch, zero=zero, rx=rx)
+    if UPTO >= 1: h = iteration1(net, h, ctx)
+    if UPTO >= 2: h = iteration2(net, h, ctx)
+    if UPTO >= 3: h = iteration3(net, h, ctx)
+    if UPTO >= 4: h = iteration4(net, h, ctx)
+    return h
+UPTO = 99
+def iteration1(net, h, c):
+    """ITERATION 1 (64 nodes): the fibres. Dark thin lines that HUG the arch edge (coordinate = distance outside the arch) on the light petal, vertical lines near the dark band, vertical streaks in the arch, a fine midrib at the arch axis."""
+    lv, ax, wA, ma, q, r = c['lv'], c['ax'], c['wA'], c['ma'], c['q'], c['r']
+    n0 = len(net.children()); b = V.box(net, 'G', 'BAND 1 V2 ITERATION 1 : 64 nodes, fibres', (0.7, 0.9, 1.0))
+    soft = T.node(net, 'fractalnoise', 'G00_soft_phase_noise', [lv], amp=0.5, center=0.0, elementsize=0.16)
+    d_out = T.mix(net, 'G01_light__distance_outside', ax, wA, 4)
+    light = T.mix(net, 'G02_light__mask', T.lin(net, 'G02a_not_arch', ma, 0.0, 1.0, 1.0, 0.0), T.lin(net, 'G02b_not_band', T.smooth(net, 'G02c_band', q, 0.92, 0.99), 0.0, 1.0, 1.0, 0.0), 5)
+    lm = T.mix(net, 'G04_light__modulated', light, V.modulation(net, 'G03_light__modulation', lv, 0.10, 0.5, 2.5, 8.8, 0.2), 5)
+    h = V.lines_layer(net, 'G11_hug_lines_main', h, d_out, 75, soft, 0.12, 0.07, 0.30, lm, lv)
+    h = V.lines_layer(net, 'G12_hug_lines_bold', h, d_out, 28, soft, 0.12, 0.08, 0.28, lm, lv)
+    h = V.lines_layer(net, 'G13_hug_lines_fine', h, d_out, 150, soft, 0.12, 0.04, 0.45, lm, lv)
+    am = T.mix(net, 'G22_arch__modulated', ma, V.modulation(net, 'G21_arch__modulation', lv, 0.10, 0.3, 3.0, 3.3, 0.2), 5)
+    h = V.lines_layer(net, 'G23_arch_streaks', h, ax, 160, soft, 0.20, 0.03, 0.45, am, lv)
+    mid = V.profile(net, 'G31_midrib', ax, [(0.0, 0.0), (0.0015, 0.12), (0.004, 0.06), (0.008, -0.03), (0.015, 0.0), (0.03, 0.0)], 0.0, 0.03, -0.1, 0.2)
+    h = T.mix(net, 'G33_midrib__added', h, T.mix(net, 'G32_midrib__masked', mid, ma, 5), 3)
+    h = V.pads(net, 'G', h, n0); V.close(net, b, 'G', n0); return h
+def iteration2(net, h, c):
+    """ITERATION 2 (64 nodes): texture. Water droplets (bright) on the dark band and the light petal, grain on the arch, a contact shadow and a bright lip along the arch edge, a rim on the cell boundary."""
+    lv, ax, wA, ma, q, r, d_arch = c['lv'], c['ax'], c['wA'], c['ma'], c['q'], c['r'], c['d_arch']
+    n0 = len(net.children()); b = V.box(net, 'H', 'BAND 1 V2 ITERATION 2 : 64 nodes, texture', (1.0, 0.85, 0.7))
+    band = T.smooth(net, 'H01_band__mask', q, 0.86, 0.95); light = T.lin(net, 'H02_not_arch', ma, 0.0, 1.0, 1.0, 0.0)
+    h = V.dots_layer(net, 'H11_droplets_band', h, lv, band, 0.0032, 3.1, 0.56, 0.20)
+    h = V.dots_layer(net, 'H12_droplets_light', h, lv, light, 0.0040, 7.7, 0.62, 0.08)
+    h = V.dots_layer(net, 'H13_pits_band', h, lv, band, 0.0028, 9.3, 0.58, -0.10)
+    h = V.grain(net, 'H21_grain_arch', h, lv, ma, 0.004, 5.5, 0.025, 0.3, 3.0)
+    h = V.grain(net, 'H22_grain_light', h, lv, light, 0.003, 6.6, 0.04)
+    lip = V.profile(net, 'H31_lip', d_arch, [(-0.02, 0.0), (-0.006, 0.10), (-0.002, 0.06), (0.0, -0.08), (0.003, -0.12), (0.008, -0.04), (0.02, 0.0)], -0.02, 0.02, -0.15, 0.15)
+    h = T.mix(net, 'H32_lip__added', h, lip, 3)
+    # the dark band is two sub bands with a thin bright line on each outer edge and one on the cell boundary
+    d_band = T.mix(net, 'H41_band__distance_from_edge', ax, net.node('B04a_band_edge_curve'), 4)
+    edge = V.profile(net, 'H42_band_edge', d_band, [(-0.012, 0.0), (-0.004, 0.10), (-0.001, 0.14), (0.002, -0.05), (0.008, -0.03), (0.02, 0.0)], -0.012, 0.02, -0.1, 0.2)
+    h = T.mix(net, 'H44_band_edge__added', h, T.mix(net, 'H43_band_edge__masked', edge, T.smooth(net, 'H43a_not_arch', q, 0.5, 0.7), 5), 3)
+    d_mid = T.mix(net, 'H51_cell__distance_to_boundary', T.const(net, 'H51a_const__half_cell', lv, P / 2), ax, 4)
+    mid = V.profile(net, 'H52_boundary_line', d_mid, [(0.0, 0.10), (0.0015, 0.04), (0.004, -0.02), (0.01, 0.0), (0.02, 0.0)], 0.0, 0.02, -0.1, 0.15)
+    h = T.mix(net, 'H53_boundary__added', h, mid, 3)
+    h = V.pads(net, 'H', h, n0); V.close(net, b, 'H', n0); return h
+def iteration3(net, h, c):
+    """ITERATION 3 (64 nodes). Zoom 2x on the reference: (a) the light petal is made of broad vertical STRIPES of different brightness (about 0.012 wide) whose fine lines slant and CONVERGE toward the bottom of the arch edge; (b) the surface is covered with small round BUBBLES (8 px), bright with a dark rim, on the dark band and the light petal; (c) a column of beads runs along the arch axis. Ours had straight hug lines, big irregular blobs and a bare arch."""
+    lv, ax, wA, ma, q, r = c['lv'], c['ax'], c['wA'], c['ma'], c['q'], c['r']
+    n0 = len(net.children()); b = V.box(net, 'J', 'BAND 1 V2 ITERATION 3 : 64 nodes, stripes, converging lines, bubbles', (0.8, 1.0, 0.8))
+    soft = net.node('G00_soft_phase_noise'); light = T.mix(net, 'J01_light__mask', T.lin(net, 'J01a_not_arch', ma, 0.0, 1.0, 1.0, 0.0), T.lin(net, 'J01b_not_band', T.smooth(net, 'J01c_band', q, 0.92, 0.99), 0.0, 1.0, 1.0, 0.0), 5)
+    dx = T.mix(net, 'J11_conv__dx', ax, T.const(net, 'J10_const__pivot', lv, 0.062), 4)
+    dy = T.lin(net, 'J12_conv__dy', lv, 0.0, 1.0, 1.35 * HC, 0.35 * HC)
+    phi = T.node(net, 'function', 'J13_conv__angle', [T.mix(net, 'J13a_conv__slope', dx, dy, 6)], func=2, func_trig=5, angleunit=2)
+    lm = T.mix(net, 'J15_conv__mask', light, V.modulation(net, 'J14_conv__modulation', lv, 0.09, 0.5, 2.5, 5.9, 0.2), 5)
+    h = V.lines_layer(net, 'J21_conv_lines_main', h, phi, 70, soft, 0.15, 0.10, 0.30, lm, lv)
+    h = V.lines_layer(net, 'J22_conv_lines_bold', h, phi, 26, soft, 0.15, 0.10, 0.28, lm, lv)
+    band = T.smooth(net, 'J31_band__mask', q, 0.86, 0.95)
+    h = V.dots_layer(net, 'J32_bubbles_band', h, lv, band, 0.0016, 11.1, 0.58, 0.20)
+    h = V.dots_layer(net, 'J34_bubbles_light', h, lv, light, 0.0018, 14.3, 0.60, 0.10)
+    beads = T.lin(net, 'J41_axis__mask', T.smooth(net, 'J41a', ax, 0.005, 0.014), 0.0, 1.0, 1.0, 0.0)
+    h = V.dots_layer(net, 'J42_axis_beads', h, lv, T.mix(net, 'J43_axis__in_arch', beads, ma, 5), 0.0022, 4.7, 0.55, 0.16)
+    h = V.pads(net, 'J', h, n0); V.close(net, b, 'J', n0); return h
+def iteration4(net, h, c):
+    """ITERATION 4 (64 nodes): crisp ribbon edges and fine striation. The ribbon profile in q is smooth (mean over rows); the reference ribbons end on THIN lines that converge with them: dark lines where the profile drops (q 0.44, 0.79, 0.07), bright lines where it rises (q 0.22, 0.62), plus two scales of fine striation along q (the lines are level curves of q, not of |dx|), lines in the arch that start and stop, and a bright line in the middle of the dark band."""
+    lv, ax, wA, ma, q, r = c['lv'], c['ax'], c['wA'], c['ma'], c['q'], c['r']
+    n0 = len(net.children()); b = V.box(net, 'K', 'BAND 1 V2 ITERATION 4 : 64 nodes, crisp ribbon edges, striation', (1.0, 0.85, 0.85))
+    soft = net.node('G00_soft_phase_noise'); light = T.mix(net, 'K01_light__mask', T.lin(net, 'K01a_not_arch', ma, 0.0, 1.0, 1.0, 0.0), T.lin(net, 'K01b_not_band', T.smooth(net, 'K01c_band', q, 0.92, 0.99), 0.0, 1.0, 1.0, 0.0), 5)
+    for tag, q0, amp in (('K11_dark_a', 0.44, -0.10), ('K12_dark_b', 0.79, -0.10), ('K13_bright_a', 0.22, 0.09)):
+        d = T.lin(net, tag + '_dist', q, q0 - 0.06, q0 + 0.06)
+        ln = T.curve(net, tag + '_profile', d, [(0.0, 0.0), (0.40, 0.0), (0.5, 1.0), (0.6, 0.0), (1.0, 0.0)], 1.0, 0.0, amp, T.SMOOTH)
+        h = T.mix(net, tag + '_added', h, T.mix(net, tag + '_masked', ln, light, 5), 3)
+    qm = T.mix(net, 'K21_striation__mask', light, V.modulation(net, 'K20_striation__modulation', lv, 0.08, 0.5, 2.5, 17.3, 0.15), 5)
+    h = V.lines_layer(net, 'K22_striation_main', h, q, 34, soft, 0.10, 0.06, 0.30, qm, lv)
+    h = V.lines_layer(net, 'K23_striation_fine', h, q, 120, soft, 0.10, 0.035, 0.40, qm, lv)
+    am = T.mix(net, 'K32_arch__modulated', ma, V.modulation(net, 'K31_arch__modulation', lv, 0.05, 0.3, 3.0, 29.1, 0.0), 5)
+    h = V.lines_layer(net, 'K33_arch_lines', h, r, 14, soft, 0.20, 0.05, 0.30, am, lv)
+    bandc = T.mix(net, 'K41_band__centre_dist', ax, T.mix(net, 'K41a_band_centre', net.node('B04a_band_edge_curve'), T.const(net, 'K41b_const__half_band', lv, 0.010), 3), 4)
+    bl = V.profile(net, 'K42_band_centre_line', bandc, [(-0.01, 0.0), (-0.003, 0.0), (0.0, 0.14), (0.003, 0.0), (0.01, 0.0)], -0.01, 0.01, -0.05, 0.2)
+    h = T.mix(net, 'K44_band_line__added', h, T.mix(net, 'K43_band_line__masked', bl, T.smooth(net, 'K43a_in_band', q, 0.90, 0.98), 5), 3)
+    h = V.pads(net, 'K', h, n0); V.close(net, b, 'K', n0); return h
+if __name__ == '__main__':
+    hou.hipFile.clear(suppress_save_prompt=True); net = hou.node('/obj').createNode('copnet', 'Band1V2_test'); res = int(sys.argv[3]) if len(sys.argv) > 3 else 2048
+    if len(sys.argv) > 4: UPTO = int(sys.argv[4])
+    out = build(net); T.export(net, out, B + ('previews/band1v2_nodes.png' if UPTO == 99 else 'previews/band1v2_it%d.png' % UPTO), res)
+    errs = [(cc.name(), [str(e)[:140] for e in cc.errors()]) for cc in net.children() if cc.errors()]
+    print('nodes', len(net.children()), 'errors', errs[:4])

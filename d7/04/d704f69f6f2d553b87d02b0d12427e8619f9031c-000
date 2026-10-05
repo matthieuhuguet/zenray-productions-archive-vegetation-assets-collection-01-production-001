@@ -1,0 +1,30 @@
+# 5 October 2026: standalone native HDA with a short master interface, verified on a fresh instance.
+import hou,json
+from pathlib import Path
+root=Path('/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01');n=hou.node('/obj/Eucalyptus');temp=hou.node('/obj').createNode('geo','Eucalyptus_interface_template');temp.setDisplayFlag(False);ptg=temp.parmTemplateGroup();temp.destroy()
+categories={'tree_shape':['tree_height','wood_radius_scale','shoot_count','leaves_per_shoot','leaf_length','crown_depth_scale','crown_width_scale','crown_height_offset'],'growth_structure':['trunk_warp','trunk_grain','trunk_frequency'],'raw_reference':['raw_yaw','raw_pitch','raw_scale','raw_cx','raw_cy','raw_mask_strength'],'bark_geometry':['wood_voxel_size','bark_fluting','bark_peel_lift','bark_strip_width','bark_strip_length','bark_strip_count']}
+# 5 October 2026: resolve the existing growth controls by their actual names.
+allnames=[p.name() for p in n.parms()];growth=[name for name in allnames if any(x in name for x in ['warp_amplitude','grain_amplitude','noise_frequency'])]
+if not all(n.parm(x) for x in categories['growth_structure']):categories['growth_structure']=growth
+assert len(categories['growth_structure'])==3,categories
+values={name:n.parm(name).eval() for names in categories.values() for name in names};transform={p.name():p.eval() for p in n.parms() if p.name() in ['tx','ty','tz','rx','ry','rz','sx','sy','sz']}
+for name,names in categories.items():
+ assert len(names)<=8
+ folder=hou.FolderParmTemplate(name,name.replace('_',' ').title(),folder_type=hou.folderType.Simple)
+ for control in names:
+  template=n.parm(control).parmTemplate();template.setDefaultValue((values[control],))
+  if control=='shoot_count':template.setMaxValue(30000)
+  if control=='leaves_per_shoot':template.setMaxValue(96)
+  if control=='leaf_length':template.setMinValue(.02)
+  folder.addParmTemplate(template)
+ ptg.append(folder)
+n.setParmTemplateGroup(ptg)
+for name,value in {**values,**transform}.items():n.parm(name).set(value)
+n.node('OUT_eucalyptus').cook(force=True);g=n.node('OUT_eucalyptus').geometry();expected=(len(g.points()),len(g.prims()),str(g.boundingBox()))
+path=str(root/'otls/ZenRay_Eucalyptus_v015.hda');definition=n.type().definition();
+if n.type().name()!='zenray_eucalyptus::15.0':
+ definition.copyToHDAFile(path,new_name='zenray_eucalyptus::15.0',new_menu_name='ZenRay Eucalyptus 15');hou.hda.installFile(path);n=n.changeNodeType('zenray_eucalyptus::15.0',keep_name=True,keep_parms=True,keep_network_contents=True)
+definition=n.type().definition();definition.setParmTemplateGroup(ptg);n.setParmTemplateGroup(ptg)
+for name,value in {**values,**transform}.items():n.parm(name).set(value)
+definition.updateFromNode(n)
+fresh=hou.node('/obj').createNode('zenray_eucalyptus::15.0','Eucalyptus_fresh_validation');fresh.setDisplayFlag(False);fresh.node('OUT_eucalyptus').cook(force=True);g=fresh.node('OUT_eucalyptus').geometry();actual=(len(g.points()),len(g.prims()),str(g.boundingBox()));errors=[(c.path(),c.errors()) for c in fresh.allSubChildren() if c.errors()];assert expected==actual,(expected,actual);assert not errors,errors;fresh.destroy();hou.hipFile.save();result={'hda':path,'fresh_geometry_identical':actual==expected,'points':actual[0],'primitives':actual[1],'bbox':actual[2],'controls':categories,'errors':errors};(root/'Scripts/Eucalyptus-v015-validation.json').write_text(json.dumps(result,indent=2))

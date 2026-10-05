@@ -1,0 +1,16 @@
+# 5 October 2026 : one sheet, reference strip over generated strip, for several bands. Usage: python3 CmpBands.py <out.png> <suffix> <band numbers...>. FR : planche comparative multi bandes.
+import sys
+from PIL import Image
+V = {0: (0.0, 0.193), 1: (0.193, 0.388), 2: (0.388, 0.507), 3: (0.507, 0.609), 4: (0.609, 0.725), 5: (0.725, 0.837), 6: (0.837, 1.0)}
+B = '/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/'
+R = Image.open('/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/refs/flower-sheets/trimsheet-height-flower.png').convert('L').resize((2048, 2048), Image.LANCZOS)
+strips = []
+for k in map(int, sys.argv[3:]):
+    a, b = V[k]; g = Image.open(B + 'previews/band%d_%s.png' % (k, sys.argv[2])).convert('L')
+    strips += [R.crop((0, int(a * 2048), 2048, int(b * 2048))), g.crop((0, int(a * 2048), 2048, int(b * 2048)))]
+H = sum(s.size[1] + 4 for s in strips); out = Image.new('L', (2048, H), 255); y = 0
+for s in strips: out.paste(s, (0, y)); y += s.size[1] + 4
+out.save(sys.argv[1]); print(out.size)
+# 6 October 2026 AUTOSAVE (see CmpBand.py)
+import os, shutil, time
+AUTO = B + 'versions/auto/'; os.makedirs(AUTO, exist_ok=True); shutil.copy(sys.argv[1], AUTO + time.strftime('%Y-%m-%d_%H%M%S_') + os.path.basename(sys.argv[1]))

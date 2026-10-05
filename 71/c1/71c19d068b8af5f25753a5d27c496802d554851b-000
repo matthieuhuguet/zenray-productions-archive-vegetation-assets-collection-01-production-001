@@ -1,0 +1,47 @@
+# 5 October 2026 14:33 Europe/Paris: editable semantic tracing and color masks, no generated image.
+from pathlib import Path
+import json,hashlib
+import numpy as np
+from PIL import Image,ImageDraw,ImageFont,ImageFilter
+W=Path('/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01');D=W/'measurements/tree/raw02';D.mkdir(exist_ok=True)
+source=W/'refs/raw/3-eucalyptus/02_erwan-gaudichon-eucalyptus-02.jpg';raw=Image.open(source).convert('RGB');a=np.asarray(raw).astype(float);h,w=a.shape[:2];factor=w/2048
+PATHS=[
+('trunk',[(580,1152,270),(600,1000,245),(633,900,210),(646,800,175),(690,700,165),(716,600,155),(766,500,165),(820,400,190),(820,350,180)]),
+('right_main',[(840,350,140),(955,220,125),(1035,120,110),(1100,50,90),(1150,0,80)]),
+('center_main',[(835,350,110),(850,280,100),(856,220,100),(877,100,95),(894,0,90)]),
+('left_main',[(820,350,100),(750,300,86),(720,250,85),(704,150,82),(655,100,70),(595,100,60),(504,111,46),(410,124,38),(302,117,29),(220,95,24),(112,61,17)]),
+('upper_right',[(930,280,43),(1035,214,40),(1160,203,36),(1250,180,30),(1350,173,26),(1420,120,23),(1500,96,20),(1570,40,15),(1600,0,10)]),
+('high_right',[(1010,191,60),(1170,114,55),(1290,57,45),(1410,15,30),(1450,0,20)]),
+('right_horizontal',[(1120,71,50),(1230,63,43),(1350,85,35),(1450,84,31),(1570,54,23),(1680,58,17),(1810,67,12),(1890,29,7)]),
+('left_secondary',[(683,389,22),(634,342,21),(591,311,19),(566,255,16),(512,253,15),(462,223,12),(402,220,10),(338,193,9),(260,184,7),(209,145,5),(180,99,3)]),
+('lower_left',[(548,847,13),(517,769,12),(490,712,10),(445,725,8),(418,749,7),(403,795,5),(362,853,4),(351,910,3),(366,962,2),(384,1008,1)]),
+('lower_right',[(767,659,18),(815,607,15),(857,576,12),(897,591,9),(938,615,7),(969,659,5),(992,697,4),(1012,723,2),(1031,758,1)])]
+traces=[];corridor=Image.new('L',(w,h));core=Image.new('L',(w,h));trunkregion=Image.new('L',(w,h))
+for index,(name,path) in enumerate(PATHS):
+ trace=Image.new('L',(w,h));draw=ImageDraw.Draw(trace);dc=ImageDraw.Draw(core)
+ for p,q in zip(path,path[1:]):
+  for t in np.linspace(0,1,40):
+   x=(p[0]*(1-t)+q[0]*t)*factor;y=(p[1]*(1-t)+q[1]*t)*factor;r=(p[2]*(1-t)+q[2]*t)*factor*.5
+   draw.ellipse((x-r,y-r,x+r,y+r),fill=255);cr=r*.28;dc.ellipse((x-cr,y-cr,x+cr,y+cr),fill=255)
+ traces.append(trace)
+ corridor=Image.fromarray(np.maximum(np.asarray(corridor),np.asarray(trace)))
+ if index==0:trunkregion=trace.copy()
+TRUNK_OUTLINE=[(442, 1152), (719, 1152), (724, 1090), (713, 1030), (718, 980), (723, 920), (730, 860), (731, 800), (750, 735), (766, 690), (770, 670), (785, 625), (800, 610), (810, 590), (835, 550), (862, 515), (877, 475), (897, 440), (928, 400), (955, 365), (916, 340), (865, 330), (814, 328), (772, 315), (733, 337), (726, 380), (718, 435), (695, 480), (684, 520), (674, 555), (653, 590), (626, 637), (615, 670), (592, 705), (585, 740), (567, 790), (556, 825), (539, 855), (530, 900), (511, 920), (501, 960), (475, 1000), (469, 1040), (455, 1090)]
+trunkregion=Image.new("L",(w,h));ImageDraw.Draw(trunkregion).polygon([(x*factor,y*factor) for x,y in TRUNK_OUTLINE],fill=255)
+# 5 October 2026: fit neutral background from explicitly empty lower image patches.
+yy,xx=np.mgrid[0:h,0:w];xn=xx/w;yn=yy/h;features=np.stack([np.ones_like(xn),xn,yn,xn*xn,xn*yn,yn*yn],axis=-1)
+sample=((xn<.11)&(yn>.60))|((xn>.73)&(yn>.55))|((xn>.55)&(xn<.68)&(yn>.83));sample&=(xx%12==0)&(yy%12==0)
+coef=np.linalg.lstsq(features[sample],a.mean(2)[sample],rcond=None)[0];bg=np.sum(features*coef,axis=-1);assert np.isfinite(bg).all()
+chroma=a.max(2)-a.min(2);intensity=a.mean(2);fg=(chroma>10)|(np.abs(intensity-bg)>13)
+green=(a[:,:,1]>a[:,:,0]+4)&(a[:,:,1]>a[:,:,2]+6)
+wood=(np.asarray(corridor)>0)&fg&~green&(((a[:,:,0]>a[:,:,1]+1)&(a[:,:,1]>a[:,:,2]+3))|(intensity>bg+8)|(np.asarray(core)>0))
+wood|=fg&~green&(((a[:,:,0]>a[:,:,1]+2)&(a[:,:,1]>a[:,:,2]+4)&(intensity>65))|(intensity>bg+12))
+labels=np.zeros((h,w),dtype=np.uint8);labels[fg]=3;labels[wood]=2;labels[fg&~green&(np.asarray(trunkregion)>0)]=1
+COLORS=np.array([[0,0,0],[255,50,50],[55,130,255],[50,220,95]],dtype=np.uint8);rgb=COLORS[labels];Image.fromarray(rgb).save(D/'TricolorMask-v001.png')
+for index,name in [(1,'trunk'),(2,'branch'),(3,'leaf')]:Image.fromarray((labels==index).astype('uint8')*255).save(D/(name+'-mask.png'))
+overlay=np.asarray(raw).copy();occupied=labels>0;overlay[occupied]=(.48*overlay[occupied]+.52*rgb[occupied]).astype('uint8');Image.fromarray(overlay).save(D/'TricolorOverlay-v001.png')
+canvas=Image.new('RGB',(2400,1480),'#171b20');cd=ImageDraw.Draw(canvas);font=lambda n:ImageFont.truetype('/System/Library/Fonts/Supplemental/Arial.ttf',n)
+for i,(im,title) in enumerate([(raw,'RAW 02, source intacte'),(Image.fromarray(rgb),'Rouge tronc | bleu branches | vert feuilles'),(Image.fromarray(overlay),'Superposition pour verifier les contours')]):
+ im=im.copy();im.thumbnail((1150,650));x=25+(i%2)*1200;y=90+(i//2)*730;canvas.paste(im,(x,y));cd.text((x,y-45),title,font=font(28),fill='white')
+cd.text((1240,870),'5 October 2026',font=font(32),fill='white');cd.text((1240,930),'Masque de travail estime et editable.',font=font(28),fill='white');cd.text((1240,980),'Les rameaux dans l ombre restent ambigus.',font=font(28),fill='white');cd.text((1240,1030),'Aucun pixel importe dans le graphe SOP.',font=font(28),fill='white');canvas.save(D/'TricolorSheet-v001.png')
+report={'date':'5 October 2026','source':str(source),'source_sha256':hashlib.sha256(source.read_bytes()).hexdigest(),'size':[w,h],'paths':PATHS,'trunk_outline':TRUNK_OUTLINE,'colors':COLORS.tolist(),'class_pixels':{str(i):int((labels==i).sum()) for i in range(4)},'limits':'manual axis corridors and color segmentation; dark twig/leaf overlap remains ambiguous, not ground truth','background_fit_coefficients':coef.tolist()};(D/'TricolorMask-v001.json').write_text(json.dumps(report,indent=2));print(report['class_pixels'])

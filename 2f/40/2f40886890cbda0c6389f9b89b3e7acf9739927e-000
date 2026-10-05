@@ -1,0 +1,25 @@
+# 5 October 2026 : segment each band of the reference (object against background), find its period by the autocorrelation of the mask columns, and fit an ellipse (centre, half axes, angle) to every connected component. Output: ref-maps/band_primitives.json. The reference is used only here. FR : segmentation des bandes, periode, ellipses.
+import json, sys, numpy as np
+from PIL import Image
+from scipy import ndimage as ndi
+N = 2048
+R = np.asarray(Image.open('/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/refs/flower-sheets/trimsheet-height-flower.png').convert('L').resize((N, N), Image.LANCZOS), np.float64) / 255
+BANDS = {'stamens': (0.388, 0.507), 'calyx': (0.507, 0.609), 'stem': (0.609, 0.725), 'leaf': (0.725, 0.837), 'bud': (0.837, 1.0)}
+def otsu(x):
+    h, e = np.histogram(x, 256, (0, 1)); p = h / h.sum(); w = np.cumsum(p); m = np.cumsum(p * e[:-1]); sb = (m[-1] * w - m) ** 2 / (w * (1 - w) + 1e-12); return e[np.argmax(sb)]
+out = {}
+for name, (a, b) in BANDS.items():
+    y0, y1 = int(a * N) + 4, int(b * N) - 4; B = ndi.gaussian_filter(R[y0:y1], 2.5); t = otsu(B)
+    # background of the reference bands is the darker class
+    mask = B > t; mask = ndi.binary_opening(mask, iterations=2)
+    col = mask.mean(0); c = col - col.mean(); ac = np.fft.irfft(np.abs(np.fft.rfft(c)) ** 2); ac /= ac[0] + 1e-9
+    lags = [(ac[l], l) for l in range(40, N // 2)]; peaks = sorted([(v, l) for v, l in lags if v > 0.25 and ac[l] >= ac[l - 1] and ac[l] >= ac[l + 1]], reverse=True)[:4]
+    lab, n = ndi.label(mask); comps = []
+    for i in range(1, n + 1):
+        ys, xs = np.nonzero(lab == i)
+        if len(xs) < 400: continue
+        cx, cy = xs.mean(), ys.mean(); cov = np.cov(np.stack([xs - cx, ys - cy])); ev, evec = np.linalg.eigh(cov)
+        ang = float(np.degrees(np.arctan2(evec[1, 1], evec[0, 1]))); comps.append(dict(cx=round(cx / N, 4), cy=round(cy / (y1 - y0), 4), a=round(2 * np.sqrt(ev[1]) / N, 4), b=round(2 * np.sqrt(ev[0]) / N, 4), angle=round(ang, 1), area=round(len(xs) / mask.size, 4), x0=round(xs.min() / N, 4), x1=round(xs.max() / N, 4), y0=round(ys.min() / (y1 - y0), 3), y1=round(ys.max() / (y1 - y0), 3)))
+    out[name] = dict(threshold=round(float(t), 3), fill=round(float(mask.mean()), 3), period_candidates=[(round(l / N, 4), round(float(v), 2)) for v, l in peaks], components=sorted(comps, key=lambda c: c['cx']))
+    print(name, 'threshold', round(float(t), 3), 'fill', round(float(mask.mean()), 3), 'periods', out[name]['period_candidates'], 'n components', len(comps))
+json.dump(out, open('/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/ref-maps/band_primitives.json', 'w'), indent=1)

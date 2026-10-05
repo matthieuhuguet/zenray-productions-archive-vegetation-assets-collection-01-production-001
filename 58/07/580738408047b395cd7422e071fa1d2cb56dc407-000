@@ -1,0 +1,55 @@
+# 5 October 2026 14:54 Europe/Paris: visible wood axes measured from raw 02, numeric guides only, native VEX and Sweep.
+import hou,json,math
+from pathlib import Path
+W=Path('/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01');D=W/'measurements/tree/raw02';n=hou.node('/obj/Eucalyptus');d=json.loads((D/'TricolorMask-v001.json').read_text());cam=json.loads((D/'CloseupCamera.json').read_text());old=json.loads((W/'measurements/tree/live-axes.json').read_text());oldp=old['points'];paths={name:path for name,path in d['paths']};yaw=cam['yaw'];pitch=cam['pitch'];scale=cam['scale']
+def inverse(x,y,z):
+ px=(x-cam['cx'])/scale;py=(cam['cy']-y)/scale;wx=(px+z*math.sin(yaw))/math.cos(yaw);wy=(py+math.sin(pitch)*(wx*math.sin(yaw)+z*math.cos(yaw)))/math.cos(pitch);return [wx,wy,z]
+def measured(name,z0,z1):
+ p=paths[name];return [(inverse(x,y,z0+(z1-z0)*i/max(1,len(p)-1)),width/(2*scale)) for i,(x,y,width) in enumerate(p)]
+axes=[];trunk=[(oldp[i],.45 if i==0 else .34) for i in [0,1]]+measured('trunk',-.35,.9)+measured('right_main',.9,1.4)[1:]+[(oldp[i],.10-i*.004) for i in [9,10,11]];axes.append(('trunk',trunk))
+axes.append(('left_fork',measured('left_main',.9,-.65)))
+axes.append(('center_fork',measured('center_main',.9,.65)+[(oldp[i],.035) for i in [24,25]]))
+axes.append(('left_secondary',measured('left_secondary',-.1,-1.2)))
+axes.append(('upper_right',measured('upper_right',1.1,1.7)))
+axes.append(('high_right',measured('high_right',1.3,1.8)))
+axes.append(('right_horizontal',measured('right_horizontal',1.5,2.0)))
+for label,ids in [('upper_left',[57,58,59,60]),('upper_rear',[67,68,69,70])]:axes.append((label,[(oldp[i],.04*(1-k/len(ids))+.008) for k,i in enumerate(ids)]))
+axes.append(('dead_right',measured('lower_right',.4,.5)));axes.append(('dead_left',measured('lower_left',-.4,-.6)))
+axes.append(('broken_stub',[(inverse(x,y,-.15),r) for x,y,r in [(699,1100,.07),(738,1050,.055),(767,990,.04),(777,935,.025)]]))
+# 5 October 2026: junction starts snap to existing parent centerlines; the surface emerges naturally from the parent volume.
+for i in range(1,len(axes)):
+ if i in [7,8]:continue
+ pts=axes[i][1];target=hou.Vector3(pts[0][0]);candidates=[(hou.Vector3(p),r) for name,curve in axes[:i] for p,r in curve];parent=min(candidates,key=lambda item:(item[0]-target).length());pts.insert(0,(list(parent[0]),min(pts[0][1],parent[1]*.65)))
+pos=[];radii=[];starts=[];ends=[];names=[]
+for name,curve in axes:
+ starts.append(len(pos));names.append(name)
+ for p,r in curve:pos.append(p);radii.append(r)
+ ends.append(len(pos))
+vec=lambda v:'{'+','.join(str(round(x,6)) for x in v)+'}';arr=lambda v:'{'+','.join(str(x) for x in v)+'}'
+code='// 5 October 2026 14:54: raw measured axes, central master controls, hidden depth interpreted.\nvector pos[]={'+','.join(vec(p) for p in pos)+'};float radii[]='+arr(radii)+';int starts[]='+arr(starts)+';int ends[]='+arr(ends)+';\n'+'''float scale=ch("../tree_height")/8;
+for(int k=0;k<len(starts);k++){
+ int pr=addprim(0,"polyline");
+ for(int j=starts[k];j<ends[k];j++){
+  int pt=addpoint(0,pos[j]*scale);addvertex(0,pr,pt);float t=float(j-starts[k])/max(1,ends[k]-starts[k]-1);
+  setpointattrib(0,"pscale",pt,radii[j]*scale*ch("../wood_radius_scale"),"set");setpointattrib(0,"trunk_t",pt,t,"set");
+ }
+ setprimattrib(0,"part",pr,k==0?"trunk":"branch","set");setprimattrib(0,"mat",pr,"bark","set");
+}'''
+n.node('C1_measured_axis').parm('snippet').set(code)
+# 5 October 2026: stronger longitudinal geometry remains subordinate to branch thickness.
+n.parm('trunk_warp').set(.065);n.parm('trunk_grain').set(.02)
+vop=n.node('TRUNK_point_vop');bind=vop.node('local_radius') or vop.createNode('bind','local_radius');bind.parm('parmname').set('pscale');bind.parm('parmtype').set(0)
+fit=vop.node('radius_relative_relief') or vop.createNode('fit','radius_relative_relief');fit.setInput(0,bind);fit.parm('srcmin').set(0);fit.parm('srcmax').set(.35);fit.parm('destmin').set(.06);fit.parm('destmax').set(1)
+mul=vop.node('scale_relief_by_branch') or vop.createNode('multiply','scale_relief_by_branch');mul.setInput(0,vop.node('combine_relief'));mul.setInput(1,fit);vop.node('normal_displacement').setInput(1,mul);vop.layoutChildren()
+relief=n.node('C1_growth_ridges');relief.parm('snippet').set('''// 5 October 2026 14:54: longitudinal flutes, radius-scaled to preserve thin branches.
+vector uv=vertex(0,"uv",pointvertex(0,@ptnum));float angle=uv.x*2*$PI;float radius=max(.01,f@pscale);
+float amplitude=min(.028,radius*.16)*ch("../wood_radius_scale");
+float ribs=sin(angle*7+f@trunk_t*2)*.65+sin(angle*13-f@trunk_t*3)*.35;
+@P+=normalize(@N)*amplitude*ribs;v@Cd=set(.62,.57,.47);''')
+semantic=n.node('C1_semantic_roles') or n.createNode('attribwrangle','C1_semantic_roles');semantic.setInput(0,relief);semantic.parm('class').set(1);semantic.parm('snippet').set('''// 5 October 2026 14:54: split the stem from its upper branches by the visible fork height.
+vector center=primuv(0,"P",@primnum,{.5,.5,0});if(s@part=="trunk"&&center.y>3.25*ch("../tree_height")/8)s@part="branch";
+s@material_role="bark";''');n.node('M_components').setInput(0,semantic)
+leaf=n.node('C4_lanceolate_leaf');s=leaf.parm('snippet').eval()
+if 'v@Cd' not in s:leaf.parm('snippet').set(s+'\nv@Cd=set(.32,.40,.23);')
+for name in ['C1_measured_axis','C1_resample_skeleton','C1_sweep_forks','C1_point_normals','TRUNK_point_vop','C1_growth_ridges','C1_semantic_roles','C3_measured_shoots','C3_sweep_twigs','C3_twig_colour','C4_attached_leaf_points','C4_lanceolate_leaf','C4_copy_leaves','M_components','N_normals','OUT_eucalyptus']:n.node(name).cook(force=True)
+errors=[(c.path(),c.errors()) for c in n.allSubChildren() if c.errors()];assert not errors,errors;n.node('OUT_eucalyptus').setDisplayFlag(True);n.node('OUT_eucalyptus').setRenderFlag(True);n.layoutChildren();hou.hipFile.save();g=n.node('OUT_eucalyptus').geometry();result={'faces':len(g.prims()),'points':len(g.points()),'axes':len(axes),'errors':errors};(D/'Raw02Rebuild-v007.json').write_text(json.dumps({'date':'5 October 2026','report':result,'camera':cam,'axes':axes,'depth_limit':'occluded depth interpreted, four-view and raw03 cross-check still required'},indent=2))

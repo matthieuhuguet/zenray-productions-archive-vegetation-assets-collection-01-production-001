@@ -1,0 +1,27 @@
+# 5 October 2026 : numbers that set the NODES of band 0 (tepal inner), measured on the masks of the reference: for 16 rows from the top to the bottom of the band, the half width of the big petal around each cell centre and the half width of the small petal around each cell boundary (cells of 1/3 of the width, big petals centred at 1/6, 1/2, 5/6). Output ref-maps/band0_profile.json. FR : largeurs mesurees pour regler les nodes de la bande 0.
+import json, numpy as np
+d = json.load(open('../ref-maps/trim_occupancy.json'))['tepal_inner']; nx, ny = d['nx'], d['ny']; o = np.array(d['occ']).reshape(ny, nx)
+rows = np.linspace(0, ny - 1, 16).astype(int); big = []; small = []
+for r in rows:
+    row = o[r] > 0.5; hb = []; hs = []
+    for c in (1 / 6, 0.5, 5 / 6):
+        x = int(c * nx); k = 0
+        if row[x]:
+            l = x
+            while l > 0 and row[l - 1]: l -= 1
+            rr = x
+            while rr < nx - 1 and row[rr + 1]: rr += 1
+            hb.append((rr - l + 1) / 2 / nx)
+        else: hb.append(0.0)
+    big.append(float(np.mean(hb)))
+    for c in (1 / 3, 2 / 3):
+        x = int(c * nx)
+        if row[x]:
+            l = x
+            while l > 0 and row[l - 1]: l -= 1
+            rr = x
+            while rr < nx - 1 and row[rr + 1]: rr += 1
+            hs.append((rr - l + 1) / 2 / nx)
+        else: hs.append(0.0)
+    small.append(float(np.mean(hs)))
+out = dict(lv=[round(float(r) / (ny - 1), 3) for r in rows], big=[round(v, 3) for v in big], small=[round(v, 3) for v in small]); json.dump(out, open('../ref-maps/band0_profile.json', 'w'), indent=1); print(out)

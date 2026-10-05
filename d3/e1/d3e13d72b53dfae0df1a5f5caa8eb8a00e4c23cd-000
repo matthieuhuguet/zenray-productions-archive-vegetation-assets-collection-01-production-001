@@ -1,0 +1,76 @@
+# 5 October 2026 : the COMPLETE trim sheet in ONE Copernicus network: seven band subnets, the assembly, then the derived maps. HEIGHT -> FINAL_HEIGHT. BASE COLOUR = per band Mono-to-RGB colour ramps keyed on the band height (palettes by quantile matching against the colour reference, MeasurePalettes.py) plus band 2 accents (green filaments and tubes, purple stigma head). NORMAL = Height to Normal. AO = Height to Ambient Occlusion. ROUGHNESS = per band level, crevices rougher. OPACITY = 1 (a trim sheet is opaque). Usage in hython: BuildFullTrim.py x x 2048 [export]. FR : trim sheet complete et cartes derivees.
+import hou, sys, json
+sys.path.insert(0, '/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/Scripts')
+import TrimNodes as T
+import BuildBand0V3 as B0, BuildBand6V2 as B6, BuildBand1V2 as B1, BuildBand2V2 as B2, BuildBand3V2 as B3, BuildBand4V3 as B4, BuildBands2to6 as B56
+B = '/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/'
+EDGES = [(0.0, 0.193), (0.193, 0.388), (0.388, 0.507), (0.507, 0.609), (0.609, 0.725), (0.725, 0.837), (0.837, 1.0)]
+BUILDERS = [B0.build, B1.build, B2.build, B3.build, B4.build, B56.leaf, B6.build]
+ROUGH = [0.55, 0.55, 0.42, 0.62, 0.72, 0.38, 0.52]          # base roughness per band
+GREEN = (0.52, 0.60, 0.20); PURPLE = (0.34, 0.12, 0.20)      # band 2 accents, from the colour reference
+def color_ramp(keys): return hou.Ramp([hou.rampBasis.Linear] * len(keys), [k[0] for k in keys], [tuple(k[1:]) for k in keys])
+def flat_colour(net, name, like, rgb):
+    n = T.node(net, 'monotorgb', name, [T.const(net, name + '_src', like, 0.5)]); n.parm('ramp').set(color_ramp([(0.0,) + rgb, (1.0,) + rgb])); return n
+def subnet_band(net, k):
+    sn = net.createNode('subnet', 'Band%d' % k); out = BUILDERS[k](sn)
+    out = T.node(sn, 'channelextract', 'OUT_mono', [out], channel=0)   # a subnet hands back RGBA: keep the first channel so every consumer reads MONO
+    on = sn.createNode('null', 'OUT'); on.setInput(0, out); [c for c in sn.children() if c.type().name() == 'output'][0].setInput(0, on); return sn
+def build(net, with_maps=True):
+    ry = T.node(net, 'ramp', 'T00_ramp__down_y', signature='f1', rotation=90.0); rx3 = T.node(net, 'ramp', 'T01_ramp__three_cycles_x', signature='f1', cycles=3.0, method=1)
+    EJ = {0: 0.0, 1: 0.016, 2: 0.008, 3: 0.008, 4: 0.008, 5: 0.008, 6: 0.008, 7: 0.0}     # half width of the cross fade at each junction (canvas): wide between the petal band and the outer petal band (Matthieu, 6 October 2026: soft transition between the two pinks)
+    bands = []; wins = []
+    for k, (a, b) in enumerate(EDGES):
+        bands.append(T.node(net, 'channelextract', 'Band%d_mono' % k, [subnet_band(net, k)], channel=0))   # a subnet hands back RGBA
+        up = T.smooth(net, 'T1%d_w%d_in' % (k, k), ry, a - EJ[k], a + EJ[k]) if k > 0 else T.const(net, 'T1%d_w%d_in' % (k, k), ry, 1.0)
+        dn = T.smooth(net, 'T1%d_w%d_out' % (k, k), ry, b - EJ[k + 1], b + EJ[k + 1], 1.0, 0.0) if k < 6 else T.const(net, 'T1%d_w%d_out' % (k, k), ry, 1.0)
+        wins.append(T.mix(net, 'T1%d_w%d' % (k, k), up, dn, 5))
+    tot = None
+    for k in range(7):
+        bw = T.mix(net, 'T2%d_band%d_windowed' % (k, k), bands[k], wins[k], 5); tot = bw if tot is None else T.mix(net, 'T3%d_height_plus_band%d' % (k, k), tot, bw, 3)
+    fin = T.node(net, 'null', 'FINAL_HEIGHT', [tot])
+    if not with_maps: return dict(height=fin)
+    pal = json.load(open(B + 'ref-maps/band_palettes.json')); rgb = None
+    for k in range(7):
+        keys = [tuple(x) for x in pal[str(k)]]
+        if keys[0][0] > 0.0: keys = [(0.0,) + keys[0][1:]] + keys
+        if keys[-1][0] < 1.0: keys = keys + [(1.0,) + keys[-1][1:]]
+        if k == 6:      # the creases are as low as the ground in height, so the bud is coloured with a LIGHT ramp and the dark ground comes from the bud mask
+            lite = [kk for kk in keys if kk[0] >= 0.42]; keys = [(0.0,) + lite[0][1:]] + lite
+        m = T.node(net, 'monotorgb', 'U1%d_colour_band%d' % (k, k), [bands[k]]); m.parm('ramp').set(color_ramp(keys))
+        if k == 6:
+            gmask = T.lin(net, 'U60_ground_mask', B6.opacity(net, ry, rx3), 0.0, 1.0, 1.0, 0.0)
+            m = T.node(net, 'blend', 'U61_ground', [m, flat_colour(net, 'U61a_dark', ry, (0.17, 0.18, 0.16)), gmask], mode=0)
+        if k == 2:
+            ax = T.mix(net, 'U20_ax', T.lin(net, 'U20a_cx', rx3, 0.0, 1.0, -1.0 / 6, 1.0 / 6), T.const(net, 'U20b_zero', ry, 0.0), 9)
+            lvb = T.lin(net, 'U21_lv_band2', ry, 0.388, 0.507, 0.0, 1.0)
+            hb = T.node(net, 'blur', 'U22_height_soft', [bands[2]], units=1, size_pixel=3.0)
+            obj = T.smooth(net, 'U23_object_mask', hb, 0.47, 0.52)
+            green = T.mix(net, 'U24_filament_mask', obj, T.smooth(net, 'U24a_lower', lvb, 0.56, 0.66), 5)
+            head = T.mix(net, 'U25_head_mask', T.lin(net, 'U25a_near_axis', T.smooth(net, 'U25b', ax, 0.032, 0.040), 0.0, 1.0, 1.0, 0.0), T.lin(net, 'U25c_top', T.smooth(net, 'U25d', lvb, 0.28, 0.34), 0.0, 1.0, 1.0, 0.0), 5)
+            m = T.node(net, 'blend', 'U26_with_green', [m, flat_colour(net, 'U26a_green', ry, GREEN), green], mode=0)
+            head = T.mix(net, 'U25e_head_on_object', head, obj, 5)       # the head colour only where the head really is (the tone says object), not a rectangle
+            m = T.node(net, 'blend', 'U27_with_purple', [m, flat_colour(net, 'U27a_purple', ry, PURPLE), head], mode=0)
+        if k == 0:
+            lv0 = T.lin(net, 'U05_lv_band0', ry, 0.0, 0.193, 0.0, 1.0)
+            m = T.node(net, 'blend', 'U06_pink_to_base', [m, flat_colour(net, 'U06a_pink', ry, (0.80, 0.50, 0.58)), T.lin(net, 'U06b_amount', T.smooth(net, 'U06c', lv0, 0.45, 1.0), 0.0, 1.0, 0.0, 0.55)], mode=0)   # the petal turns pink toward its base, where it meets the outer petal
+        bw = T.mix(net, 'U3%d_colour%d_windowed' % (k, k), m, wins[k], 5); rgb = bw if rgb is None else T.mix(net, 'U4%d_colour_plus_band%d' % (k, k), rgb, bw, 3)
+    base = T.node(net, 'null', 'BASECOLOR', [rgb])
+    nrm = T.node(net, 'null', 'NORMAL', [T.node(net, 'heighttonormal', 'N10_normal', [fin], scale=2.2)])
+    ao = T.node(net, 'null', 'AO', [T.lin(net, 'N21_ao_lifted', T.node(net, 'heighttoambientocclusion', 'N20_ao', [fin], heightscale=0.25, viewradius_pixel=16.0), 0.0, 1.0, 0.35, 1.0)])   # lifted: a trim AO should only darken crevices
+    lvl = None
+    for k in range(7):
+        c = T.mix(net, 'R1%d_level_band%d' % (k, k), T.const(net, 'R0%d_const' % k, ry, ROUGH[k]), wins[k], 5); lvl = c if lvl is None else T.mix(net, 'R2%d_level_plus_band%d' % (k, k), lvl, c, 3)
+    crev = T.lin(net, 'R30_crevice', fin, 0.0, 1.0, 0.18, -0.20)          # low height = rougher, high = smoother
+    rough = T.node(net, 'null', 'ROUGHNESS', [T.node(net, 'clamp', 'R40_clamp', [T.mix(net, 'R31_rough', lvl, crev, 3)])])
+    masks = {0: B0.opacity(net, ry, rx3), 5: B56.leaf_opacity(net, ry, rx3), 6: B6.opacity(net, ry, rx3)}      # petals, leaf lens and buds are cut out; every other band is opaque
+    acc = None
+    for k in range(7):
+        mk = masks.get(k, T.const(net, 'O1%d_one' % k, ry, 1.0)); c = T.mix(net, 'O2%d_mask_band%d' % (k, k), mk, wins[k], 5); acc = c if acc is None else T.mix(net, 'O3%d_plus_band%d' % (k, k), acc, c, 3)
+    opac = T.node(net, 'null', 'OPACITY', [acc])
+    return dict(height=fin, basecolor=base, normal=nrm, ao=ao, roughness=rough, opacity=opac)
+if __name__ == '__main__':
+    hou.hipFile.clear(suppress_save_prompt=True); net = hou.node('/obj').createNode('copnet', 'Lily_Trim_test'); res = int(sys.argv[3]) if len(sys.argv) > 3 else 2048
+    outs = build(net); print('nodes', len(net.children()), 'errors', [(c.name(), str(c.errors())[:100]) for c in net.children() if c.errors()][:4])
+    if len(sys.argv) > 4:
+        import os; os.makedirs(B + 'maps/trim', exist_ok=True)
+        for nm, n in outs.items(): T.export(net, n, B + 'maps/trim/lily_trim_%s.png' % nm, res); print('exported', nm)

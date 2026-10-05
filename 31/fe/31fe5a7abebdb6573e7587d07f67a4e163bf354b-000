@@ -1,0 +1,21 @@
+{
+  "graph": "/obj/Eucalyptus_Materials/copnet",
+  "nodes": 44,
+  "variants": [
+    "/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/measurements/tree/textures/01_Pale_BaseColor.png",
+    "/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/measurements/tree/textures/01_Pale_Height.png",
+    "/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/measurements/tree/textures/02_Fibrous_BaseColor.png",
+    "/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/measurements/tree/textures/02_Fibrous_Height.png",
+    "/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/measurements/tree/textures/03_Peeled_BaseColor.png",
+    "/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/measurements/tree/textures/03_Peeled_Height.png"
+  ],
+  "textures": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/textures/Eucalyptus",
+  "errors": [
+    [
+      "/obj/Eucalyptus_Materials/copnet/OUT_Leaf_RGBA",
+      [
+        "Can't convert RGB to Mono for green (at signature index 0)"
+      ]
+    ]
+  ]
+}

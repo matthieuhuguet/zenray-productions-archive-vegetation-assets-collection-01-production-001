@@ -1,0 +1,14 @@
+# 5 October 2026 14:51 Europe/Paris: reference-sized instanced leaves and explicit radius transfer to Point VOP.
+import hou,json
+from pathlib import Path
+W=Path('/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01');n=hou.node('/obj/Eucalyptus')
+attrs=n.node('C1_surface_attributes') or n.createNode('attribwrangle','C1_surface_attributes');attrs.setInput(0,n.node('C1_sweep_forks'));attrs.setInput(1,n.node('C1_resample_skeleton'));attrs.parm('snippet').set('''// 5 October 2026 14:51: Sweep does not preserve pscale; explicitly recover growth coordinates from the skeleton.
+int nearest=nearpoint(1,@P);f@pscale=point(1,"pscale",nearest);f@trunk_t=point(1,"trunk_t",nearest);''');n.node('C1_point_normals').setInput(0,attrs)
+n.parm('shoot_count').set(16000);n.parm('leaves_per_shoot').set(64);n.parm('leaf_length').set(.07)
+shoot=n.node('C3_measured_shoots');code=shoot.parm('snippet').eval().replace('lerp(.006,.0012,t)','lerp(.0025,.0006,t)').replace('.008*scale','.0035*scale').replace('.004*scale','.0018*scale').replace('.0055*scale','.0025*scale');shoot.parm('snippet').set(code)
+copy=n.node('C4_copy_leaves');copy.parm('pack').set(1)
+role=n.node('C4_leaf_roles') or n.createNode('attribwrangle','C4_leaf_roles');role.setInput(0,copy);role.parm('class').set(1);role.parm('snippet').set('''// 5 October 2026 14:51: packed instances retain explicit material and component roles.
+s@part="leaf";s@material_role="green_leaf";''');n.node('M_components').setInput(2,role)
+for name in ['C1_surface_attributes','C1_point_normals','TRUNK_point_vop','C1_growth_ridges','C1_semantic_roles','C3_measured_shoots','C3_sweep_twigs','C3_twig_colour','C4_attached_leaf_points','C4_copy_leaves','C4_leaf_roles','M_components','N_normals','OUT_eucalyptus']:n.node(name).cook(force=True)
+errors=[(c.name(),c.errors()) for c in n.allSubChildren() if c.errors()];assert not errors,errors
+leaves=len(copy.geometry().prims());wood=len(n.node('C1_semantic_roles').geometry().prims())+len(n.node('C3_twig_colour').geometry().prims());g=n.node('OUT_eucalyptus').geometry();result={'leaves':leaves,'wood_faces':wood,'packed_output_prims':len(g.prims()),'unique_leaf_faces':len(n.node('C4_lanceolate_leaf').geometry().prims()),'instanced_equivalent_faces':leaves*16+wood,'pscale_transferred':n.node('C1_surface_attributes').geometry().findPointAttrib('pscale') is not None,'errors':errors};(W/'measurements/tree/raw02/Foliage-v008.json').write_text(json.dumps(result,indent=2));n.layoutChildren();hou.hipFile.save()

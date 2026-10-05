@@ -1,0 +1,33 @@
+# 5 October 2026 15:00 Europe/Paris: project actual live mesh on a raw reference, without image-driven geometry.
+import json
+from pathlib import Path
+import numpy as np
+from PIL import Image, ImageDraw, ImageFont, ImageFilter
+import sys
+VERSION=sys.argv[1] if len(sys.argv)>1 else 'v007'
+W=Path('/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01');D=W/'measurements/tree/raw';D.mkdir(exist_ok=True)
+CONFIG={'crop':[1150,150,2660,1600],'root':[1620,1594],'top_y':178,'height':8.0,'raw':'03_erwan-gaudichon-eucalyptus-03.jpg','output_scale':.55}
+raw=Image.open(W/'refs/raw/3-eucalyptus'/CONFIG['raw']).convert('RGB');crop=raw.crop(CONFIG['crop']);a=np.asarray(crop).astype(float);h,w=a.shape[:2]
+# 5 October 2026: exclude ground by an explicit hand-traced ROI; ambiguous leaf edges remain segmentation estimates.
+roi=Image.new('L',(w,h));rd=ImageDraw.Draw(roi);rd.polygon([(0,0),(w,0),(w,1120),(740,1120),(630,1200),(535,1210),(505,1280),(490,1340),(485,1380),(492,1420),(516,1450),(403,1450),(397,1420),(393,1380),(399,1330),(409,1280),(421,1230),(440,1170),(300,1100),(0,1100)],fill=255)
+bg=np.median(np.asarray(raw).astype(float)[:,50:650,:],axis=1)[150:1600].mean(axis=1)[:,None]
+mask=((a.max(2)-a.min(2)>12)|(a.mean(2)<bg-19))&(np.asarray(roi)>0)
+Image.fromarray(mask.astype('uint8')*255).save(D/'raw-mask.png');roi.save(D/'raw-roi.png');crop.save(D/'raw-reference.png')
+scale=(CONFIG['root'][1]-CONFIG['top_y'])/CONFIG['height'];axis=CONFIG['root'][0]-CONFIG['crop'][0];base=CONFIG['root'][1]-CONFIG['crop'][1]
+mesh=np.load(W/('measurements/tree/live-mesh-'+VERSION+'.npz'));counts=mesh['counts'];indices=mesh['indices'];p=mesh['positions'];projected=np.column_stack([axis+p[:,0]*scale,base-p[:,1]*scale]);out=Image.new('L',(w,h));draw=ImageDraw.Draw(out);offset=0
+for count in counts:
+ face=indices[offset:offset+count];offset+=count;draw.polygon([tuple(q) for q in projected[face]],fill=255)
+out.save(D/'model-mask.png');model=np.asarray(out)>0
+strict=float((model&mask).sum()/max(1,(model|mask).sum()));modelclose=np.asarray(out.filter(ImageFilter.MaxFilter(9)).filter(ImageFilter.MinFilter(9)))>0;refclose=np.asarray(Image.fromarray(mask.astype('uint8')*255).filter(ImageFilter.MaxFilter(9)).filter(ImageFilter.MinFilter(9)))>0
+overlay=(a*.40).astype('uint8');overlay[model&mask]=(240,240,225);overlay[model&~mask]=(235,75,75);overlay[mask&~model]=(60,215,160)
+refmark=crop.copy();marks=ImageDraw.Draw(refmark);axes=json.loads((W/('measurements/tree/live-axes-'+VERSION+'.json')).read_text());colors=['#ff6b58','#58dbff','#ffdc60','#c591ff']
+for k,indices in enumerate(axes['prims']):
+ pts=[(axis+axes['points'][i][0]*scale,base-axes['points'][i][1]*scale) for i in indices];marks.line(pts,fill=colors[k%4],width=5)
+ for x,y in pts:marks.ellipse((x-6,y-6,x+6,y+6),fill=colors[k%4])
+ x,y=pts[0];marks.text((x+10,y+8),str(k+1),fill=colors[k%4])
+refmark.save(D/'raw-live-axes.png');Image.fromarray(overlay).save(D/'raw-overlay.png')
+s=.55;tw,th=round(w*s),round(h*s);canvas=Image.new('RGB',(tw*3,th+115),'#181c22');font=ImageFont.truetype('/System/Library/Fonts/Supplemental/Arial.ttf',21);cd=ImageDraw.Draw(canvas)
+for i,(im,title) in enumerate([(refmark,'RAW + axes du graphe live'),(out.convert('RGB'),'Masque de la geometrie reelle'),(Image.fromarray(overlay),'Blanc : commun | rouge : en trop | vert : manque')]):
+ canvas.paste(im.resize((tw,th),Image.Resampling.LANCZOS),(i*tw,65));cd.text((i*tw+14,20),title,font=font,fill='white')
+cd.text((15,th+78),'5 October 2026 | Camera commune orthographique | Masque raw estime, sol exclu | IoU %.1f%%'%(strict*100),font=font,fill='white');canvas.save(D/('RawPositionProof-'+VERSION+'.png'))
+report={'date':'5 October 2026','config':CONFIG,'strict_iou':strict,'closed_iou':float((modelclose&refclose).sum()/max(1,(modelclose|refclose).sum())),'camera':'orthographic front, registered by root and total height; original perspective unknown','mask_limit':'estimated foreground inside hand-traced tree ROI, ground excluded','geometry':'actual live OUT_eucalyptus points and polygon indices; no artificial silhouette fitting','faces':int(len(mesh['counts']))};(D/('RawPositionProof-'+VERSION+'.json')).write_text(json.dumps(report,indent=2));print(json.dumps(report))

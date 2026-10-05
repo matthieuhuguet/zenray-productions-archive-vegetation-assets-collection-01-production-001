@@ -1,0 +1,17 @@
+{
+  "controls": {
+    "trunk_warp": 0.0016,
+    "trunk_grain": 0.0024,
+    "bark_fluting": 0.0036,
+    "bark_strip_count": 0,
+    "shoot_count": 4000,
+    "leaves_per_shoot": 32
+  },
+  "leaf_faces": 2,
+  "leaf_points": 8,
+  "leaf_uv": true,
+  "output_points": 297966,
+  "output_primitives": 293077,
+  "errors": [],
+  "materials_started_but_unused": "/obj/Eucalyptus_Materials"
+}

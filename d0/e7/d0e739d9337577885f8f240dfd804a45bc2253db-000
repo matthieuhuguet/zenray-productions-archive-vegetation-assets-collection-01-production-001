@@ -1,0 +1,61 @@
+# 5 October 2026 13:52 Europe/Paris: native VEX backbone, Sweep and editable Point VOP trunk relief.
+import hou,json,time
+from pathlib import Path
+BASE=Path('/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01')
+WORK=Path('/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01')
+n=hou.node('/obj/Eucalyptus');n.allowEditingOfContents()
+assert n.node('TRUNK_point_vop') is None,'Already built; edit the existing graph instead.'
+controls=[('trunk_sections',96,24,256),('trunk_sides',48,16,96),('root_flare',.65,0.,1.5),('root_lobes',5,3,9),('root_ridges',.16,0.,.4),('trunk_warp',.035,0.,.1),('trunk_grain',.008,0.,.025),('trunk_frequency',4.,1.,12.)]
+ptg=n.parmTemplateGroup();folder=hou.FolderParmTemplate('trunk_structure','HDA Trunk Structure',folder_type=hou.folderType.Simple)
+for name,val,lo,hi in controls:folder.addParmTemplate((hou.IntParmTemplate if isinstance(val,int) else hou.FloatParmTemplate)(name,name.replace('_',' ').title(),1,default_value=(val,),min=lo,max=hi))
+ptg.append(folder);n.setParmTemplateGroup(ptg)
+curve=n.createNode('attribwrangle','TRUNK_vex_backbone');curve.parm('class').set(0)
+curve.parm('snippet').set('''// 5 October 2026 13:52: preserve the measured cubic axis and generate a native curve.
+float h=ch("../trunk_height"), lean=ch("../trunk_lean"), r=ch("../trunk_radius");
+int count=chi("../trunk_sections"), pr=addprim(0,"polyline");
+for(int i=0;i<count;i++){
+ float t=float(i)/(count-1), u=1-t;
+ vector a=set(0,h*.35,0), b=set(lean*.6,h*.7,lean*.1), c=set(lean,h,lean*.25);
+ vector p=3*u*u*t*a+3*u*t*t*b+t*t*t*c;
+ int pt=addpoint(0,p);addvertex(0,pr,pt);
+ float radius=r*(1-.62*t)*(1+ch("../root_flare")*exp(-t*16));
+ setpointattrib(0,"pscale",pt,radius,"set");
+ setpointattrib(0,"trunk_t",pt,t,"set");
+}
+''')
+sweep=n.createNode('sweep::2.0','TRUNK_sweep_volume');sweep.setInput(0,curve);sweep.parm('surfaceshape').set(1);sweep.parm('radius').set(1);sweep.parm('cols').setExpression('ch("../trunk_sides")');sweep.parm('endcaptype').set(1);sweep.parm('reversecrosssections').set(1);sweep.parm('computeuvs').set(1)
+normal=n.createNode('normal','TRUNK_outward_normals');normal.setInput(0,sweep);normal.parm('type').set(0)
+ribs=n.createNode('attribwrangle','TRUNK_buttress_ridges');ribs.setInput(0,normal)
+ribs.parm('snippet').set('''// 5 October 2026 13:52: tapered root lobes and longitudinal growth ridges, in real geometry.
+float t=f@trunk_t;
+vector uv=vertex(0,"uv",pointvertex(0,@ptnum));
+float theta=uv.x*2*$PI;
+float lobe=pow(.5+.5*cos(theta*chi("../root_lobes")+t*3),3);
+float envelope=exp(-t*7)+.12*(1-t);
+float displacement=ch("../root_ridges")*ch("../trunk_radius")*envelope*(lobe-.2);
+@P+=normalize(@N)*displacement;
+v@Cd=set(.62,.58,.50);s@part="trunk";s@mat="bark";
+''')
+vop=n.createNode('attribvop','TRUNK_point_vop');vop.setInput(0,ribs)
+global_node=vop.node('geometryvopglobal1');out=vop.node('geometryvopoutput1')
+noise=vop.createNode('turbnoise','growth_burls');noise.setNamedInput('pos',global_node,'P');noise.parmTuple('freq').set((4.,.7,4.));noise.parm('freq1').setExpression('ch("../../trunk_frequency")');noise.parm('freq3').setExpression('ch("../../trunk_frequency")');noise.parm('amp').setExpression('ch("../../trunk_warp")');noise.parm('type').set('snoise');noise.parm('turb').set(3)
+fine=vop.createNode('turbnoise','longitudinal_surface');fine.setNamedInput('pos',global_node,'P');fine.parmTuple('freq').set((28.,2.,28.));fine.parm('amp').setExpression('ch("../../trunk_grain")');fine.parm('type').set('snoise');fine.parm('turb').set(2)
+add=vop.createNode('add','combine_relief');add.setInput(0,noise);add.setInput(1,fine)
+mul=vop.createNode('multiply','normal_displacement');mul.setInput(0,global_node,global_node.outputIndex('N'));mul.setInput(1,add)
+pos=vop.createNode('add','displace_position');pos.setInput(0,global_node,global_node.outputIndex('P'));pos.setInput(1,mul);out.setNamedInput('P',pos,pos.outputNames()[0]);vop.layoutChildren()
+finish=n.createNode('normal','TRUNK_final_normals');finish.setInput(0,vop)
+merge=n.node('M_components');merge.setInput(0,finish)
+old=n.node('C1_trunk');old.destroy()
+for b in n.networkBoxes():
+ if b.name()=='component_1':b.destroy()
+n.layoutChildren();box=n.createNetworkBox('component_1');box.setComment('C1 Native Trunk: VEX Backbone / Sweep / Point VOP');box.setColor(hou.Color((.48,.40,.32)))
+for node in (curve,sweep,normal,ribs,vop,finish):box.addItem(node)
+box.fitAroundContents()
+start=time.perf_counter();geo=finish.geometry();elapsed=time.perf_counter()-start
+errors=[(c.path(),c.errors()) for c in n.allSubChildren() if c.errors()];assert not errors,errors
+base=[p.position() for p in ribs.geometry().points()];deltas=[(p.position()-q).length() for p,q in zip(geo.points(),base)]
+assert max(deltas)>.005
+library=str(BASE/'otls/ZenRay_Eucalyptus_v004.hda');definition=n.type().definition();definition.copyToHDAFile(library,'zenray_eucalyptus::4.0','ZenRay Eucalyptus Native Trunk v004');hou.hda.installFile(library);n=n.changeNodeType('zenray_eucalyptus::4.0',keep_network_contents=True);definition=n.type().definition();definition.setParmTemplateGroup(n.parmTemplateGroup());definition.updateFromNode(n)
+probe=hou.node('/obj').createNode(n.type().name(),'Eucalyptus_trunk_replay');replay=len(probe.displayNode().geometry().prims());assert replay==len(n.displayNode().geometry().prims());probe.destroy()
+report={'trunk_points':len(geo.points()),'trunk_faces':len(geo.prims()),'vop_nodes':len(vop.children()),'max_relief':max(deltas),'cook_seconds':elapsed,'replay_faces':replay,'hda':library,'errors':errors}
+(WORK/'measurements/tree/trunk-v004-report.json').write_text(json.dumps(report,indent=2));hou.hipFile.save(str(BASE/'hip/VegetationCollection01.hiplc'));result=report

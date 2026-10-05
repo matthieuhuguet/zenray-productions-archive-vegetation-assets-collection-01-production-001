@@ -1,0 +1,19 @@
+# 5 October 2026 14:21 Europe/Paris: all-view coarse occupancy, curved branchlets and multi-scale canopy clumps.
+import hou,json
+from pathlib import Path
+W=Path('/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01');d=json.loads((W/'measurements/tree/four-view-measures.json').read_text());n=hou.node('/obj/Eucalyptus');c=n.node('C3_measured_shoots');code=c.parm('snippet').eval();arr=lambda x:'{'+','.join(str(v) for v in x)+'}'
+code='float qd[]='+arr(d['profiles']['quarter']['density'])+';float td[]='+arr(d['profiles']['top']['density'])+';\n'+code
+needle='float density=fd[iy*48+ix]*sd[iy*48+iz];';assert needle in code
+code=code.replace(needle,needle+'''
+ float q=(x+z)*.70710678;int iq=clamp(int((q+3)/9*48),0,47);
+ int tx=clamp(int((x-1.6+3.42)/6.84*48),0,47),ty=clamp(int((z-.55+4)/8*48),0,47);
+ density*=pow(qd[iy*48+iq]*td[ty*48+tx],.4);
+''')
+# 5 October 2026: intermediate controls make branchlets bow and fork rather than radiate as straight spokes.
+code=code.replace('int link=addprim(0,"polyline");int a=addpoint(0,root),bpt=addpoint(0,start);addvertex(0,link,a);addvertex(0,link,bpt);','''int link=addprim(0,"polyline");int a=addpoint(0,root);
+ vector bend=lerp(root,start,.5)+set(.15*sin(i*2.4),.25,.15*cos(i*2.4))*scale;
+ int middle=addpoint(0,bend),bpt=addpoint(0,start);addvertex(0,link,a);addvertex(0,link,middle);addvertex(0,link,bpt);
+ setpointattrib(0,"pscale",middle,.0055*scale,"set");''')
+c.parm('snippet').set(code);n.parm('shoot_count').set(7000);n.parm('leaf_length').set(.19)
+for name in ['C3_measured_shoots','C3_sweep_twigs','C3_twig_colour','C4_attached_leaf_points','C4_copy_leaves','M_components','N_normals','OUT_eucalyptus']:n.node(name).cook(force=True)
+assert not [(x.name(),x.errors()) for x in n.allSubChildren() if x.errors()];hou.hipFile.save();result={'leaves':len(n.node('C4_attached_leaf_points').geometry().points()),'faces':len(n.displayNode().geometry().prims())}

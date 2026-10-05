@@ -1,0 +1,65 @@
+# 5 October 2026 : BAND 3 (calyx) version 2, same protocol. Canonical cell of 7 per width (0.1428), centred on the dark pointed ARCH (ogive, apex at the top), the bright FUNNEL between two arches that narrows into a short rough BASE BLOCK at the bottom (lv > 0.66). Reference spacing is irregular (0.161 measured on the middle pair), so it is regularised to 0.1428 and all widths scaled by 0.887. Measured on a 3x zoom (6144 px per canvas unit). FR : bande 3 version 2, calice.
+import hou, sys
+sys.path.insert(0, '/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/Scripts')
+import TrimNodes as T
+import BuildBand0V2 as V
+B = '/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/'
+V0, V1, CELLS = 0.507, 0.609, 7; P = 1.0 / CELLS; HC = V1 - V0; EDGE = 0.0012
+WA = [(0.0, 0.0), (0.03, 0.0), (0.08, 0.0075), (0.16, 0.0144), (0.24, 0.026), (0.32, 0.0354), (0.40, 0.041), (0.48, 0.0447), (0.56, 0.0472), (0.64, 0.0484), (0.8, 0.0495), (1.0, 0.0495)]   # arch half width against lv
+WB = [(0.0, 0.0), (0.64, 0.0), (0.66, 0.0231), (0.8, 0.0224), (1.0, 0.0217)]                                                                                  # base block half width
+UPTO = 99
+def prelude(net):
+    rx = T.node(net, 'ramp', 'A00_ramp__cycles_x', signature='f1', cycles=float(CELLS), method=1); ry = T.node(net, 'ramp', 'A01_ramp__down_y', signature='f1', rotation=90.0)
+    lv = T.lin(net, 'A03_band__lv_0_top_1_bottom', ry, V0, V1)
+    cx = T.lin(net, 'A04_cell__cx', rx, 0.0, 1.0, -P / 2, P / 2); ax = T.mix(net, 'A06_cell__abs_cx', cx, T.const(net, 'A05_zero', lv, 0.0), 9)
+    return lv, ax, cx
+def build(net):
+    lv, ax, cx = prelude(net); one = T.const(net, 'A07_one', lv, 1.0); half = T.const(net, 'A08_half_cell', lv, P / 2)
+    wA = T.curve(net, 'B01_arch__halfwidth', lv, [(x, y / 0.0714) for x, y in WA], 1.0, 0.0, 0.0714, T.SMOOTH)
+    d_arch = T.mix(net, 'B02_arch__distance_inside', wA, ax, 4); ma = T.smooth(net, 'B03_arch__mask', d_arch, -EDGE, EDGE)
+    wB = T.curve(net, 'B04_block__halfwidth', lv, [(x, y / 0.0714) for x, y in WB], 1.0, 0.0, 0.0714, T.SMOOTH)
+    d_blk = T.mix(net, 'B05_block__distance_inside', wB, T.mix(net, 'B05a_dist_to_boundary', half, ax, 4), 4)
+    # the block is centred on the CELL BOUNDARY: half width wB measured from the boundary
+    dsb = T.mix(net, 'B06_cell__distance_to_boundary', half, ax, 4)
+    mblk = T.mix(net, 'B07_block__mask', T.smooth(net, 'B07a', T.mix(net, 'B07b_wB_minus_dsb', wB, dsb, 4), -EDGE, EDGE), T.smooth(net, 'B07c_below_top', lv, 0.64, 0.67), 5)
+    # tone: arch dark with a vertical gradient, funnel bright, brighter near the arch edge
+    arch_t = T.curve(net, 'C01_arch__tone', lv, [(0.0, 0.34), (0.3, 0.37), (0.7, 0.40), (1.0, 0.38)], 1.0, 0.0, 1.0, T.SMOOTH)
+    edge_d = T.mix(net, 'C02_funnel__distance_outside', ax, wA, 4)
+    fun_t = T.mix(net, 'C03_funnel__tone', T.curve(net, 'C03a_vertical', lv, [(0.0, 0.52), (0.5, 0.58), (0.66, 0.62), (1.0, 0.62)], 1.0, 0.0, 1.0, T.SMOOTH), V.profile(net, 'C03b_near_arch', edge_d, [(0.0, 0.0), (0.004, 0.10), (0.012, 0.05), (0.03, 0.0), (0.07, 0.0)], 0.0, 0.07, -0.05, 0.15), 3)
+    h = T.mix(net, 'C04_composition', fun_t, T.mix(net, 'C04a_arch_delta', T.mix(net, 'C04b_delta', arch_t, fun_t, 4), ma, 5), 3)
+    blk_t = T.curve(net, 'C05_block__tone', lv, [(0.0, 0.70), (0.7, 0.68), (1.0, 0.60)], 1.0, 0.0, 1.0, T.SMOOTH)
+    h = T.mix(net, 'C06_block__over', h, T.mix(net, 'C06a_delta_masked', T.mix(net, 'C06b_delta', blk_t, h, 4), mblk, 5), 3)
+    c = dict(lv=lv, ax=ax, cx=cx, wA=wA, ma=ma, mblk=mblk, edge_d=edge_d, d_arch=d_arch, one=one, dsb=dsb)
+    if UPTO >= 1: h = iteration1(net, h, c)
+    return h
+def iteration1(net, h, c):
+    """ITERATION 1 (64 nodes): edges and fibres. Bright rim on the arch edge with a dark groove just outside, fibres that HUG the arch edge in the funnel (arch shaped lines converging to the base), a lip on top of the block, chevron streaks inside the arch (lines at +-60 degrees from the axis), mottled texture on the funnel and the block from Turing patterns."""
+    lv, ax, wA, ma, mblk, edge_d, d_arch, one = c['lv'], c['ax'], c['wA'], c['ma'], c['mblk'], c['edge_d'], c['d_arch'], c['one']
+    n0 = len(net.children()); b = V.box(net, 'D', 'BAND 3 V2 ITERATION 1 : 64 nodes, edges, fibres, mottling', (1.0, 0.9, 0.7))
+    soft = T.node(net, 'fractalnoise', 'D00_soft_phase_noise', [lv], amp=0.5, center=0.0, elementsize=0.16)
+    rim = V.profile(net, 'D01_arch_rim', d_arch, [(-0.01, 0.0), (-0.003, 0.14), (-0.001, 0.20), (0.0, -0.08), (0.003, -0.12), (0.01, -0.02), (0.03, 0.0)], -0.01, 0.03, -0.15, 0.25)
+    h = T.mix(net, 'D03_rim__added', h, T.mix(net, 'D02_rim__not_block', rim, T.lin(net, 'D02a', mblk, 0.0, 1.0, 1.0, 0.0), 5), 3)
+    fun = T.mix(net, 'D04_funnel__mask', T.lin(net, 'D04a_not_arch', ma, 0.0, 1.0, 1.0, 0.0), T.lin(net, 'D04b_not_block', mblk, 0.0, 1.0, 1.0, 0.0), 5)
+    fm = fun
+    h = V.lines_layer(net, 'D11_hug_lines_main', h, edge_d, 48, soft, 0.15, 0.20, 0.30, fm, lv)
+    # chevrons: the coordinate |dx| + 0.55 * y gives lines slanting down and out from the axis, a mirrored V on |dx|
+    chev = T.mix(net, 'D21_chevron__coordinate', ax, T.lin(net, 'D21a_y_scaled', lv, 0.0, 1.0, 0.0, 0.55 * HC), 3)
+    am = T.mix(net, 'D23_arch__modulated', ma, V.modulation(net, 'D22_arch__modulation', lv, 0.05, 0.5, 2.0, 3.3, 0.1), 5)
+    h = V.lines_layer(net, 'D24_chevrons', h, chev, 230, soft, 0.15, 0.05, 0.40, am, lv)
+    def maze(tag, size, rad, seed, mask, lo, hi, base):
+        nz = T.node(net, 'fractalnoise', '%s_seed' % tag, [lv], amp=0.5, center=0.5, elementsize=size, noisetype=1, offx=seed, tilesizex=2.0 / CELLS)
+        tp = T.node(net, 'turingpatterns', '%s_turing' % tag, [nz], iterations=40, radius_pixel=rad, units=1); bl = T.node(net, 'blur', '%s_soften' % tag, [tp], units=1, size_pixel=1.4)
+        return T.mix(net, '%s_added' % tag, base, T.mix(net, '%s_masked' % tag, T.lin(net, '%s_range' % tag, bl, 0.0, 1.0, lo, hi), mask, 5), 3)
+    h = maze('D31_mottle_funnel', 0.006, 3.0, 5.1, fun, -0.04, 0.07, h)
+    side = V.profile(net, 'D42_block_side', T.mix(net, 'D42a_wB_minus_dsb', net.node('B04_block__halfwidth'), c['dsb'], 4), [(-0.02, 0.0), (-0.004, -0.12), (-0.001, -0.14), (0.0007, 0.12), (0.004, 0.04), (0.012, 0.0), (0.03, 0.0)], -0.02, 0.03, -0.2, 0.25)
+    h = T.mix(net, 'D43_block_side__added', h, T.mix(net, 'D43a_masked', T.mix(net, 'D43c_near_block', side, T.smooth(net, 'D43d_near', T.mix(net, 'D43e_wB_minus_dsb', net.node('B04_block__halfwidth'), c['dsb'], 4), -0.010, -0.006), 5), T.smooth(net, 'D43b_below_top', lv, 0.665, 0.70), 5), 3)
+    lipd = T.mix(net, 'D44_lip__dist', lv, T.const(net, 'D44a_const__top', lv, 0.665), 4)
+    lip = V.profile(net, 'D45_block_lip', lipd, [(-0.03, 0.0), (-0.008, 0.0), (-0.002, -0.10), (0.0, 0.0), (0.003, 0.20), (0.008, 0.06), (0.03, 0.0)], -0.03, 0.03, -0.15, 0.25)
+    h = T.mix(net, 'D46_lip__added', h, T.mix(net, 'D46a_masked', lip, T.mix(net, 'D46b_in_block_x', c['mblk'], one, 5), 5), 3) if False else T.mix(net, 'D46_lip__added', h, T.mix(net, 'D46a_masked', lip, T.smooth(net, 'D46b_block_width', T.mix(net, 'D46c_wB_at_top', net.node('B04_block__halfwidth'), c['dsb'], 4), -0.001, 0.001), 5), 3)
+    h = V.pads(net, 'D', h, n0); V.close(net, b, 'D', n0); return h
+if __name__ == '__main__':
+    hou.hipFile.clear(suppress_save_prompt=True); net = hou.node('/obj').createNode('copnet', 'Band3V2_test'); res = int(sys.argv[3]) if len(sys.argv) > 3 else 2048
+    if len(sys.argv) > 4: UPTO = int(sys.argv[4])
+    out = build(net); T.export(net, out, B + ('previews/band3v2_nodes.png' if UPTO == 99 else 'previews/band3v2_it%d.png' % UPTO), res)
+    errs = [(cc.name(), [str(e)[:140] for e in cc.errors()]) for cc in net.children() if cc.errors()]
+    print('nodes', len(net.children()), 'errors', errs[:4])

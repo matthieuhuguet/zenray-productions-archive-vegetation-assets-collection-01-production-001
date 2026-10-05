@@ -1,0 +1,41 @@
+{
+  "hda": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/otls/ZenRay_Eucalyptus_v016.hda",
+  "fresh_geometry_identical": true,
+  "points": 257653,
+  "primitives": 254252,
+  "bbox": "[-1.71185, 5.41817, -0.211591, 7.93423, -2.47581, 3.66534]",
+  "controls": {
+    "tree_shape": [
+      "tree_height",
+      "wood_radius_scale",
+      "shoot_count",
+      "leaves_per_shoot",
+      "leaf_length",
+      "crown_depth_scale",
+      "crown_width_scale",
+      "crown_height_offset"
+    ],
+    "growth_structure": [
+      "trunk_warp",
+      "trunk_grain",
+      "trunk_frequency"
+    ],
+    "raw_reference": [
+      "raw_yaw",
+      "raw_pitch",
+      "raw_scale",
+      "raw_cx",
+      "raw_cy",
+      "raw_mask_strength"
+    ],
+    "bark_geometry": [
+      "wood_voxel_size",
+      "bark_fluting",
+      "bark_peel_lift",
+      "bark_strip_width",
+      "bark_strip_length",
+      "bark_strip_count"
+    ]
+  },
+  "errors": []
+}

@@ -1,0 +1,85 @@
+# 5 October 2026 23:45 Europe/Paris: native Copernicus bark blend and crossed leaf card textures.
+import hou,sys,json
+from pathlib import Path
+ROOT=Path('/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01')
+WORK=Path('/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/measurements/tree/textures')
+WORK.mkdir(parents=True,exist_ok=True)
+sys.path.insert(0,str(ROOT/'Scripts'))
+from TrimNodes import node,lin,smooth,curve,mix,export
+net=hou.node('/obj/Eucalyptus_Materials/copnet')
+for p in list(net.children()):
+ if p.name().startswith('probe_'):p.destroy()
+ctrl=hou.node('/obj/Eucalyptus_Materials')
+ptg=ctrl.parmTemplateGroup()
+if not ctrl.parm('brown_coverage'):
+ folder=hou.FolderParmTemplate('bark_controls','Bark texture')
+ for key,label,default,limit in [('brown_coverage','Brown coverage',.46,1),('peel_coverage','Peel coverage',.28,1),('normal_strength','Normal strength',.08,1),('fiber_scale','Fiber scale',.035,.2)]:
+  folder.addParmTemplate(hou.FloatParmTemplate(key,label,1,default_value=(default,),min=0,max=limit))
+ ptg.append(folder);ctrl.setParmTemplateGroup(ptg)
+def rgb(name,color):
+ return node(net,'constant',name,signature='f3',f3r=color[0],f3g=color[1],f3b=color[2])
+def noise(name,size,sx,sy,octaves=4,offset=0):
+ return node(net,'fractalnoise',name,elementsize=size,elementscalex=sx,elementscaley=sy,oct=octaves,lac=2,offx=offset,offy=offset*.71,dotiled=1)
+def masked(name,a,b,mask):return node(net,'blend',name,[a,b,mask],mode=0)
+fiber=noise('Longitudinal_fibers',.035,.30,9,5)
+fiber.parm('elementsize').setExpression('ch("../../fiber_scale")')
+plates=noise('Peeling_plate_islands',.20,.65,2.8,3,.73)
+brownnoise=noise('Brown_bark_regions',.36,.6,2.4,3,2.3)
+maskbrown=smooth(net,'MASK_brown',brownnoise,.42,.61)
+maskpeel=smooth(net,'MASK_peel',plates,.56,.66)
+maskbrown.parm('inputmin').setExpression('1-ch("../../brown_coverage")-.08')
+maskbrown.parm('inputmax').setExpression('1-ch("../../brown_coverage")+.08')
+maskpeel.parm('inputmin').setExpression('1-ch("../../peel_coverage")-.06')
+maskpeel.parm('inputmax').setExpression('1-ch("../../peel_coverage")+.06')
+h1=lin(net,'Pale_bark_height',fiber,0,1,.48,.52)
+h2=curve(net,'Fibrous_bark_height',fiber,[(0,.1),(.33,.20),(.43,.65),(.56,.45),(.72,.9),(1,.7)],1,.35,.65,hou.rampBasis.MonotoneCubic)
+h3=lin(net,'Peeled_bark_height',plates,0,1,.49,.54)
+h12=masked('Height_pale_brown',h1,h2,maskbrown)
+height=masked('OUT_Bark_Height',h12,h3,maskpeel)
+normal=node(net,'heighttonormal','OUT_Bark_Normal',[height],scale=.08)
+normal.parm('scale').setExpression('ch("../../normal_strength")')
+c1=masked('Pale_bark_color',rgb('Pale_shadow',(.36,.38,.32)),rgb('Pale_highlight',(.74,.75,.63)),fiber)
+c2=masked('Fibrous_bark_color',rgb('Fiber_shadow',(.13,.10,.055)),rgb('Fiber_highlight',(.48,.35,.19)),h2)
+c3=masked('Peeled_bark_color',rgb('Peel_shadow',(.46,.48,.41)),rgb('Peel_highlight',(.84,.85,.73)),plates)
+c12=masked('Color_pale_brown',c1,c2,maskbrown)
+color=masked('OUT_Bark_BaseColor',c12,c3,maskpeel)
+r1=lin(net,'Pale_roughness',fiber,0,1,.5,.7)
+r2=lin(net,'Fiber_roughness',fiber,0,1,.72,.9)
+r3=lin(net,'Peel_roughness',plates,0,1,.45,.65)
+r12=masked('Rough_pale_brown',r1,r2,maskbrown)
+rough=masked('OUT_Bark_Roughness',r12,r3,maskpeel)
+preview=node(net,'previewmaterial','PREVIEW_Bark')
+for index,src in [(1,color),(5,rough),(15,normal),(16,height)]:preview.setInput(index,src)
+preview.parm('tintwithcdswitch').set(0);preview.parm('heightscale').set(.002)
+u=node(net,'ramp','Leaf_U',signature='f1',rotation=0)
+v=node(net,'ramp','Leaf_V',signature='f1',rotation=90)
+half=node(net,'constant','Leaf_center',signature='f1',f1=.5)
+distance=mix(net,'Leaf_distance_to_center',u,half,9)
+width=curve(net,'Lanceolate_width',v,[(0,0),(.08,.055),(.23,.40),(.46,.49),(.7,.31),(.88,.10),(1,0)],1,basis=hou.rampBasis.MonotoneCubic)
+inside=mix(net,'Leaf_signed_edge',width,distance,4)
+alpha=smooth(net,'OUT_Leaf_Alpha',inside,-.005,.005)
+leafnoise=noise('Leaf_color_variation',.16,1,4,3,.13)
+leafcolor=masked('OUT_Leaf_BaseColor',rgb('Leaf_dark',(.035,.075,.014)),rgb('Leaf_green',(.20,.31,.055)),leafnoise)
+rgba=node(net,'channeljoin','OUT_Leaf_RGBA',signature='f4')
+# 5 October 2026: extract RGB channels before joining the procedural alpha.
+for index,label in enumerate(['red','green','blue']):
+ ex=node(net,'channelextract','Leaf_'+label,[leafcolor])
+ menu=ex.parm('channel')
+ if menu:menu.set(index)
+ rgba.setInput(index,ex)
+rgba.setInput(3,alpha)
+leafpreview=node(net,'previewmaterial','PREVIEW_Leaf')
+leafpreview.setInput(1,leafcolor);leafpreview.setInput(14,alpha);leafpreview.parm('tintwithcdswitch').set(0)
+net.layoutChildren()
+variants=[('01_Pale',.22,.18,.04),('02_Fibrous',.70,.12,.12),('03_Peeled',.48,.40,.07)]
+records=[]
+for name,brown,peel,strength in variants:
+ ctrl.parm('brown_coverage').set(brown);ctrl.parm('peel_coverage').set(peel);ctrl.parm('normal_strength').set(strength)
+ for label,src in [('BaseColor',color),('Height',height)]:
+  path=WORK/(name+'_'+label+'.png');export(net,src,str(path),512);records.append(str(path))
+ctrl.parm('brown_coverage').set(.48);ctrl.parm('peel_coverage').set(.40);ctrl.parm('normal_strength').set(.07)
+textures=ROOT/'textures/Eucalyptus';textures.mkdir(parents=True,exist_ok=True)
+for label,src in [('Bark_BaseColor',color),('Bark_Roughness',rough),('Bark_Normal',normal),('Bark_Height',height),('Leaf_RGBA',rgba),('Leaf_Alpha',alpha)]:
+ export(net,src,str(textures/(label+'.png')),1024)
+result={'graph':net.path(),'nodes':len(net.children()),'variants':records,'textures':str(textures),'errors':[(p.path(),p.errors()) for p in net.children() if p.errors()]}
+(ROOT/'Scripts/TextureGraphReport.json').write_text(json.dumps(result,indent=2))

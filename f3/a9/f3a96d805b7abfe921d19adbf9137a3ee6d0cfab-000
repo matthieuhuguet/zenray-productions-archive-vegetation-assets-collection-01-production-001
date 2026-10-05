@@ -79,3 +79,22 @@ def attach(slot):
     p0 = P + out * stem_radius(s); p3 = p0 + out * L * 0.75 + V3(0, 1, 0) * L * 0.55
     pts = bez(p0, p0 + V3(0, 1, 0) * L * 0.2 + out * L * 0.3, p3 - d_out * L * 0.4, p3, 8)
     return pts, d_out.normalized(), out
+
+# ---- generated trim sheet layout (5 October 2026), measured from the band scripts: tables of canvas fractions against lv (0 top, 1 bottom)
+def _interp(tab, x):
+    if x <= tab[0][0]: return tab[0][1]
+    for (a, b), (c, d) in zip(tab, tab[1:]):
+        if x <= c: return b + (d - b) * (x - a) / (c - a)
+    return tab[-1][1]
+SIL_TAB = [(0.0, .045), (0.04, .052), (0.12, .071), (0.2, .089), (0.3, .111), (0.4, .125), (0.5, .135), (0.6, .150), (0.74, .162), (1.0, .1665)]   # tepal_inner: half width of the big petal
+WA_TAB = [(0.0, 0.0), (0.06, 0.011), (0.1, 0.0175), (0.2, 0.031), (0.4, 0.0444), (0.6, 0.058), (0.8, 0.073), (1.0, 0.0885)]      # tepal_outer: half width of the dark arch
+DB_TAB = [(0.0, 0.1005), (0.3, 0.1025), (0.5, 0.1055), (0.7, 0.1105), (1.0, 0.115)]                                              # tepal_outer: inner edge of the dark band
+WA3_TAB = [(0.0, 0.0), (0.08, 0.0075), (0.16, 0.0144), (0.24, 0.026), (0.4, 0.041), (0.56, 0.0472), (0.8, 0.0495), (1.0, 0.0495)]   # calyx: half width of the arch
+def sil(lv): return _interp(SIL_TAB, lv)
+def outer_half(lv): wa = _interp(WA_TAB, lv); return (wa + 0.85 * (_interp(DB_TAB, lv) - wa)) * (4.0 / 3.0)   # band 1 has 3 cells like band 0: x distances x 4/3
+def funnel_half(lv): return 0.0714 - _interp(WA3_TAB, lv)
+
+BUD_TOP = [(0.0, .29), (.11, .246), (.22, .201), (.33, .153), (.44, .108), (.55, .081), (.62, .075), (.72, .087), (.83, .135), (.94, .216), (1.0, .275)]   # band 6, top edge of a bud against s
+BUD_BOT = [(0.0, .55), (.11, .599), (.22, .686), (.33, .737), (.44, .763), (.55, .778), (.62, .763), (.72, .754), (.78, .737), (.89, .686), (1.0, .593)]   # bottom edge
+def bud_lv(s, u):
+    t, b = _interp(BUD_TOP, s), _interp(BUD_BOT, s); return 0.5 * (t + b) + (u * 2.0 - 1.0) * 0.5 * (b - t) * 0.96

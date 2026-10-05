@@ -1,0 +1,28 @@
+# 5 October 2026 14:15 Europe/Paris: fixed orthographic camera registration, no per-view geometry changes.
+import hou,json
+from pathlib import Path
+B=Path('/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01');W=Path('/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01');data=json.loads((W/'measurements/tree/four-view-measures.json').read_text());n=hou.node('/obj/Eucalyptus');viewer=hou.ui.paneTabOfType(hou.paneTabType.SceneViewer);vp=viewer.curViewport();s=vp.settings()
+oldlight=s.lighting();s.setLighting(hou.viewportLighting.Off)
+oldcam=vp.camera();oldpath=viewer.pwd();oldpin=viewer.isPin();states={c.path():c.isDisplayFlagSet() for c in hou.node('/obj').children() if hasattr(c,'isDisplayFlagSet')};tex=s.displayTextures();mat=s.showingMaterials();bg=s.displayBackgroundImage();env=s.displayEnvironmentBackgroundImage();grid=s.displayOrthoGrid();options=hou.hscript('viewdisplay Build.panetab1.world')[0]
+paths=[]
+rop=hou.node('/out').createNode('opengl','tree_measurement_opengl');rop.parm('vobjects').set('');rop.parm('forceobjects').set('/obj/Eucalyptus');rop.parm('alights').set('');rop.parm('usetextures').set(0);rop.parm('usegeocolor').set(1);rop.parm('shadows').set(0);rop.parm('camera').set('/obj/cam_tree_four_views');rop.parm('tres').set(1)
+try:
+ viewer.setPin(False);viewer.setPwd(n);s.setDisplayTextures(False);s.showMaterials(False);s.setDisplayBackgroundImage(False);s.setDisplayEnvironmentBackgroundImage(False);s.setDisplayOrthoGrid(False)
+ for path in states:hou.node(path).setDisplayFlag(path==n.path())
+ hou.hscript('viewdisplay -G Eucalyptus -x off -y off -z off -m off -v off -H off Build.panetab1.world')
+ cam=hou.node('/obj').createNode('cam','cam_tree_four_views');cam.parm('projection').set(1)
+ for name in ['front','side','quarter','top']:
+  reference=data['profiles'][name];box=data['crops'][name];width,height=box[2]-box[0],box[3]-box[1];scale=8/reference['pixel_height'];horizontal=(width/2-reference['axis'])*scale;vertical=(reference['base']-height/2)*scale
+  if name=='front':center=hou.Vector3(horizontal,vertical,0);direction=hou.Vector3(0,0,1);up=hou.Vector3(0,1,0)
+  elif name=='side':center=hou.Vector3(0,vertical,horizontal);direction=hou.Vector3(-1,0,0);up=hou.Vector3(0,1,0)
+  elif name=='quarter':center=hou.Vector3(horizontal*.7071,vertical,horizontal*.7071);direction=hou.Vector3(-.7071,0,.7071);up=hou.Vector3(0,1,0)
+  else:center=hou.Vector3(1.6,0,.55);direction=hou.Vector3(0,1,0);up=hou.Vector3(0,0,-1)
+  center=center*n.worldTransform();position=center+direction*100;cam.parmTuple('t').set(position);cam.parmTuple('r').set(hou.hmath.buildRotateLookAt(position,center,up).extractRotates());cam.parm('orthowidth').set(width*scale);cam.parm('resx').set(width);cam.parm('resy').set(height);vp.setCamera(cam)
+  fb=viewer.flipbookSettings().stash();path=str(W/('measurements/tree/four-view/'+name+'-model.png'));fb.output(path);fb.outputToMPlay(False);fb.useResolution(True);fb.resolution((width,height));fb.cropOutMaskOverlay(True);fb.frameRange((hou.frame(),hou.frame()));viewer.flipbook(vp,fb);rop.parmTuple('res').set((width,height));rop.parm('picture').set(path.replace('-model.png','-rop.png'));rop.render(frame_range=(hou.frame(),hou.frame()));paths.append(path)
+finally:
+ rop.destroy();s.setLighting(oldlight);vp.setCamera(oldcam)
+ if hou.node('/obj/cam_tree_four_views'):hou.node('/obj/cam_tree_four_views').destroy()
+ for path,flag in states.items():
+  if hou.node(path):hou.node(path).setDisplayFlag(flag)
+ s.setDisplayTextures(tex);s.showMaterials(mat);s.setDisplayBackgroundImage(bg);s.setDisplayEnvironmentBackgroundImage(env);s.setDisplayOrthoGrid(grid);hou.hscript(options);viewer.setPwd(oldpath);viewer.setPin(oldpin)
+result={'views':paths}

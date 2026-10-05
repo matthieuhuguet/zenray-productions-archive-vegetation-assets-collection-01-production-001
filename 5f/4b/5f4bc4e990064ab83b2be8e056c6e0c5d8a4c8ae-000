@@ -1,0 +1,30 @@
+# 5 October 2026 : helpers to build the lily trim sheet with REAL Copernicus nodes (Tile Pattern, Channel Extract, Remap, Blend, Blur, Function, noises...). No wrangle, no VEX: every intention is one named node. Imported by BuildTrimBand*.py. FR : aides pour construire la trim avec de vrais nodes.
+import hou
+DEFAULT_BASIS = hou.rampBasis.Linear   # tone curves stay linear; SHAPE curves (silhouettes, edges) pass basis=SMOOTH
+SMOOTH = hou.rampBasis.MonotoneCubic
+def ramp(points, rng, basis=None):
+    # 5 October 2026 : curves are SMOOTH by default (MonotoneCubic never overshoots its keys); a Linear ramp draws a polyline silhouette. Pass basis=hou.rampBasis.Linear for a deliberate sharp corner.
+    basis = basis or DEFAULT_BASIS
+    return hou.Ramp([basis] * len(points), [x / rng for x, _ in points], [y for _, y in points])
+def node(net, kind, name, inputs=(), **parms):
+    n = net.node(name) or net.createNode(kind, name)
+    for i, src in enumerate(inputs):
+        if src is not None: n.setInput(i, src[0] if isinstance(src, tuple) else src, src[1] if isinstance(src, tuple) else 0)
+    for k, v in parms.items(): n.parm(k).set(v)
+    return n
+def const(net, name, like, value): return node(net, 'remap', name, [like], inputmin=0, inputmax=1, outputmin=value, outputmax=value, useramp=0)
+def lin(net, name, src, in0, in1, out0=0.0, out1=1.0): return node(net, 'remap', name, [src], inputmin=in0, inputmax=in1, outputmin=out0, outputmax=out1, useramp=0)
+SMOOTHSTEP = [(i / 10.0, 3 * (i / 10.0) ** 2 - 2 * (i / 10.0) ** 3) for i in range(11)]
+def smooth(net, name, src, in0, in1, out0=0.0, out1=1.0):
+    """a mask edge with a smoothstep transition (one Remap node, 11 point ramp): no stair step, no linear kink at either end."""
+    n = node(net, 'remap', name, [src], inputmin=in0, inputmax=in1, outputmin=out0, outputmax=out1, useramp=1); n.parm('ramp').set(ramp(SMOOTHSTEP, 1.0, hou.rampBasis.Linear)); return n
+def curve(net, name, src, keys, rng, out0=0.0, out1=1.0, basis=None):
+    keys = list(keys)
+    if keys[-1][0] < rng: keys.append((rng, keys[-1][1]))
+    n = node(net, 'remap', name, [src], inputmin=0, inputmax=rng, outputmin=out0, outputmax=out1, useramp=1); n.parm('ramp').set(ramp(keys, rng, basis)); return n
+def mix(net, name, a, b, mode): return node(net, 'blend', name, [a, b], mode=mode)    # 3 add, 4 subtract, 5 multiply, 6 divide, 8 hypot, 9 difference, 12 max, 13 min
+def export(net, src, path, res=None):
+    # 5 October 2026 : the export resolution is the ROP's own Override Resolution (setres, res1, res2); the copnet res parms do not drive it, so everything exported before was 1024.
+    r = node(net, 'rop_image', 'tmp_export', [src]); r.parm('copoutput').set(path); r.parm('colorconversion').set(2)
+    if res: r.parm('setres').set(1); r.parm('res1').set(res); r.parm('res2').set(res)
+    r.parm('execute').pressButton(); return r

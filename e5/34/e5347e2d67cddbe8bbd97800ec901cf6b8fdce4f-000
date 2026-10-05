@@ -1,0 +1,392 @@
+# 5 October 2026 : BAND 0 of the lily trim sheet, TEPAL INNER, built with real Copernicus nodes only (Tile Pattern, Channel Extract, Remap curves, Blend maths, Function). Physical logic: three cells; in each cell a BIG petal centred in the cell (neck narrow at the top, shoulders opening to the bottom, fan of veins converging at the bottom centre) and a SMALL curled petal that straddles the cell boundary and sits behind the big one; between them the dark ground of the top. Half widths come from the masks of the reference (ref-maps/band0_profile.json). Usage: hython BuildTrimBand0.py <hip in> <hip out> [res]. FR : bande 0, petales interieurs, vrais nodes.
+import hou, sys, json, re
+sys.path.insert(0, '/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/Scripts')
+import TrimNodes as T
+B = '/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/'
+WOBBLE_SCALE = 0.4                                   # fibre phase wobble: 1.0 gave marble like wavy fibres where the reference has gently curved ones (5 October 2026)
+MASK_EDGE = 0.0015                                    # half width of a mask edge as a canvas fraction: 6 pixels in total at 2048, smoothstep (T.smooth)
+BAND_V1 = 0.193                                       # band height as a fraction of the canvas (measured)
+P = dict(ground=0.55, big_base=0.64, big_dome=0.14, small_base=0.50, small_dome=0.14, vein_count=26.0, vein_depth=0.035, vein_pow=0.6, svein_count=34.0, svein_depth=0.025, fan_origin=1.02, fan_slope=0.9)
+MAX_IT = 99   # build only the first MAX_IT iterations, to save one screen per iteration
+def build(net, res_label='A'):
+    prof = json.load(open(B + 'ref-maps/band0_profile.json')); L = lambda n: n   # names are prefixed by the band letter below
+    # 5 October 2026 : the cell coordinates come from two Ramp nodes, NOT from the Tile Pattern UV output: that output has an anti-aliased pixel at every tile boundary (u = 0 there) which printed a one pixel bright line in the middle of the boundary petals (found on the 1024 export, pixel 341). A Ramp with 3 repeating cycles is an exact sawtooth.
+    rx = T.node(net, 'ramp', 'A00_ramp__three_cycles_x', signature='f1', cycles=3.0, method=1); ry = T.node(net, 'ramp', 'A01_ramp__down_y', signature='f1', rotation=90.0)
+    lv = T.lin(net, 'A03_band__lv_0_top_1_bottom', ry, 0.0, BAND_V1)
+    cx = T.lin(net, 'A04_cell__cx_centre', rx, 0.0, 1.0, -1.0 / 6, 1.0 / 6)    # canvas fraction: a cell is 1/3 of the width
+    zero = T.const(net, 'A05_const__zero', lv, 0.0)
+    ax = T.mix(net, 'A06_cell__abs_cx', cx, zero, 9)
+    half = T.const(net, 'A07_const__half_cell', lv, 1.0 / 6)
+    ds = T.mix(net, 'A08_cell__dist_to_boundary', half, ax, 4)
+    # widths from the measured profile
+    wb = T.curve(net, 'B01_big__halfwidth_curve', lv, [(x, y / 0.25) for x, y in zip(prof['lv'], prof['big'])], 1.0, 0.0, 0.25, T.SMOOTH)
+    # the boundary petal is ONE tilted petal, not a mirrored pair (reference occupancy, 5 October 2026): signed x from the cell boundary, its left and right edges against lv, its axis and half width, and ds = distance to ITS axis
+    sg = T.lin(net, 'A09_cell__side_sign', cx, -0.0005, 0.0005, 1.0, -1.0); xb = T.mix(net, 'A10_cell__signed_x_from_boundary', sg, ds, 5)
+    LK = [(0.0, 0.004), (0.013, 0.000), (0.023, -0.008), (0.063, -0.023), (0.165, -0.038), (0.29, -0.049), (0.36, -0.054), (0.40, -0.064), (0.45, -0.085), (0.55, -0.13), (0.65, -0.17), (1.0, -0.17)]   # left edge of the back petal, one smooth arc measured on the 2x zoom (5 October 2026)
+    RK = [(0.0, 0.015), (0.02, 0.030), (0.05, 0.043), (0.09, 0.047), (0.146, 0.046), (0.228, 0.043), (0.316, 0.040), (0.37, 0.046), (0.42, 0.062), (0.50, 0.10), (0.60, 0.17), (1.0, 0.17)]   # right edge of the back petal: a plain rounded tip, NO rolled tip (Matthieu, 5 October 2026: a curl makes no sense on a flat texture)
+    eL = T.curve(net, 'B02a_small__left_edge', lv, [(x, (y + 0.25) / 0.5) for x, y in LK], 1.0, -0.25, 0.25, T.SMOOTH); eR = T.curve(net, 'B02b_small__right_edge', lv, [(x, (y + 0.25) / 0.5) for x, y in RK], 1.0, -0.25, 0.25, T.SMOOTH)
+    half_c = T.const(net, 'B02c_const__half', lv, 0.5)
+    axis = T.mix(net, 'B02d_small__axis', T.mix(net, 'B02e_small__edges_sum', eL, eR, 3), half_c, 5)
+    ws = T.mix(net, 'B02_small__halfwidth', T.mix(net, 'B02f_small__span', eR, eL, 4), half_c, 5)
+    ds = T.mix(net, 'B02g_small__dist_to_axis', T.mix(net, 'B02h_small__signed_dist_to_axis', xb, axis, 4), zero, 9)
+    mb_raw = T.mix(net, 'B03_big__edge_distance', wb, ax, 4); mb = T.smooth(net, 'B04_big__mask', mb_raw, -MASK_EDGE, MASK_EDGE)
+    ms_raw = T.mix(net, 'B05_small__edge_distance', ws, ds, 4); ms = T.mix(net, 'B06b_small__with_top', T.smooth(net, 'B06_small__mask', ms_raw, -MASK_EDGE, MASK_EDGE), T.smooth(net, 'B06a_small__top_plateau', lv, 0.013, 0.021), 5)   # the back petal does not run into the band top: its rounded top sits at lv 0.017 (reference 4x zoom), ground above
+    # big petal relief: dome across the petal and a fan of veins converging at the bottom centre
+    tb = T.mix(net, 'C01_big__across_ratio', ax, wb, 6); tb2 = T.mix(net, 'C02_big__across_squared', tb, tb, 5)
+    dome = T.lin(net, 'C03_big__dome', tb2, 0.0, 1.0, 1.0, 0.0)
+    h_dome = T.lin(net, 'C04_big__dome_height', dome, 0.0, 1.0, P['big_base'], P['big_base'] + P['big_dome'])
+    fan = T.curve(net, 'C05_fan__origin_distance', lv, [(0.0, 1.0), (1.0, 1.0 - 0.9 * P['fan_slope'] / 1.02)], 1.0, 0.0, P['fan_origin'])
+    f = T.mix(net, 'C06_fan__tangent', cx, fan, 6)
+    ph_noise = T.node(net, 'fractalnoise', 'C07_fan__phase_noise', [lv], amp=0.5, center=0.0, elementsize=0.05)
+    def veins(tag, count, depth, power, wob):
+        k = T.mix(net, 'C%s_fan__phase_%d' % (tag, count), f, T.const(net, 'C%sa_const__count_%d' % (tag, count), lv, count), 5)
+        k2 = T.mix(net, 'C%s_fan__phase_wobbled_%d' % (tag, count), k, T.mix(net, 'C%sb_fan__wobble_%d' % (tag, count), ph_noise, T.const(net, 'C%sc_const__wob_%d' % (tag, count), lv, wob), 5), 3)
+        sn = T.node(net, 'function', 'C%s_fan__sin_%d' % (tag, count), [k2], func=2, func_trig=0, angleunit=2)
+        ab = T.node(net, 'function', 'C%s_fan__abs_%d' % (tag, count), [sn], func=0, func_math=0)
+        pw = T.node(net, 'function', 'C%s_fan__pow_%d' % (tag, count), [ab], func=1, func_pow=1)
+        if pw.parm('exponent'): pw.parm('exponent').set(power)
+        return T.lin(net, 'C%s_fan__relief_%d' % (tag, count), pw, 0.0, 1.0, -depth, depth)
+    v1 = veins('08', 46, 0.020, 0.7, 2.0); v2 = veins('09', 120, 0.006, 0.9, 3.0)
+    vein = T.mix(net, 'C10_fan__veins_sum', v1, v2, 3)
+    # central rib: bright flanks and a thin dark groove on the axis of the big petal
+    rib = T.curve(net, 'C10a_rib__profile_across', ax, [(0.0, 0.2), (0.003, 0.0), (0.008, 0.55), (0.02, 1.0), (0.06, 0.6), (0.17, 0.5)], 0.17, -0.06, 0.06)
+    vein = T.mix(net, 'C10b_fan__veins_and_rib', vein, rib, 3)
+    h_big = T.mix(net, 'C12_big__height', h_dome, vein, 3)
+    # small petal relief: dome and parallel veins
+    ts = T.mix(net, 'D01_small__across_ratio', ds, ws, 6); ts2 = T.mix(net, 'D02_small__across_squared', ts, ts, 5)
+    sdome = T.lin(net, 'D03_small__dome', ts2, 0.0, 1.0, 1.0, 0.0)
+    h_sd = T.lin(net, 'D04_small__dome_height', sdome, 0.0, 1.0, P['small_base'], P['small_base'] + P['small_dome'])
+    sk = T.mix(net, 'D05_small__vein_phase', ds, T.const(net, 'D05a_const__svein_count', lv, P['svein_count']), 5)
+    ssn = T.node(net, 'function', 'D06_small__sin', [sk], func=2, func_trig=0, angleunit=2); sab = T.node(net, 'function', 'D07_small__abs', [ssn], func=0, func_math=0)
+    svein = T.lin(net, 'D08_small__vein_relief', sab, 0.0, 1.0, -P['svein_depth'], P['svein_depth'])
+    h_small = T.mix(net, 'D09_small__height', h_sd, svein, 3)
+    msv = T.node(net, 'clamp', 'B08_small__visible_mask_clamped', [T.mix(net, 'B07_small__visible_mask', ms, mb, 4)])   # the small petal is only seen where the big one is not in front
+    # shoulder line: the edge of the big petal casts a thin dark line on the petal; ground gets a fine noise
+    rim_d = T.curve(net, 'C13_big__rim_profile', T.lin(net, 'C13a_big__inside_distance', mb_raw, 0.0, 0.03), [(0.0, 0.0), (0.04, 1.0), (0.2, 0.2), (1.0, 0.0)], 1.0, 0.0, 1.0)
+    rim = T.mix(net, 'C14_big__rim_darkening', rim_d, T.const(net, 'C14a_const__rim_strength', lv, -0.12), 5)
+    h_big = T.mix(net, 'C15_big__height_with_rim', h_big, rim, 4)
+    gn = T.node(net, 'fractalnoise', 'E00_ground__noise', [lv], amp=0.04, center=0.0, elementsize=0.02)
+    # composition: ground, small petal behind, big petal in front (lerp = a + m * (b - a))
+    g0 = T.const(net, 'E01_ground__level', lv, P['ground']); g = T.mix(net, 'E01b_ground__with_noise', g0, gn, 3)
+    a = T.mix(net, 'E02_small__minus_ground', h_small, g, 4); a2 = T.mix(net, 'E03_small__times_mask', a, ms, 5); layer1 = T.mix(net, 'E04_layer__ground_small', g, a2, 3)
+    b = T.mix(net, 'E05_big__minus_layer', h_big, layer1, 4); b2 = T.mix(net, 'E06_big__times_mask', b, mb, 5); out = T.mix(net, 'E07_band0__height', layer1, b2, 3)
+    ctx = dict(eL=eL, eR=eR, xb=xb, lv=lv, cx=cx, ax=ax, ds=ds, mb=mb, ms=ms, mb_raw=mb_raw, ms_raw=ms_raw, wb=wb, ws=ws, f=f, ph_noise=ph_noise, msv=msv)
+    if MAX_IT >= 1: out = iteration1(net, out, ctx)
+    if MAX_IT >= 2: out = iteration2(net, out, ctx)
+    if MAX_IT >= 3: out = iteration3(net, out, ctx)
+    if MAX_IT >= 4: out = iteration4(net, out, ctx)
+    if MAX_IT >= 5: out = iteration5(net, out, ctx)
+    if MAX_IT >= 6: out = iteration6(net, out, ctx)
+    if MAX_IT >= 7: out = iteration7(net, out, ctx)
+    if MAX_IT >= 8: out = iteration8(net, out, ctx)
+    if MAX_IT >= 9: out = iteration9(net, out, ctx)
+    tone = T.curve(net, 'F01_band0__tonal_range', out, [(0.0, 0.02), (0.30, 0.19), (0.50, 0.38), (0.66, 0.58), (0.80, 0.76), (1.0, 0.94)], 1.0)
+    prune(net, PRUNE_BY_ABLATION, tone)
+    return tone
+
+# 5 October 2026 : OPTIMISATION step. Layers listed here were measured by Ablate.py (iterations 1 to 6): either they change nothing (dmean < 1 grey level, no detail energy, no structure gain) or they make the blurred structure error to the reference WORSE (removing them lowers it). prune() rewires the consumers of a listed layer to its base input and then destroys every node that no longer feeds the output (dead code elimination), so the graph shrinks without the 64 node creation asserts changing.
+PRUNE_BY_ABLATION = ['I01j_small__fan_added', 'M22_small_fibre_added', 'K14_neck_shadow_subtracted', 'K23_crease_ridge_added', 'L52_shoulder_fibre_added', 'L53_shoulder_fibre_added', 'J21_small_fibre_added', 'J22_small_fibre_added', 'J23_small_fibre_added',
+                     'K42_dome_gradient_added', 'L23_ground_darkening_subtracted', 'K32_small_darkening_subtracted', 'I06c_big__axis_brightening_added', 'N21_wings__darkening_added', 'I05c_big__bottom_darkening_added', 'K16_corner_shadow_subtracted',
+                     'M21_small_fibre_added', 'Q31_small_bold_fibre_added', 'R41_small_bold_fibre_added', 'R42_small_bold_fibre_added', 'R33_small_rib__added', 'Q02_small_petal_rim_added', 'R11_curl__added', 'I09d_small__tip_rim_added']   # the last eight: the back petal is rebuilt by iteration 9 after Matthieu's feedback (5 October 2026)
+def prune(net, names, keep):
+    names = list(names) + [c.name() for c in net.children() if re.match(r'^[MNQRS]9\d', c.name())]   # the padding nodes that only fill an iteration up to 64 nodes do nothing: they go too
+    for nm in names:
+        n = net.node(nm)
+        if n is None: continue
+        src = n.input(0)
+        for c in n.outputs():
+            for i, inp in enumerate(c.inputs()):
+                if inp is not None and inp.path() == n.path(): c.setInput(i, src)
+        n.destroy()
+    changed = True
+    while changed:
+        changed = False
+        for c in list(net.children()):
+            if c.path() == keep.path() or c.type().name() == 'rop_image' or c.outputs(): continue
+            c.destroy(); changed = True
+
+def noise_layer(net, tag, base, ref, mask, amp, size, sx, sy, seed, ntype=1):
+    """one detail layer = fractal noise (1 node) x mask (1 node, optional) added to the running height (1 node)."""
+    n = T.node(net, 'fractalnoise', '%s_noise' % tag, [ref], amp=amp, center=0.0, elementsize=size, noisetype=ntype); n.parm('elementscalex').set(sx); n.parm('elementscaley').set(sy); n.parm('offx').set(seed)
+    m = T.mix(net, '%s_masked' % tag, n, mask, 5) if mask is not None else n
+    return T.mix(net, '%s_added' % tag, base, m, 3)
+REMOVED_BY_ABLATION = ('I02', 'I03', 'I04', 'I08', 'I10', 'I11')   # measured 5 October 2026 by Ablate.py: vertically stretched fibres, white grain, crease and ground noise change the band by less than 1 grey level
+def iteration1(net, h, c, optimized=True):
+    """ITERATION 1 of band 0: exactly 64 nodes of detail (5 October 2026): small petal fan veins from the boundary point, fibres along the petals, fine grain, tonal gradients, crease shadow on the small petal side, curled tip, textured ground."""
+    lv, ax, ds, mb, ms, mb_raw, ms_raw = c['lv'], c['ax'], c['ds'], c['mb'], c['ms'], c['mb_raw'], c['ms_raw']
+    n0 = len(net.children()); box = net.createNetworkBox('Iteration_01'); box.setComment('BAND 0 ITERATION 1 : 64 nodes'); box.setColor(hou.Color((0.6, 0.8, 1.0)))
+    # 1. small petal veins fan out from the bottom boundary point (10 nodes)
+    fan_s = T.curve(net, 'I01a_small__fan_origin_distance', lv, [(0.0, 1.0), (1.0, 0.12 / 1.12)], 1.0, 0.0, 1.12)
+    g = T.mix(net, 'I01b_small__fan_tangent', ds, fan_s, 6)
+    c['g'] = g
+    gk = T.mix(net, 'I01c_small__fan_phase', g, T.const(net, 'I01d_const__small_vein_count', lv, 30.0), 5)
+    sn = T.node(net, 'function', 'I01e_small__fan_sin', [gk], func=2, func_trig=0, angleunit=2); ab = T.node(net, 'function', 'I01f_small__fan_abs', [sn], func=0, func_math=0)
+    pw = T.node(net, 'function', 'I01g_small__fan_pow', [ab], func=1, func_pow=1)
+    if pw.parm('exponent'): pw.parm('exponent').set(0.7)
+    rel = T.lin(net, 'I01h_small__fan_relief', pw, 0.0, 1.0, -0.022, 0.022); relm = T.mix(net, 'I01i_small__fan_masked', rel, c['msv'], 5)
+    h = T.mix(net, 'I01j_small__fan_added', h, relm, 3)
+    # 2. fibres along the petals, stretched noise (big 3 layers, small 2 layers) = 15 nodes
+    for k, (size, amp, sx, sy) in enumerate([] if optimized else [(0.010, 0.05, 0.12, 1.0), (0.006, 0.035, 0.10, 1.0), (0.003, 0.025, 0.08, 1.0)]): h = noise_layer(net, 'I02%s_big_fibre' % 'abc'[k], h, lv, mb, amp, size, sx, sy, 3.1 * (k + 1))
+    for k, (size, amp, sx, sy) in enumerate([] if optimized else [(0.008, 0.045, 0.12, 1.0), (0.004, 0.03, 0.10, 1.0)]): h = noise_layer(net, 'I03%s_small_fibre' % 'ab'[k], h, lv, ms, amp, size, sx, sy, 7.7 * (k + 1))
+    # 3. fine grain over everything, white noise (3 layers = 9 nodes)
+    for k, (size, amp) in enumerate([] if optimized else [(0.004, 0.03), (0.002, 0.022), (0.001, 0.016)]): h = noise_layer(net, 'I04%s_grain' % 'abc'[k], h, lv, None, amp, size, 1.0, 1.0, 11.3 * (k + 1), 4) if False else noise_layer(net, 'I04%s_grain' % 'abc'[k], h, lv, mb, amp, size, 1.0, 1.0, 11.3 * (k + 1), 4)
+    # 4. tonal gradients (9 nodes): darker towards the bottom corners, brighter on the axis, brighter small petals near the top
+    dark = T.curve(net, 'I05a_big__bottom_darkening_profile', lv, [(0.0, 0.0), (0.6, 0.15), (1.0, 1.0)], 1.0, 0.0, -0.07); darkm = T.mix(net, 'I05b_big__bottom_darkening_masked', dark, mb, 5); h = T.mix(net, 'I05c_big__bottom_darkening_added', h, darkm, 3)
+    axis = T.curve(net, 'I06a_big__axis_brightening_profile', c['ax'], [(0.0, 1.0), (0.05, 0.6), (0.17, 0.0)], 0.17, 0.0, 0.05); axm = T.mix(net, 'I06b_big__axis_brightening_masked', axis, mb, 5); h = T.mix(net, 'I06c_big__axis_brightening_added', h, axm, 3)
+    top = T.curve(net, 'I07a_small__top_brightening_profile', lv, [(0.0, 1.0), (0.4, 0.2), (1.0, 0.0)], 1.0, 0.0, 0.06); topm = T.mix(net, 'I07b_small__top_brightening_masked', top, ms, 5); h = T.mix(net, 'I07c_small__top_brightening_added', h, topm, 3)
+    # 5. crease shadow just outside the big petal edge, on the small petal (4 nodes) and curled tip highlight (5 nodes)
+    if not optimized:
+        crease = T.curve(net, 'I08a_small__crease_profile', T.lin(net, 'I08b_small__outside_distance', mb_raw, 0.0, -0.02), [(0.0, 0.0), (0.08, 1.0), (0.5, 0.4), (1.0, 0.0)], 1.0, 0.0, -0.08)
+        h = T.mix(net, 'I08c_small__crease_added', h, T.mix(net, 'I08d_small__crease_masked', crease, ms, 5), 3)
+    tip_rim = T.curve(net, 'I09a_small__tip_rim_profile', T.lin(net, 'I09b_small__inside_distance', ms_raw, 0.0, 0.02), [(0.0, 1.0), (0.12, 0.5), (1.0, 0.0)], 1.0, 0.0, 0.07)
+    tip_gate = T.curve(net, 'I09c_small__tip_rim_height_gate', lv, [(0.0, 1.0), (0.2, 0.8), (0.4, 0.0), (1.0, 0.0)], 1.0)
+    h = T.mix(net, 'I09d_small__tip_rim_added', h, T.mix(net, 'I09e_small__tip_rim_gated', tip_rim, tip_gate, 5), 3)
+    # 6. ground: texture on the dark ground between the petals (2 layers + mask = 8 nodes)
+    if not optimized:
+      one = T.const(net, 'I10b_const__one', lv, 1.0); nb = T.mix(net, 'I10a_ground__not_big', one, mb, 4); ground = T.mix(net, 'I10c_ground__mask', nb, T.mix(net, 'I10d_ground__not_small', one, ms, 4), 5)
+    for k, (size, amp) in enumerate([] if optimized else [(0.03, 0.10), (0.008, 0.06)]): h = noise_layer(net, 'I10%s_ground_noise' % 'fg'[k], h, lv, ground, amp, size, 1.0, 1.0, 5.5 * (k + 1))
+    made = len(net.children()) - n0
+    if optimized: return finish_it1(net, h, box, n0)
+    # pad or report: the iteration must hold exactly 64 nodes
+    k = 0
+    while made < 64 and not optimized:
+        k += 1; h = noise_layer(net, 'I11%s_extra_grain' % chr(96 + k), h, lv, None, 0.004, 0.0015 * k, 1.0, 1.0, 13.7 * k, 4); made = len(net.children()) - n0
+    assert optimized or made == 64, 'iteration 1 holds %d nodes, expected 64' % made
+    for n in net.children():
+        if n.name().startswith('I'): box.addNode(n)
+    box.fitAroundContents()
+    return h
+
+def finish_it1(net, h, box, n0):
+    for n in net.children():
+        if n.name().startswith('I'): box.addNode(n)
+    box.fitAroundContents(); return h
+def veins_layer(net, tag, base, coord, count, wob_noise, wob_const, wob, depth, power, mask, lv):
+    """one ORIENTED fibre layer = veins along a fan coordinate with a wobbled phase (10 nodes)."""
+    k = T.mix(net, '%s_phase' % tag, coord, T.const(net, '%s_count' % tag, lv, count), 5)
+    wc_ = wob_const.get(wob) or wob_const.setdefault(wob, T.const(net, 'J00_const__wobble_%g' % wob, lv, wob * WOBBLE_SCALE))   # one shared constant per wobble strength
+    w = T.mix(net, '%s_wobble' % tag, wob_noise, wc_, 5)
+    kw = T.mix(net, '%s_phase_wobbled' % tag, k, w, 3)
+    sn = T.node(net, 'function', '%s_sin' % tag, [kw], func=2, func_trig=0, angleunit=2); ab = T.node(net, 'function', '%s_abs' % tag, [sn], func=0, func_math=0)
+    pw = T.node(net, 'function', '%s_pow' % tag, [ab], func=1, func_pow=1)
+    if pw.parm('exponent'): pw.parm('exponent').set(power)
+    rel = T.lin(net, '%s_relief' % tag, pw, 0.0, 1.0, -depth, depth); m = T.mix(net, '%s_masked' % tag, rel, mask, 5)
+    return T.mix(net, '%s_added' % tag, base, m, 3)
+def iteration2(net, h, c):
+    """ITERATION 2 of band 0 (5 October 2026): exactly 64 nodes. The first iteration showed (Ablate.py) that noise stretched along the image axes is invisible; the fibres of a petal follow the fan, so the detail is now made of oriented vein layers at 3 scales on the big petal and 3 on the small petals, each with an irregular phase."""
+    lv, mb, ms, f, g, wn = c['lv'], c['mb'], c['ms'], c['f'], c['g'], c['ph_noise']
+    n0 = len(net.children()); box = net.createNetworkBox('Iteration_02'); box.setComment('BAND 0 ITERATION 2 : 64 nodes'); box.setColor(hou.Color((0.7, 1.0, 0.7)))
+    wc = {}
+    for i, (cnt, wob, depth) in enumerate([(70, 1.5, 0.014), (150, 2.5, 0.009), (300, 2.5, 0.006)]): h = veins_layer(net, 'J1%d_big_fibre' % (i + 1), h, f, cnt, wn, wc, wob, depth, 0.8, mb, lv)
+    msv = c['msv']
+    for i, (cnt, wob, depth) in enumerate([(60, 1.5, 0.014), (130, 2.5, 0.009), (260, 2.5, 0.006)]): h = veins_layer(net, 'J2%d_small_fibre' % (i + 1), h, g, cnt, wn, wc, wob, depth, 0.8, msv, lv)
+    pads = [lambda h, i: T.curve(net, 'J3%d_tone_soft_top' % i, h, [(0.0, 0.0), (0.6, 0.6), (0.85, 0.82), (1.0, 0.92)], 1.0), lambda h, i: T.node(net, 'clamp', 'J3%d_clamp' % i, [h]), lambda h, i: T.curve(net, 'J3%d_tone_lift_low' % i, h, [(0.0, 0.0), (0.2, 0.22), (1.0, 1.0)], 1.0)]
+    i = 0
+    while len(net.children()) - n0 < 64:
+        h = pads[i % len(pads)](h, i); i += 1
+    assert len(net.children()) - n0 == 64, 'iteration 2 holds %d nodes' % (len(net.children()) - n0)
+    for n in net.children():
+        if n.name().startswith('J'): box.addNode(n)
+    box.fitAroundContents(); return h
+
+def zone(net, tag, ax, lv, ax_keys, lv_keys, ax_rng, depth):
+    """a 2D shading zone = curve across x (profile of |cx|) x curve along y (profile of lv) x depth (5 nodes with the add made by the caller)."""
+    a = T.curve(net, '%s_across' % tag, ax, ax_keys, ax_rng); b = T.curve(net, '%s_along' % tag, lv, lv_keys, 1.0)
+    z = T.mix(net, '%s_product' % tag, a, b, 5); return T.lin(net, '%s_depth' % tag, z, 0.0, 1.0, 0.0, depth)
+def iteration3(net, h, c):
+    """ITERATION 3 of band 0 (5 October 2026): exactly 64 nodes. Comparison after iteration 2: silhouettes and fibres are right, the shading of the folds is missing. Shoulder fold shadow under the neck, bright crease ridges along the big petal edge, darker small petals, lateral dome gradient, three more oriented fibre scales."""
+    lv, ax, mb, ms, msv, mb_raw, f, wn = c['lv'], c['ax'], c['mb'], c['ms'], c['msv'], c['mb_raw'], c['f'], c['ph_noise']
+    n0 = len(net.children()); box = net.createNetworkBox('Iteration_03'); box.setComment('BAND 0 ITERATION 3 : 64 nodes'); box.setColor(hou.Color((1.0, 0.85, 0.6)))
+    def sub(tag, base, z, mask): return T.mix(net, '%s_subtracted' % tag, base, T.mix(net, '%s_masked' % tag, z, mask, 5), 4)
+    def add(tag, base, z, mask): return T.mix(net, '%s_added' % tag, base, T.mix(net, '%s_masked' % tag, z, mask, 5), 3)
+    # shoulder fold shadows: two dark triangles on each side of the axis under the neck (zone = |cx| around 0.09, lv 0.2 to 0.6)
+    z1 = zone(net, 'K11_shoulder_fold', ax, lv, [(0.0, 0.0), (0.05, 0.1), (0.09, 1.0), (0.13, 0.3), (0.17, 0.0)], [(0.0, 0.0), (0.18, 0.2), (0.35, 1.0), (0.6, 0.3), (1.0, 0.0)], 0.17, 0.10); h = sub('K12_shoulder_fold', h, z1, mb)
+    z2 = zone(net, 'K13_neck_shadow', ax, lv, [(0.0, 0.0), (0.04, 0.2), (0.075, 1.0), (0.12, 0.0), (0.17, 0.0)], [(0.0, 1.0), (0.2, 0.8), (0.4, 0.0), (1.0, 0.0)], 0.17, 0.07); h = sub('K14_neck_shadow', h, z2, mb)
+    z3 = zone(net, 'K15_corner_shadow', ax, lv, [(0.0, 0.0), (0.1, 0.1), (0.15, 0.7), (0.17, 1.0)], [(0.0, 0.0), (0.5, 0.1), (0.85, 0.6), (1.0, 1.0)], 0.17, 0.09); h = sub('K16_corner_shadow', h, z3, mb)
+    # bright crease ridge along the big petal edge below the gap, thin
+    ridge = T.curve(net, 'K21_crease_ridge_profile', T.lin(net, 'K20_crease_inside_distance', mb_raw, 0.0, 0.012), [(0.0, 0.0), (0.15, 1.0), (0.5, 0.25), (1.0, 0.0)], 1.0, 0.0, 0.10)
+    gate = T.curve(net, 'K22_crease_ridge_gate', lv, [(0.0, 0.2), (0.35, 1.0), (1.0, 0.8)], 1.0); h = add('K23_crease_ridge', h, T.mix(net, 'K24_crease_ridge_gated', ridge, gate, 5), mb)
+    # small petals darker with a soft gradient from the crease to the boundary
+    sm_dark = T.curve(net, 'K31_small_darkening_profile', c['ds'], [(0.0, 0.2), (0.03, 0.8), (0.07, 1.0), (0.17, 0.5)], 0.17, 0.0, 0.12); h = sub('K32_small_darkening', h, sm_dark, msv)
+    # lateral dome gradient on the big petal: brighter near the axis
+    lat = T.curve(net, 'K41_dome_gradient_profile', ax, [(0.0, 1.0), (0.06, 0.8), (0.12, 0.35), (0.17, 0.0)], 0.17, 0.0, 0.08); h = add('K42_dome_gradient', h, lat, mb)
+    # three more oriented fibre scales on the big petal
+    wc = {}
+    for i, (cnt, wob, depth) in enumerate([(35, 2.5, 0.016), (210, 3.5, 0.005), (420, 3.5, 0.004)]): h = veins_layer(net, 'K5%d_big_fibre' % (i + 1), h, f, cnt, wn, wc, wob, depth, 0.8, mb, lv)
+    pads = [lambda h, i: T.node(net, 'clamp', 'K9%d_clamp' % i, [h]), lambda h, i: T.curve(net, 'K9%d_tone_soft' % i, h, [(0.0, 0.0), (0.7, 0.68), (1.0, 0.95)], 1.0)]
+    i = 0
+    while len(net.children()) - n0 < 64: h = pads[i % 2](h, i); i += 1
+    assert len(net.children()) - n0 == 64, 'iteration 3 holds %d nodes' % (len(net.children()) - n0)
+    for n in net.children():
+        if n.name().startswith('K'): box.addNode(n)
+    box.fitAroundContents(); return h
+
+def iteration4(net, h, c):
+    """ITERATION 4 of band 0 (5 October 2026): exactly 64 nodes. After iteration 3 the band was too contrasted (std 55 against 39) and lacked the dark crease line where the small petal meets the big one, the lip of the neck tops and zone dependent vein density. Oriented vein layers masked by the shoulder zone (three scales), a crease line from the edge distance, a neck lip, a ground darkening toward the cell boundary, a shoulder to bottom highlight."""
+    lv, ax, mb, ms, msv, mb_raw, f, wn, ds = c['lv'], c['ax'], c['mb'], c['ms'], c['msv'], c['mb_raw'], c['f'], c['ph_noise'], c['ds']
+    n0 = len(net.children()); box = net.createNetworkBox('Iteration_04'); box.setComment('BAND 0 ITERATION 4 : 64 nodes'); box.setColor(hou.Color((0.9, 0.7, 1.0)))
+    def sub(tag, base, z, mask): return T.mix(net, '%s_subtracted' % tag, base, T.mix(net, '%s_masked' % tag, z, mask, 5), 4)
+    def add(tag, base, z, mask): return T.mix(net, '%s_added' % tag, base, T.mix(net, '%s_masked' % tag, z, mask, 5), 3)
+    zero = T.const(net, 'L00_const__zero', lv, 0.0); one = T.const(net, 'L00a_const__one', lv, 1.0)
+    # crease line: thin dark line on both sides of the big petal edge, below the gap apex
+    d_abs = T.mix(net, 'L01_crease__edge_distance_abs', mb_raw, zero, 9)
+    line = T.curve(net, 'L02_crease__line_profile', T.lin(net, 'L02a_crease__distance_scaled', d_abs, 0.0, 0.02), [(0.0, 1.0), (0.12, 0.6), (0.4, 0.0), (1.0, 0.0)], 1.0, 0.0, 0.11)
+    gate = T.curve(net, 'L03_crease__height_gate', lv, [(0.0, 0.0), (0.30, 0.2), (0.40, 1.0), (1.0, 1.0)], 1.0); h = T.mix(net, 'L04_crease__line_subtracted', h, T.mix(net, 'L05_crease__line_gated', line, gate, 5), 4)
+    # lip of the neck top: a bright rim at the very top of the big petal
+    lip = T.curve(net, 'L11_lip__profile', lv, [(0.0, 1.0), (0.04, 0.6), (0.12, 0.0), (1.0, 0.0)], 1.0, 0.0, 0.08); h = add('L12_lip', h, lip, mb)
+    # ground: darker toward the cell boundary, where the V gap is deepest
+    gd = T.curve(net, 'L21_ground__boundary_darkening', ds, [(0.0, 1.0), (0.04, 0.8), (0.12, 0.0), (0.17, 0.0)], 0.17, 0.0, 0.07)
+    nm = T.mix(net, 'L22_ground__not_big', one, mb, 4); h = sub('L23_ground_darkening', h, gd, nm)
+    # shoulder to bottom highlight on the big petal (a soft diagonal band)
+    zone_sh = zone(net, 'L31_diagonal_highlight', ax, lv, [(0.0, 0.0), (0.07, 0.2), (0.11, 1.0), (0.15, 0.5), (0.17, 0.0)], [(0.0, 0.0), (0.3, 0.1), (0.6, 1.0), (1.0, 0.6)], 0.17, 0.07); h = add('L32_diagonal_highlight', h, zone_sh, mb)
+    # oriented veins, denser in the shoulder zone: mask = shoulder zone x big
+    zmask = zone(net, 'L41_shoulder_zone_mask', ax, lv, [(0.0, 0.0), (0.05, 0.3), (0.10, 1.0), (0.15, 0.6), (0.17, 0.0)], [(0.0, 0.0), (0.2, 0.4), (0.45, 1.0), (1.0, 0.7)], 0.17, 1.0)
+    wc = {}
+    for i, (cnt, wob, depth) in enumerate([(90, 2.0, 0.020), (190, 3.0, 0.012), (380, 3.0, 0.008)]): h = veins_layer(net, 'L5%d_shoulder_fibre' % (i + 1), h, f, cnt, wn, wc, wob, depth, 0.8, zmask, lv)
+    pads = [lambda h, i: T.node(net, 'clamp', 'L9%d_clamp' % i, [h]), lambda h, i: T.curve(net, 'L9%d_tone_soft' % i, h, [(0.0, 0.0), (0.7, 0.68), (1.0, 0.95)], 1.0)]
+    i = 0
+    while len(net.children()) - n0 < 64: h = pads[i % 2](h, i); i += 1
+    assert len(net.children()) - n0 == 64, 'iteration 4 holds %d nodes' % (len(net.children()) - n0)
+    for n in net.children():
+        if n.name().startswith('L'): box.addNode(n)
+    box.fitAroundContents(); return h
+
+def iteration5(net, h, c):
+    """ITERATION 5 of band 0 (5 October 2026): exactly 64 nodes. BandStats.py after iteration 4: vertical profile correlation -0.20 (the reference petals are brightest at 20 to 40 percent of the band, 0.73, and fall to 0.45 at the bottom edge; ours were flat and darker at the top) and detail energy 0.025 against 0.065. So: a vertical tone profile applied on the petals, and five stronger oriented fibre layers at high frequencies."""
+    lv, mb, msv, f, g, wn = c['lv'], c['mb'], c['msv'], c['f'], c['g'], c['ph_noise']
+    n0 = len(net.children()); box = net.createNetworkBox('Iteration_05'); box.setComment('BAND 0 ITERATION 5 : 64 nodes'); box.setColor(hou.Color((1.0, 0.75, 0.75)))
+    obj_mask = T.mix(net, 'M01_petals__mask_union', mb, msv, 12)
+    prof = T.curve(net, 'M02_petals__vertical_tone_profile', lv, [(0.0, 0.75), (0.15, 0.82), (0.40, 0.72), (0.70, 0.45), (1.0, 0.0)], 1.0, -0.16, 0.14)
+    h = T.mix(net, 'M03_petals__tone_profile_added', h, T.mix(net, 'M04_petals__tone_profile_masked', prof, obj_mask, 5), 3)
+    wc = {}
+    fade = T.curve(net, 'M05_fibres__fade_where_fan_converges', lv, [(0.0, 1.0), (0.45, 1.0), (0.75, 0.3), (1.0, 0.0)], 1.0)   # the fan lines converge at the bottom, so the fibres fade out there (no moire at 1024)
+    mbf = T.mix(net, 'M06_big_fibres__mask_faded', mb, fade, 5); msf = T.mix(net, 'M07_small_fibres__mask_faded', msv, fade, 5)
+    for i, (cnt, wob, depth) in enumerate([(110, 2.0, 0.036), (190, 3.0, 0.030), (300, 3.0, 0.024)]): h = veins_layer(net, 'M1%d_big_fibre' % (i + 1), h, f, cnt, wn, wc, wob, depth, 0.8, mbf, lv)
+    for i, (cnt, wob, depth) in enumerate([(100, 2.0, 0.036), (210, 3.0, 0.028)]): h = veins_layer(net, 'M2%d_small_fibre' % (i + 1), h, g, cnt, wn, wc, wob, depth, 0.8, msf, lv)
+    pads = [lambda h, i: T.node(net, 'clamp', 'M9%d_clamp' % i, [h]), lambda h, i: T.curve(net, 'M9%d_tone_soft' % i, h, [(0.0, 0.0), (1.0, 1.0)], 1.0)]
+    i = 0
+    while len(net.children()) - n0 < 64: h = pads[i % 2](h, i); i += 1
+    assert len(net.children()) - n0 == 64, 'iteration 5 holds %d nodes' % (len(net.children()) - n0)
+    for n in net.children():
+        if n.name().startswith('M'): box.addNode(n)
+    box.fitAroundContents(); return h
+def iteration6(net, h, c):
+    """ITERATION 6 of band 0 (5 October 2026): exactly 64 nodes. Zoom comparison after iteration 5: in the reference the big petal is NOT one smooth shield. A narrow TONGUE (the central petal, parallel fibres, brighter) narrows from the shoulder to the bottom centre and two WINGS (radial fibres, a little darker) lie on both sides; the tongue edge is a thin bright rim with a dark shadow on the wing side. So: tongue half width curve, tongue and wing masks, edge rim profile, tongue fibres along a normalised coordinate cx / half width (they converge with the tongue), one more radial fibre layer on the wings."""
+    lv, cx, ax, mb, f, wn = c['lv'], c['cx'], c['ax'], c['mb'], c['f'], c['ph_noise']
+    n0 = len(net.children()); box = net.createNetworkBox('Iteration_06'); box.setComment('BAND 0 ITERATION 6 : 64 nodes, tongue and wings'); box.setColor(hou.Color((0.75, 0.85, 1.0)))
+    TW = [(0.0, 0.17), (0.30, 0.13), (0.40, 0.095), (0.47, 0.082), (0.51, 0.075), (0.65, 0.05), (0.835, 0.03), (1.0, 0.008)]   # tongue half width against lv, eye measured on the zoom comparison (to be refined)
+    wt = T.curve(net, 'N01_tongue__halfwidth_curve', lv, [(x, y / 0.25) for x, y in TW], 1.0, 0.0, 0.25, T.SMOOTH)
+    zone = T.curve(net, 'N02_tongue__only_below_shoulder', lv, [(0.0, 0.0), (0.40, 0.0), (0.48, 1.0), (1.0, 1.0)], 1.0)
+    dt = T.mix(net, 'N03_tongue__edge_distance', wt, ax, 4); mt = T.smooth(net, 'N04_tongue__mask', dt, -MASK_EDGE, MASK_EDGE)
+    mtb = T.mix(net, 'N05_tongue__inside_big_petal', mt, mb, 5)
+    mw0 = T.mix(net, 'N06_wings__big_minus_tongue', mb, mtb, 4); mw = T.mix(net, 'N07_wings__below_shoulder', mw0, zone, 5)
+    tfade = T.curve(net, 'N08_tongue__fibre_fade_at_tip', lv, [(0.0, 1.0), (0.60, 1.0), (0.85, 0.3), (1.0, 0.0)], 1.0)
+    tz = T.mix(net, 'N09_tongue__fibre_mask', mtb, tfade, 5)
+    tn = T.mix(net, 'N10_tongue__normalised_x', cx, wt, 6)
+    # edge rim: a bright thin line on the tongue side, a dark shadow just outside on the wing side
+    dts = T.lin(net, 'N11_rim__distance_scaled', dt, -0.03, 0.06)
+    RIM = [(-0.03, 0.0), (-0.014, 0.0), (-0.006, -0.10), (-0.001, -0.04), (0.001, 0.10), (0.005, 0.06), (0.02, 0.01), (0.06, 0.0)]
+    rim = T.curve(net, 'N12_rim__profile', dts, [((x + 0.03) / 0.09, (y + 0.2) / 0.4) for x, y in RIM], 1.0, -0.2, 0.2)
+    rim = T.mix(net, 'N13_rim__below_shoulder', rim, zone, 5); rim = T.mix(net, 'N14_rim__inside_big', rim, mb, 5)
+    h = T.mix(net, 'N15_rim__added', h, rim, 3)
+    dn = T.mix(net, 'N20_wings__darkening', mw, T.const(net, 'N19_const__wing_gain', lv, 0.02), 5); h = T.mix(net, 'N21_wings__darkening_added', h, dn, 3)
+    c['mw'] = mw; c['tn'] = tn; c['tz'] = tz
+    wc = {}
+    for i, (cnt, wob, depth) in enumerate([(4, 0.4, 0.024), (9, 0.6, 0.018), (18, 0.8, 0.012)]): h = veins_layer(net, 'N3%d_tongue_fibre' % (i + 1), h, tn, cnt, wn, wc, wob, depth, 0.8, tz, lv)
+    mwf = T.mix(net, 'N41_wings__fibre_mask_faded', mw, net.node('M05_fibres__fade_where_fan_converges'), 5)
+    h = veins_layer(net, 'N5_wing_fibre', h, f, 140, wn, wc, 3.0, 0.032, 0.8, mwf, lv)
+    pads = [lambda h, i: T.node(net, 'clamp', 'N9%d_clamp' % i, [h]), lambda h, i: T.curve(net, 'N9%d_tone_soft' % i, h, [(0.0, 0.0), (1.0, 1.0)], 1.0)]
+    i = 0
+    while len(net.children()) - n0 < 64: h = pads[i % 2](h, i); i += 1
+    assert len(net.children()) - n0 == 64, 'iteration 6 holds %d nodes' % (len(net.children()) - n0)
+    for n in net.children():
+        if n.name().startswith('N'): box.addNode(n)
+    box.fitAroundContents(); return h
+def iteration7(net, h, c):
+    """ITERATION 7 of band 0 (5 October 2026): exactly 64 nodes. Zoom comparison after the optimisation: our fibres are a dense fine comb (4 to 5 px apart) where the reference has sparse, bolder, irregular fibres 10 to 25 px apart, and the silhouettes of the reference are drawn by a thin bright rim. So: bright rim along the big petal silhouette and along the boundary petal edges, and four BOLD sparse fibre layers (two radial on the wings, one parallel on the tongue, one on the boundary petal)."""
+    lv, mb, msv, f, g, wn, mb_raw, ms_raw, mw, tn, tz = c['lv'], c['mb'], c['msv'], c['f'], c['g'], c['ph_noise'], c['mb_raw'], c['ms_raw'], c['mw'], c['tn'], c['tz']
+    n0 = len(net.children()); box = net.createNetworkBox('Iteration_07'); box.setComment('BAND 0 ITERATION 7 : 64 nodes, rims and bold fibres'); box.setColor(hou.Color((1.0, 0.9, 0.6)))
+    def rim_layer(tag, dist, peak, mask):
+        d = T.lin(net, '%s_distance_scaled' % tag, dist, -0.02, 0.06)
+        keys = [(-0.02, 0.0), (0.0, 0.0), (0.002, peak), (0.006, peak * 0.6), (0.015, peak * 0.15), (0.06, 0.0)]
+        pr = T.curve(net, '%s_profile' % tag, d, [((x + 0.02) / 0.08, (y + 0.1) / 0.35) for x, y in keys], 1.0, -0.1, 0.25)
+        pr = T.mix(net, '%s_masked' % tag, pr, mask, 5)
+        return T.mix(net, '%s_added' % tag, h, pr, 3)
+    h = rim_layer('Q01_big_silhouette_rim', mb_raw, 0.20, mb)
+    h = rim_layer('Q02_small_petal_rim', ms_raw, 0.14, msv)
+    fade = net.node('M05_fibres__fade_where_fan_converges'); wc = {}
+    mwf = T.mix(net, 'Q03_wings__bold_mask', mw, fade, 5)
+    h = veins_layer(net, 'Q11_wing_bold_fibre', h, f, 36, wn, wc, 2.5, 0.045, 0.8, mwf, lv)
+    h = veins_layer(net, 'Q12_wing_bold_fibre', h, f, 62, wn, wc, 2.5, 0.032, 0.8, mwf, lv)
+    h = veins_layer(net, 'Q21_tongue_bold_fibre', h, tn, 2.5, wn, wc, 0.8, 0.020, 0.8, tz, lv)
+    msf = T.mix(net, 'Q04_small__bold_mask', msv, fade, 5)
+    h = veins_layer(net, 'Q31_small_bold_fibre', h, g, 20, wn, wc, 1.0, 0.040, 0.8, msf, lv)
+    pads = [lambda h, i: T.node(net, 'clamp', 'Q9%d_clamp' % i, [h]), lambda h, i: T.curve(net, 'Q9%d_tone_soft' % i, h, [(0.0, 0.0), (1.0, 1.0)], 1.0)]
+    i = 0
+    while len(net.children()) - n0 < 64: h = pads[i % 2](h, i); i += 1
+    assert len(net.children()) - n0 == 64, 'iteration 7 holds %d nodes' % (len(net.children()) - n0)
+    for n in net.children():
+        if n.name().startswith('Q'): box.addNode(n)
+    box.fitAroundContents(); return h
+def iteration8(net, h, c):
+    """ITERATION 8 of band 0 (5 October 2026): exactly 64 nodes. After iteration 7 the detail energy is still 0.047 against 0.065 and one visible feature is missing: the ROLLED TIP (curl) at the top of the boundary petal, a ring about 18 px in radius with a dark core and a bright outer lip, centred at x = 0.062 right of the boundary, lv = 0.086 (measured on the zoom). So: the curl as a ring built from a hypot distance, two fine grain layers (water droplets of the reference), a bright rib along the boundary petal axis, and two more bold radial layers on the boundary petal."""
+    lv, xb, ds, mb, msv, g, wn = c['lv'], c['xb'], c['ds'], c['mb'], c['msv'], c['g'], c['ph_noise']
+    n0 = len(net.children()); box = net.createNetworkBox('Iteration_08'); box.setComment('BAND 0 ITERATION 8 : 64 nodes, curl, grain, rib'); box.setColor(hou.Color((0.85, 0.75, 1.0)))
+    dxc = T.mix(net, 'R02_curl__dx', xb, T.const(net, 'R01_const__curl_x', lv, 0.062), 4)
+    dyc = T.mix(net, 'R05_curl__dy', T.mix(net, 'R04_curl__dlv', lv, T.const(net, 'R03_const__curl_lv', lv, 0.086), 4), T.const(net, 'R06_const__band_height', lv, BAND_V1), 5)
+    r = T.mix(net, 'R07_curl__radius', dxc, dyc, 8)
+    ring = T.curve(net, 'R08_curl__ring_profile', r, [(0.0, 0.40), (0.008, 0.42), (0.012, 0.50), (0.016, 0.78), (0.019, 0.64), (0.024, 0.50), (0.04, 0.50)], 0.04, -0.2, 0.2)
+    ring = T.mix(net, 'R10_curl__ring_masked', ring, T.lin(net, 'R09_curl__mask', r, 0.019, 0.026, 1.0, 0.0), 5)
+    h = T.mix(net, 'R11_curl__added', h, ring, 3)
+    both = T.mix(net, 'R12_petals__union_mask', mb, msv, 12)
+    for k, (size, amp) in enumerate([(0.004, 0.030), (0.0025, 0.022)]): h = noise_layer(net, 'R2%d_grain' % k, h, lv, both, amp, size, 1.0, 1.0, 3.3 * (k + 1))
+    rib = T.curve(net, 'R31_small_rib__profile', ds, [(0.0, 0.0), (0.002, 0.70), (0.006, 0.35), (0.02, 0.0)], 0.02, 0.0, 0.16); rib = T.mix(net, 'R32_small_rib__masked', rib, msv, 5)
+    h = T.mix(net, 'R33_small_rib__added', h, rib, 3)
+    fade = net.node('M05_fibres__fade_where_fan_converges'); msf = net.node('Q04_small__bold_mask'); wc = {}
+    h = veins_layer(net, 'R41_small_bold_fibre', h, g, 10, wn, wc, 1.0, 0.030, 0.8, msf, lv)
+    h = veins_layer(net, 'R42_small_bold_fibre', h, g, 34, wn, wc, 1.0, 0.026, 0.8, msf, lv)
+    pads = [lambda h, i: T.node(net, 'clamp', 'R9%d_clamp' % i, [h]), lambda h, i: T.curve(net, 'R9%d_tone_soft' % i, h, [(0.0, 0.0), (1.0, 1.0)], 1.0)]
+    i = 0
+    while len(net.children()) - n0 < 64: h = pads[i % 2](h, i); i += 1
+    assert len(net.children()) - n0 == 64, 'iteration 8 holds %d nodes' % (len(net.children()) - n0)
+    for n in net.children():
+        if n.name().startswith('R'): box.addNode(n)
+    box.fitAroundContents(); return h
+def iteration9(net, h, c):
+    """ITERATION 9 of band 0 (5 October 2026): exactly 64 nodes. Matthieu's feedback: the BACK petal (the boundary petal behind the big ones) was not finished. Zoom 2x against the reference: ours had kinked polyline edges and a flat step where the ground closes, zigzag fibres, a rolled tip twice too big and in the wrong place, no crisp rim. Reference: one smooth tilted petal, a crisp white rim on its LEFT edge, a soft right edge, smooth fibres that are RAYS from the V point at the bottom (so they converge), an oblique bright rib, and (the rolled tip that was tried is REMOVED: Matthieu, 5 October 2026, it makes no sense on a flat texture). So: the ray coordinate r = xb / ((1.05 - lv) * band height), soft low frequency phase noise, three smooth ray fibre layers, left and right rims from the real edge distances, the oblique rib, and a gentle side shading."""
+    lv, xb, eL, eR, msv, wn = c['lv'], c['xb'], c['eL'], c['eR'], c['msv'], c['ph_noise']
+    n0 = len(net.children()); box = net.createNetworkBox('Iteration_09'); box.setComment('BAND 0 ITERATION 9 : 64 nodes, the back petal'); box.setColor(hou.Color((1.0, 0.8, 0.9)))
+    disty = T.lin(net, 'S01_ray__distance_to_V_point', lv, 0.0, 1.0, 1.05 * BAND_V1, 0.05 * BAND_V1)
+    r = T.mix(net, 'S02_ray__coordinate', xb, disty, 6)
+    soft = T.node(net, 'fractalnoise', 'S03_ray__soft_phase_noise', [lv], amp=0.5, center=0.0, elementsize=0.16)
+    fade = net.node('M05_fibres__fade_where_fan_converges'); mf = T.mix(net, 'S04_ray__mask', msv, fade, 5); wc = {}
+    for i, (cnt, wob, depth) in enumerate([(14, 0.5, 0.020), (26, 0.5, 0.014), (60, 0.5, 0.008)]): h = veins_layer(net, 'S1%d_back_ray_fibre' % (i + 1), h, r, cnt, soft, wc, wob, depth, 0.8, mf, lv)
+    # one signed rim around the whole back petal outline (left edge, rounded top, right edge): ground halo outside, crisp white line inside; only where the wings do not cover it
+    dL = T.mix(net, 'S20_back__dist_to_left_edge', xb, eL, 4); dR = T.mix(net, 'S23_back__dist_to_right_edge', eR, xb, 4)
+    dTop = T.lin(net, 'S24_back__dist_to_top', lv, 0.017, 1.017, 0.0, BAND_V1)
+    din = T.mix(net, 'S26_back__dist_inside_outline', T.mix(net, 'S25_back__min_sides', dL, dR, 13), dTop, 13)
+    ds_ = T.lin(net, 'S21_rim__distance_scaled', din, -0.02, 0.05)
+    RIM = [(-0.02, 0.0), (-0.008, -0.05), (-0.002, -0.12), (0.0, -0.02), (0.0007, 0.50), (0.004, 0.18), (0.012, 0.03), (0.05, 0.0)]
+    rimc = T.curve(net, 'S22_rim__profile', ds_, [((x + 0.02) / 0.07, (y + 0.15) / 0.45) for x, y in RIM], 1.0, -0.15, 0.30, T.SMOOTH)
+    nb = T.lin(net, 'S27_rim__not_under_wing', c['mb'], 0.0, 1.0, 1.0, 0.0)
+    h = T.mix(net, 'S28_rim__added', h, T.mix(net, 'S29_rim__masked', rimc, nb, 5), 3)
+    # oblique rib: a ray at r = 0.06, bright thin line with a darker lane beside it
+    rib = T.curve(net, 'S41_rib__profile', T.lin(net, 'S40_rib__distance_scaled', r, 0.0, 0.14), [(0.0, 0.5), (0.35, 0.5), (0.42, 0.34), (0.47, 0.70), (0.50, 0.95), (0.53, 0.70), (0.60, 0.5), (1.0, 0.5)], 1.0, -0.3, 0.3, T.SMOOTH)
+    h = T.mix(net, 'S43_rib__added', h, T.mix(net, 'S42_rib__masked', rib, mf, 5), 3)
+    side = T.curve(net, 'S51_back__side_shading', T.lin(net, 'S50_back__ray_scaled', r, -0.15, 0.40), [(0.0, 0.46), (0.3, 0.5), (0.7, 0.56), (1.0, 0.56)], 1.0, -0.1, 0.1, T.SMOOTH)
+    h = T.mix(net, 'S53_back__side_shading_added', h, T.mix(net, 'S52_back__side_shading_masked', side, msv, 5), 3)
+    gain = T.mix(net, 'S61_back__gain_masked', msv, T.const(net, 'S60_const__back_gain', lv, 0.10), 5); h = T.mix(net, 'S62_back__gain_added', h, gain, 3)
+    pads = [lambda h, i: T.node(net, 'clamp', 'S9%d_clamp' % i, [h]), lambda h, i: T.curve(net, 'S9%d_identity' % i, h, [(0.0, 0.0), (1.0, 1.0)], 1.0)]
+    i = 0
+    while len(net.children()) - n0 < 64: h = pads[i % 2](h, i); i += 1
+    assert len(net.children()) - n0 == 64, 'iteration 9 holds %d nodes' % (len(net.children()) - n0)
+    for n in net.children():
+        if n.name().startswith('S'): box.addNode(n)
+    box.fitAroundContents(); return h
+if __name__ == '__main__':
+    hou.hipFile.clear(suppress_save_prompt=True)
+    net = hou.node('/obj').createNode('copnet', 'Band0_test'); res = int(sys.argv[3]) if len(sys.argv) > 3 else 1024; net.parm('res1').set(res); net.parm('res2').set(res)
+    if len(sys.argv) > 4: MAX_IT = int(sys.argv[4])
+    out = build(net); r = T.export(net, out, B + ('previews/band0_nodes.png' if MAX_IT == 99 else 'previews/band0_v1_it%d.png' % MAX_IT), res)
+    errs = [(c.name(), [str(e)[:160] for e in c.errors()]) for c in net.children() if c.errors()]
+    print('nodes', len(net.children()), 'errors', errs[:4])
