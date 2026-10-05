@@ -1,0 +1,44 @@
+# 5 October 2026 : fits the SHAPE parameters of the generated trim bands to the masks of the reference (mask IoU per band, the reference is read only here). A coordinate descent that perturbs one parameter of EVERY band at the same time (bands are independent), keeps what raises the band IoU, shrinks the steps each round, writes ref-maps/trim_fit.json (read by BuildLilyTrim.py as the HDA defaults). Usage: python3 FitTrim.py [rounds=4] [res=512]. FR : calage des formes sur les masques.
+import json, subprocess, sys, os
+import numpy as np
+from PIL import Image
+sys.path.insert(0, '/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/Scripts')
+import TrimMask as M
+B = '/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/'
+HY = '/Users/zenray/Create/Build/Houdini22/Houdini22.0.368/Frameworks/Houdini.framework/Versions/Current/Resources/bin/hython'
+REFP = '/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/refs/flower-sheets/trimsheet-height-flower.png'
+rounds = int(sys.argv[1]) if len(sys.argv) > 1 else 4; RES = int(sys.argv[2]) if len(sys.argv) > 2 else 512
+BANDS = [(0.0, 0.193), (0.193, 0.388), (0.388, 0.507), (0.507, 0.609), (0.609, 0.725), (0.725, 0.837), (0.837, 1.0)]
+# per band: (parameter, start, step, lo, hi)
+PARAMS = {0: [('a_neck', 0.225, 0.04, 0.08, 0.45), ('a_small_w', 0.15, 0.04, 0.04, 0.32), ('a_open', 1.0, 0.25, 0.4, 2.5)], 1: [('b_w0', 0.50, 0.06, 0.25, 0.7), ('b_pow', 0.9, 0.2, 0.3, 2.5)],
+          2: [('c_anther_w', 0.030, 0.006, 0.012, 0.07), ('c_anther_l', 0.30, 0.05, 0.12, 0.55), ('c_stigma_w', 0.060, 0.012, 0.025, 0.13)], 3: [('d_fan', 1.0, 0.15, 0.4, 1.5)], 5: [('f_width', 0.36, 0.05, 0.15, 0.48), ('f_wave', 0.06, 0.03, 0.0, 0.25)], 6: [('g_width', 0.40, 0.05, 0.15, 0.49)]}
+ref = np.asarray(Image.open(REFP).convert('L').resize((RES, RES), Image.LANCZOS), np.float32) / 255.0
+RM = [M.seg(ref[int(a * RES) + 3:int(b * RES) - 3]) for a, b in BANDS]
+open('/tmp/fit_export.py', 'w').write("import hou,os\nhou.hipFile.load('/tmp/veg_fit.hiplc',suppress_save_prompt=True,ignore_load_warnings=True)\nn=hou.node('/obj/Lily_Trim')\nr=n.node('VX_export__height'); o=r.parm('copoutput').eval()\nos.path.exists(o) and os.remove(o)\nr.parm('execute').pressButton()\n")
+def evaluate(vals):
+    json.dump(vals, open(B + 'ref-maps/trim_fit.json', 'w'))
+    subprocess.run(['cp', B + 'hip/VegetationCollection01.hiplc', '/tmp/veg_fit.hiplc'])
+    subprocess.run([HY, B + 'Scripts/BuildLilyTrim.py', '/tmp/veg_fit.hiplc', '/tmp/veg_fit.hiplc', str(RES)], capture_output=True, text=True)
+    subprocess.run([HY, '/tmp/fit_export.py'], capture_output=True, text=True)
+    gen = np.asarray(Image.open(B + 'maps/trim/lily_trim_height.png').convert('L'), np.float32) / 255.0
+    return [M.iou(M.seg(gen[int(a * RES) + 3:int(b * RES) - 3]), RM[i]) for i, (a, b) in enumerate(BANDS)]
+cur = {n: s for bi in PARAMS for (n, s, st, lo, hi) in PARAMS[bi]}
+try: cur.update(json.load(open(B + 'ref-maps/trim_fit.json')))
+except Exception: pass
+best = evaluate(cur); print('start IoU per band', [round(x, 3) for x in best], 'mean %.3f' % np.mean(best), flush=True)
+for rd in range(rounds):
+    k = 1.0 / (1 + rd)
+    for slot in range(3):
+        for sign in (+1, -1):
+            trial = dict(cur); moved = {}
+            for bi, plist in PARAMS.items():
+                if slot < len(plist):
+                    n, s, st, lo, hi = plist[slot]; v = cur[n] + sign * st * k
+                    if lo <= v <= hi: trial[n] = v; moved[bi] = n
+            if not moved: continue
+            sc = evaluate(trial)
+            for bi, n in moved.items():
+                if sc[bi] > best[bi] + 1e-4: cur[n] = trial[n]; best[bi] = sc[bi]
+        json.dump(cur, open(B + 'ref-maps/trim_fit.json', 'w'), indent=1)
+    print('round', rd, 'IoU', [round(x, 3) for x in best], 'mean %.3f' % np.mean(best), flush=True)
+final = evaluate(cur); print('final IoU', [round(x, 3) for x in final], 'mean %.3f' % np.mean(final)); print(json.dumps(cur))

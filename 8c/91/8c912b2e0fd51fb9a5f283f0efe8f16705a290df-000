@@ -1,0 +1,10 @@
+Traceback (most recent call last):
+  File "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/Scripts/FitTrim.py", line 28, in <module>
+    best = evaluate(cur); print('start IoU per band', [round(x, 3) for x in best], 'mean %.3f' % np.mean(best), flush=True)
+  File "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/Scripts/FitTrim.py", line 24, in evaluate
+    return [M.iou(M.seg(gen[int(a * RES) + 3:int(b * RES) - 3]), RM[i]) for i, (a, b) in enumerate(BANDS)]
+  File "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/Scripts/FitTrim.py", line 24, in <listcomp>
+    return [M.iou(M.seg(gen[int(a * RES) + 3:int(b * RES) - 3]), RM[i]) for i, (a, b) in enumerate(BANDS)]
+  File "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/Scripts/TrimMask.py", line 14, in iou
+    def iou(a, b): return float((a & b).sum()) / max(float((a | b).sum()), 1.0)
+ValueError: operands could not be broadcast together with shapes (92,1024) (92,512) 

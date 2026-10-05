@@ -17,11 +17,11 @@ float h = p@C.x; if (!on) h = 0.0;   // outside its band a chain outputs zero (t
 '''
 PRELUDE = {
  0: '''float cx = fr(u * 3.0) - 0.5; float g = 0.30;
-float wb = chf("../a_neck") + (0.5 - chf("../a_neck")) * sm(0.08, 0.9, lv); float mb = 1.0 - sm(wb - 0.012, wb + 0.012, abs(cx)); float tb = abs(cx) / max(wb, 0.01);
+float wb = chf("../a_neck") + (0.5 - chf("../a_neck")) * pow(sm(0.08, 0.9, lv), chf("../a_open")); float mb = 1.0 - sm(wb - 0.012, wb + 0.012, abs(cx)); float tb = abs(cx) / max(wb, 0.01);
 float cs = 0.5 - abs(cx); float ws = chf("../a_small_w") * pow(sin(PI * clamp(0.03 + 0.94 * lv, 0.0, 1.0)), 0.75); float ms = 1.0 - sm(ws - 0.012, ws + 0.012, cs);
 float ang = atan2(cx, 1.35 - lv * 0.95); float tS = cs / max(ws, 0.01);''',
  1: '''float cx = fr(u * 3.0) - 0.5; int cell = int(floor(u * 3.0));
-float ww = 0.50 * pow(1.0 - lv * 0.97, 0.9) + 0.045; float inW = 1.0 - sm(ww - 0.012, ww + 0.012, abs(cx)); float t = cx / ww; float at = abs(t);
+float ww = chf("../b_w0") * pow(1.0 - lv * 0.97, chf("../b_pow")) + 0.045; float inW = 1.0 - sm(ww - 0.012, ww + 0.012, abs(cx)); float t = cx / ww; float at = abs(t);
 float bgm = 1.0 - inW;''',
  2: '''float s = fr(u * 3.0); float AX[] = {0.06, 0.18, 0.55, 0.70, 0.86}; float FX[] = {0.27, 0.45, 0.97};''',
  3: '''float s = fr(u * 7.0); float cx = s - 0.5; float fan = 0.10 + 0.40 * pow(1.0 - clamp(lv / 0.72, 0.0, 1.0), 1.7) * chf("../d_fan");

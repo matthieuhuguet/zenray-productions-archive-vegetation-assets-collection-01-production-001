@@ -7,7 +7,7 @@ LIVE = sys.argv[1] == 'LIVE'
 if not LIVE: hou.hipFile.load(sys.argv[1], suppress_save_prompt=True, ignore_load_warnings=True)
 RES = int(sys.argv[3]) if len(sys.argv) > 3 else 2048
 BANDS = [('tepal_inner', 0.0, 0.193, 'A', (0.85, 0.85, 0.9)), ('tepal_outer', 0.193, 0.388, 'B', (0.9, 0.6, 0.75)), ('stamens', 0.388, 0.507, 'C', (0.95, 0.65, 0.3)), ('calyx', 0.507, 0.609, 'D', (0.6, 0.85, 0.4)), ('stem', 0.609, 0.725, 'E', (0.5, 0.7, 0.45)), ('leaf', 0.725, 0.837, 'F', (0.3, 0.75, 0.35)), ('bud', 0.837, 1.0, 'G', (0.85, 0.5, 0.65))]
-SPEC = {'HDA Tepals': [('a_neck', 'Inner petal neck (half width)', 0.225, 0.1, 0.4), ('a_small_w', 'Small curled petal width', 0.15, 0.05, 0.3), ('b_stripe', 'Outer tepal dark stripes', 1.0, 0.0, 1.5)],
+SPEC = {'HDA Tepals': [('a_neck', 'Inner petal neck (half width)', 0.225, 0.08, 0.45), ('a_small_w', 'Small curled petal width', 0.15, 0.04, 0.32), ('a_open', 'Inner petal opening curve', 1.0, 0.4, 2.5), ('b_w0', 'Outer wedge width', 0.50, 0.25, 0.7), ('b_pow', 'Outer wedge taper curve', 0.9, 0.3, 2.5), ('b_stripe', 'Outer tepal dark stripes', 1.0, 0.0, 1.5)],
         'HDA Stamens': [('c_anther_w', 'Anther half width', 0.030, 0.015, 0.06), ('c_anther_l', 'Anther half length', 0.30, 0.15, 0.5), ('c_pollen', 'Pollen relief', 0.20, 0.0, 0.5), ('c_stigma_w', 'Stigma head half width', 0.060, 0.03, 0.12)],
         'HDA Green': [('d_fan', 'Calyx fan spread', 1.0, 0.5, 1.4), ('f_width', 'Leaf half width', 0.36, 0.2, 0.46), ('f_wave', 'Leaf edge wave', 0.06, 0.0, 0.2), ('g_width', 'Bud half width', 0.40, 0.2, 0.48), ('g_groove', 'Bud groove depth', 0.15, 0.0, 0.4)]}
 try: FITV = json.load(open(B + 'ref-maps/trim_fit.json'))
