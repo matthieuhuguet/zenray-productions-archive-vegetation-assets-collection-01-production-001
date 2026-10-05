@@ -1,18 +1,16 @@
-# 5 October 2026 : Copernicus graph of the LILY TRIM SHEET (/obj/Lily_Trim), version 2: the height is GENERATED (Scripts/TrimGen.vex, seven bands, periodic so seamless by construction), the base colour is generated from that height (Scripts/TrimColour.vex). NO image is read: the reference is only used by TrimLab.py to measure. basecolor_mode 0 shows the height in the base colour, 1 the generated colour. Eight parameters at most per folder. Usage: hython Scripts/BuildLilyTrim.py <hip> <hip out> [res], or live with sys.argv = ['x', 'LIVE', 'LIVE']. FR : graphe de la trim sheet, version procedurale.
-import hou, sys, json
+# 5 October 2026 : Copernicus graph of the LILY TRIM SHEET HEIGHT (/obj/Lily_Trim), version 3, phase 1 of the two phase rule: SEVEN BANDS x 64 NODES (448 small wrangle COPs, Scripts/TrimStages.py) merged by maximum. The height is GENERATED, no image is read; the base colour output simply SHOWS the height (Matthieu, 5 October 2026: height applied as base colour to see the nuances, no colour yet). Every band pattern is periodic in u, so seamless by construction. Eight parameters at most per folder. Usage: hython Scripts/BuildLilyTrim.py <hip> <hip out> [res], or live with sys.argv = ['x', 'LIVE', 'LIVE', res]. FR : graphe de la height de la trim sheet, 7 bandes de 64 noeuds.
+import hou, sys, json, os
+sys.path.insert(0, '/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/Scripts')
+import importlib, TrimStages; importlib.reload(TrimStages)
 B = '/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/'
 LIVE = sys.argv[1] == 'LIVE'
 if not LIVE: hou.hipFile.load(sys.argv[1], suppress_save_prompt=True, ignore_load_warnings=True)
 RES = int(sys.argv[3]) if len(sys.argv) > 3 else 2048
-COL = json.load(open(B + 'ref-maps/lily_colours.json'))
-def c3(n): return ', '.join('%.4f' % x for x in COL[n]['srgb'])
-BANDS = [('tepal_inner', 0.0, 0.193), ('tepal_outer', 0.193, 0.388), ('stamens', 0.388, 0.507), ('calyx', 0.507, 0.609), ('stem', 0.609, 0.725), ('leaf', 0.725, 0.837), ('bud', 0.837, 1.0)]
-FIT = B + 'ref-maps/trim_fit.json'
-SPEC = {'HDA Tepals': [('a_neck', 'Inner petal neck (half width)', 0.225, 0.1, 0.4), ('a_small_w', 'Small curled petal width', 0.15, 0.05, 0.3), ('a_veins', 'Inner petal vein count', 42.0, 10.0, 90.0), ('a_vein_amp', 'Inner petal vein depth', 0.07, 0.0, 0.2), ('b_ridges', 'Outer tepal ridge count', 5.0, 2.0, 12.0), ('b_stripe', 'Outer tepal dark stripes', 1.0, 0.0, 1.5)],
+BANDS = [('tepal_inner', 0.0, 0.193, 'A', (0.85, 0.85, 0.9)), ('tepal_outer', 0.193, 0.388, 'B', (0.9, 0.6, 0.75)), ('stamens', 0.388, 0.507, 'C', (0.95, 0.65, 0.3)), ('calyx', 0.507, 0.609, 'D', (0.6, 0.85, 0.4)), ('stem', 0.609, 0.725, 'E', (0.5, 0.7, 0.45)), ('leaf', 0.725, 0.837, 'F', (0.3, 0.75, 0.35)), ('bud', 0.837, 1.0, 'G', (0.85, 0.5, 0.65))]
+SPEC = {'HDA Tepals': [('a_neck', 'Inner petal neck (half width)', 0.225, 0.1, 0.4), ('a_small_w', 'Small curled petal width', 0.15, 0.05, 0.3), ('b_stripe', 'Outer tepal dark stripes', 1.0, 0.0, 1.5)],
         'HDA Stamens': [('c_anther_w', 'Anther half width', 0.030, 0.015, 0.06), ('c_anther_l', 'Anther half length', 0.30, 0.15, 0.5), ('c_pollen', 'Pollen relief', 0.20, 0.0, 0.5), ('c_stigma_w', 'Stigma head half width', 0.060, 0.03, 0.12)],
-        'HDA Green': [('d_fan', 'Calyx fan spread', 1.0, 0.5, 1.4), ('e_hair', 'Stem hair strength', 0.35, 0.1, 0.8), ('f_width', 'Leaf half width', 0.36, 0.2, 0.46), ('f_wave', 'Leaf edge wave', 0.06, 0.0, 0.2), ('f_veins', 'Leaf vein count', 14.0, 4.0, 40.0), ('g_width', 'Bud half width', 0.40, 0.2, 0.48), ('g_groove', 'Bud groove depth', 0.15, 0.0, 0.4)],
-        'HDA Colour': [('basecolor_mode', 'Base colour shows (0 height, 1 generated)', 1, 0, 1), ('cavity_dark', 'Cavity darkening', 0.55, 0.0, 1.5), ('detail_gain', 'Height to tone gain', 0.7, 0.0, 1.5), ('fine_blur', 'Fine blur (px)', 3.0, 1.0, 12.0), ('wide_blur', 'Wide blur (px)', 28.0, 8.0, 80.0), ('white_gain', 'Tepal white gain', 1.0, 0.7, 1.3), ('magenta_gain', 'Magenta strength', 1.0, 0.5, 1.5), ('pink_flush', 'Pink flush at the petal base', 0.7, 0.0, 1.0)]}
-try: FITV = json.load(open(FIT))
+        'HDA Green': [('d_fan', 'Calyx fan spread', 1.0, 0.5, 1.4), ('f_width', 'Leaf half width', 0.36, 0.2, 0.46), ('f_wave', 'Leaf edge wave', 0.06, 0.0, 0.2), ('g_width', 'Bud half width', 0.40, 0.2, 0.48), ('g_groove', 'Bud groove depth', 0.15, 0.0, 0.4)]}
+try: FITV = json.load(open(B + 'ref-maps/trim_fit.json'))
 except Exception: FITV = {}
 obj = hou.node('/obj')
 if obj.node('Lily_Trim'): obj.node('Lily_Trim').destroy()
@@ -21,29 +19,31 @@ ptg = net.parmTemplateGroup()
 for folder, rows in SPEC.items():
     assert len(rows) <= 8, folder
     f = hou.FolderParmTemplate(folder.lower().replace(' ', '_'), folder, folder_type=hou.folderType.Simple)
-    for n, lab, dv, lo, hi in rows: f.addParmTemplate((hou.IntParmTemplate if isinstance(dv, int) else hou.FloatParmTemplate)(n, lab, 1, default_value=(FITV.get(n, dv),), min=lo, max=hi))
+    for n, lab, dv, lo, hi in rows: f.addParmTemplate(hou.FloatParmTemplate(n, lab, 1, default_value=(FITV.get(n, dv),), min=lo, max=hi))
     ptg.append(f)
 net.setParmTemplateGroup(ptg)
-def node(kind, name, inputs=(), **parms):
-    x = net.createNode(kind, name)
-    for k, v in parms.items(): x.parm(k).set(v)
-    for i, s in enumerate(inputs): x.setInput(i, s)
-    return x
-canvas = node('constant', 'A1_canvas__size_only')
+v0 = ', '.join('%.4f' % b[1] for b in BANDS); v1 = ', '.join('%.4f' % b[2] for b in BANDS)
+canvas = net.createNode('constant', 'A00_canvas__size_only'); canvas.setPosition(hou.Vector2(-4, 0))
 for k in ('colorr', 'colorg', 'colorb'):
     if canvas.parm(k): canvas.parm(k).set(0.0)
-v0 = ', '.join('%.4f' % b[1] for b in BANDS); v1 = ', '.join('%.4f' % b[2] for b in BANDS)
-gen = node('wrangle', 'B1_height__generated_seven_bands', [canvas]); gen.parm('vexsnippet').set(open(B + 'Scripts/TrimGen.vex').read() % dict(v0=v0, v1=v1))
-hm = node('channelextract', 'B2_height__mono', [gen], channel=0)
-bf = node('blur', 'C1_detail__fine_blur', [hm]); bf.parm('units').set(1); bf.parm('size_pixel').setExpression('ch("../fine_blur")')
-bw = node('blur', 'C2_detail__wide_blur', [hm]); bw.parm('units').set(1); bw.parm('size_pixel').setExpression('ch("../wide_blur")')
-pk = node('channeljoin', 'C3_pack__height_fine_wide', [hm, bf, bw, hm])
-col = node('wrangle', 'D1_colour__generated_from_height', [pk])
-col.parm('vexsnippet').set(open(B + 'Scripts/TrimColour.vex').read() % dict(v0=v0, v1=v1, white=c3('tepal_white'), flush=c3('tepal_pink_flush'), mag=c3('tepal_magenta'), purple=c3('tepal_purple_base'), orange=c3('anther_orange'), olive=c3('filament_olive'), lime=c3('pedicel_lime'), stem=c3('stem_grey_green'), leaf=c3('leaf_green')))
-fin = node('null', 'FINAL_BASECOLOR', [col]); finh = node('null', 'FINAL_HEIGHT', [hm])
-for nm, src, path in (('VX_export__basecolor', fin, 'maps/trim/lily_trim_basecolor.png'), ('VX_export__height', finh, 'maps/trim/lily_trim_height.png')):
-    r = node('rop_image', nm, [src]); r.parm('copoutput').set(B + path)
-net.layoutChildren(); bad = [(c.name(), [str(e)[:200] for e in c.errors()]) for c in net.children()]
-bad = [b for b in bad if b[1]]
-print('nodes', len(net.children()), 'errors', bad)
+tails = []; total = 0
+for bi, (bname, a, b, L, color) in enumerate(BANDS):
+    prev = canvas; head = TrimStages.HEAD % dict(v0=v0, v1=v1, bid=bi); pre = TrimStages.PRELUDE[bi]; stg = TrimStages.stages(bi); assert len(stg) == 64
+    box = net.createNetworkBox('Band_%s_%s' % (L, bname)); box.setComment('BAND %s %s : 64 nodes' % (L, bname)); box.setColor(hou.Color(color))
+    for k, (nm, body) in enumerate(stg):
+        n = net.createNode('wrangle', '%s%02d_%s__%s' % (L, k + 1, nm.split('_')[0], '_'.join(nm.split('_')[1:]) or 'layer'))
+        n.parm('vexsnippet').set(head + pre + '\nif (on) {\n' + body + '\n}\np@C = set(h, h, h, 1.0);\n'); n.setInput(0, prev); n.setColor(hou.Color(color))
+        n.setPosition(hou.Vector2((k % 16) * 2.1, -(bi * 7.2 + (k // 16) * 1.5))); box.addNode(n); prev = n; total += 1
+    box.fitAroundContents(); tails.append(prev)
+merge = tails[0]
+for i in range(1, 7):
+    m = net.createNode('blend', 'M%02d_bands__merge_%s' % (i, BANDS[i][3])); m.parm('mode').set(12); m.setInput(0, merge); m.setInput(1, tails[i]); m.setPosition(hou.Vector2(36 + i * 2.1, -i * 1.8)); merge = m
+finh = net.createNode('null', 'FINAL_HEIGHT'); finh.setInput(0, merge); finh.setPosition(hou.Vector2(52, -14))
+finc = net.createNode('null', 'FINAL_BASECOLOR'); finc.setInput(0, merge); finc.setPosition(hou.Vector2(52, -17))   # the base colour output shows the height
+for nm, src, path in (('VX_export__basecolor', finc, 'maps/trim/lily_trim_basecolor.png'), ('VX_export__height', finh, 'maps/trim/lily_trim_height.png')):
+    r = net.createNode('rop_image', nm); r.setInput(0, src); r.parm('copoutput').set(B + path); r.parm('colorconversion').set(2);   # 2 = raw: the height is data, no colour transform
+    r.setPosition(hou.Vector2(56, -14 if 'height' in nm else -17))
+finc.setDisplayFlag(True) if hasattr(finc, 'setDisplayFlag') else None
+bad = [(c.name(), [str(e)[:160] for e in c.errors()]) for c in net.children() if c.errors()]
+print('nodes', len(net.children()), 'stages', total, 'errors', bad[:3])
 if not LIVE: hou.hipFile.save(sys.argv[2])
