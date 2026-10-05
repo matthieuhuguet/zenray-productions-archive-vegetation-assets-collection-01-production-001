@@ -26,6 +26,7 @@ def build(net):
     h = T.mix(net, 'C06_over_ground', ground, T.mix(net, 'C06a_delta_masked', T.mix(net, 'C06b_delta', tone, ground, 4), mb, 5), 3)
     c = dict(lv=lv, ax=ax, wb=wb, mb=mb, t=t)
     if UPTO >= 1: h = iteration1(net, h, c)
+    if UPTO >= 2: h = iteration2(net, h, c)
     return h
 def iteration1(net, h, c):
     """ITERATION 1 (64 nodes): rim, central rib, the fan of fibres (angle around a pivot below the petal), droplets and grain. No crease anywhere."""
@@ -47,6 +48,25 @@ def iteration1(net, h, c):
     sh = V.profile(net, 'G41_contact', d_sil, [(-0.05, 0.0), (-0.025, -0.05), (-0.010, -0.11), (-0.003, -0.08), (0.0, 0.0), (0.05, 0.0)], -0.05, 0.05, -0.15, 0.05)
     h = T.mix(net, 'G43_contact__added', h, T.mix(net, 'G42_contact__outside', sh, T.lin(net, 'G42a', mb, 0.0, 1.0, 1.0, 0.0), 5), 3)
     h = V.pads(net, 'G', h, n0); V.close(net, b, 'G', n0); return h
+def speckles(net, lv, ax, wb, mb, tag='SP'):
+    """THE SPECKLES of the petal (Matthieu, 6 October 2026: add small random dots, like the photo): scattered round dots, dense around the centre and the lower middle of the petal, rarer toward the white edge. Returns a 0..1 mask. The same function builds the same pattern in the height AND in the base colour (deterministic noise), so the dot is dark pink in the colour exactly where it is a bump in the height. 11 nodes. FR : points aleatoires du petale."""
+    t = T.node(net, 'clamp', tag + '01_across', [T.mix(net, tag + '01a', ax, T.mix(net, tag + '01b', wb, T.const(net, tag + '01c', lv, 0.01), 12), 6)])
+    region = T.mix(net, tag + '02_region', T.smooth(net, tag + '02a_below_neck', lv, 0.22, 0.52), T.lin(net, tag + '02b_inside', T.smooth(net, tag + '02c', t, 0.55, 0.92), 0.0, 1.0, 1.0, 0.0), 5)
+    nz = T.node(net, 'fractalnoise', tag + '03_dots', [lv], amp=0.5, center=0.5, elementsize=0.0075, noisetype=1, offx=21.3, tilesizex=2.0 / 3.0)
+    dots = T.curve(net, tag + '04_cut', nz, [(0.0, 0.0), (0.66, 0.0), (0.70, 1.0), (1.0, 1.0)], 1.0, 0.0, 1.0)
+    dens = V.modulation(net, tag + '05_density', lv, 0.14, 1.0, 1.0, 5.3, 0.35)
+    return T.mix(net, tag + '06_mask', T.mix(net, tag + '06a_in_region', dots, region, 5), T.mix(net, tag + '06b_with_density', mb, dens, 5), 5)
+def iteration2(net, h, c):
+    """ITERATION 2 (64 nodes): the speckles in the height: small raised dots with a tiny dimple ring, plus fine pores scattered over the whole petal."""
+    lv, ax, wb, mb = c['lv'], c['ax'], c['wb'], c['mb']
+    n0 = len(net.children()); b = V.box(net, 'H', 'BAND 0 V3 ITERATION 2 : 64 nodes, speckles', (1.0, 0.8, 0.85))
+    spk = speckles(net, lv, ax, wb, mb)
+    h = T.mix(net, 'H11_speckles__added', h, T.lin(net, 'H11a_gain', spk, 0.0, 1.0, 0.0, 0.10), 3)
+    ring = T.mix(net, 'H12_ring', T.node(net, 'blur', 'H12a_soft', [spk], units=1, size_pixel=3.0), spk, 4)
+    h = T.mix(net, 'H13_dimple__added', h, T.mix(net, 'H13a_gain', ring, T.const(net, 'H13b_k', lv, -0.5), 5), 3)
+    h = V.dots_layer(net, 'H21_pores', h, lv, mb, 0.0022, 9.9, 0.66, 0.045)
+    h = V.dots_layer(net, 'H22_pores_dark', h, lv, mb, 0.0017, 14.1, 0.70, -0.04)
+    h = V.pads(net, 'H', h, n0); V.close(net, b, 'H', n0); return h
 def opacity(net, ry, rx):
     """the petal mask alone (1 inside a petal, 0 on the ground between petals) for the opacity map. FR : masque d'opacite."""
     lv = T.lin(net, 'OP0_lv', ry, 0.0, BAND_V1); cx = T.lin(net, 'OP0_cx', rx, 0.0, 1.0, -1.0 / 6, 1.0 / 6); ax = T.mix(net, 'OP0_ax', cx, T.const(net, 'OP0_zero', lv, 0.0), 9)
