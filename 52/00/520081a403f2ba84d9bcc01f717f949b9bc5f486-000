@@ -1,0 +1,38 @@
+# 5 October 2026 : the measuring bench of the trim sheet. It builds the generated graph (BuildLilyTrim.py) in a scratch copy, exports the height, and compares every band with the REFERENCE height (trimsheet-height-flower.png, used ONLY here, never in the graph) by measurements: mean, standard deviation, percentiles, gradient energy (detail density), horizontal period (autocorrelation), vertical profile correlation, histogram distance, and the seam percentile. Writes previews/trim_lab_<label>.png (reference | generated, band by band). Usage: python3 TrimLab.py <label> [res=1024]. FR : banc de mesure de la trim sheet.
+import subprocess, sys, json
+import numpy as np
+from PIL import Image
+B = '/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/'
+HY = '/Users/zenray/Create/Build/Houdini22/Houdini22.0.368/Frameworks/Houdini.framework/Versions/Current/Resources/bin/hython'
+REFP = '/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/refs/flower-sheets/trimsheet-height-flower.png'
+label = sys.argv[1]; RES = int(sys.argv[2]) if len(sys.argv) > 2 else 1024
+BANDS = [('tepal_inner', 0.0, 0.193), ('tepal_outer', 0.193, 0.388), ('stamens', 0.388, 0.507), ('calyx', 0.507, 0.609), ('stem', 0.609, 0.725), ('leaf', 0.725, 0.837), ('bud', 0.837, 1.0)]
+subprocess.run(['cp', B + 'hip/VegetationCollection01.hiplc', '/tmp/veg_lab.hiplc'])
+r = subprocess.run([HY, B + 'Scripts/BuildLilyTrim.py', '/tmp/veg_lab.hiplc', '/tmp/veg_lab.hiplc', str(RES)], capture_output=True, text=True)
+print(r.stdout.strip().splitlines()[-1] if r.stdout.strip() else r.stderr[-300:])
+code = ("import hou,os\nhou.hipFile.load('/tmp/veg_lab.hiplc',suppress_save_prompt=True,ignore_load_warnings=True)\nn=hou.node('/obj/Lily_Trim')\n"
+        "r=n.node('VX_export__height'); o=r.parm('copoutput').eval()\nos.path.exists(o) and os.remove(o)\nr.parm('execute').pressButton()\n"
+        "print('exported', os.path.exists(o), [str(e)[:300] for e in n.node('B1_height__generated_seven_bands').errors()])")
+open('/tmp/lab_export.py', 'w').write(code)
+r = subprocess.run([HY, '/tmp/lab_export.py'], capture_output=True, text=True)
+print(r.stdout.strip().splitlines()[-1] if r.stdout.strip() else r.stderr[-400:])
+ref = np.asarray(Image.open(REFP).convert('L').resize((RES, RES), Image.LANCZOS), np.float32) / 255.0
+gen = np.asarray(Image.open(B + 'maps/trim/lily_trim_height.png').convert('L'), np.float32) / 255.0
+def stats(b):
+    gx = np.abs(np.diff(b, axis=1)).mean(); gy = np.abs(np.diff(b, axis=0)).mean(); prof = b.mean(1)
+    m = b.mean(0); ac = np.fft.irfft(np.abs(np.fft.rfft(m - m.mean())) ** 2); ac = ac / (ac[0] + 1e-9); lag = int(np.argmax(ac[RES // 40:RES // 2])) + RES // 40
+    return dict(mean=float(b.mean()), std=float(b.std()), p10=float(np.percentile(b, 10)), p90=float(np.percentile(b, 90)), grad=float(gx + gy), period=lag / RES, prof=prof)
+rows = []; tiles = []
+print('%-12s | reference: mean std p10 p90 grad period | generated: mean std p10 p90 grad period | prof corr, hist dist, seam percentile' % 'band')
+for name, a, b in BANDS:
+    ya, yb = int(a * RES) + 3, int(b * RES) - 3; R = ref[ya:yb]; G = gen[ya:yb]; sr, sg = stats(R), stats(G)
+    n = min(len(sr['prof']), len(sg['prof'])); pc = float(np.corrcoef(sr['prof'][:n], sg['prof'][:n])[0, 1])
+    hd = float(np.abs(np.sort(R.ravel())[::7] - np.sort(G.ravel())[::7]).mean())
+    col = np.abs(G[:, 1:] - G[:, :-1]).mean(0); seam = float(np.abs(G[:, 0] - G[:, -1]).mean()); pct = float((col < seam).mean() * 100)
+    print('%-12s | %.2f %.2f %.2f %.2f %.3f %.3f | %.2f %.2f %.2f %.2f %.3f %.3f | %+.2f  %.3f  %.0f' % (name, sr['mean'], sr['std'], sr['p10'], sr['p90'], sr['grad'], sr['period'], sg['mean'], sg['std'], sg['p10'], sg['p90'], sg['grad'], sg['period'], pc, hd, pct))
+    rows.append(dict(band=name, ref={k: v for k, v in sr.items() if k != 'prof'}, gen={k: v for k, v in sg.items() if k != 'prof'}, profile_corr=pc, hist_dist=hd, seam_percentile=pct))
+    tiles.append(np.concatenate([R, np.ones((R.shape[0], 6), np.float32), G], axis=1))
+H = sum(t.shape[0] + 4 for t in tiles); out = np.zeros((H, tiles[0].shape[1]), np.float32); y = 0
+for t in tiles: out[y:y + t.shape[0]] = t; y += t.shape[0] + 4
+Image.fromarray((np.clip(out, 0, 1) * 255).astype(np.uint8)).save(B + 'previews/trim_lab_%s.png' % label)
+json.dump(rows, open(B + 'previews/trim_lab_%s.json' % label, 'w'), indent=1); print('saved previews/trim_lab_%s.png' % label)

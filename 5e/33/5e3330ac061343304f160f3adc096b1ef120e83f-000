@@ -1,0 +1,36 @@
+// 5 October 2026 : base colour generated FROM THE GENERATED height (never from a reference image): bands, colours measured by masks on the photographs (ref-maps/lily_colours.json). FR : couleur deduite de la height generee.
+
+// band table: v0, v1 from the top of the sheet (MeasureTrim.py)
+float V0[] = {%(v0)s}; float V1[] = {%(v1)s};
+float srgb2lin(float x) { return x <= 0.04045 ? x / 12.92 : pow((x + 0.055) / 1.055, 2.4); }
+vector lin3(float cr; float cg; float cb) { return set(srgb2lin(cr), srgb2lin(cg), srgb2lin(cb)); }
+float sm(float a; float b; float x) { float t = clamp((x - a) / (b - a), 0.0, 1.0); return t * t * (3.0 - 2.0 * t); }
+float h = p@C.x; float hf = p@C.y; float hw = p@C.z; float cav = hf - hw;
+float u = 0.5 + 0.5 * @P.x; float vt = 0.5 - 0.5 * @P.y;
+int band = 0; for (int i = 0; i < 7; i++) if (vt >= V0[i] && vt < V1[i] + 0.0001) band = i;
+float lv = (vt - V0[band]) / (V1[band] - V0[band]);                           // 0 top of the band, 1 bottom
+float hn = clamp((h - 0.30) / 0.55, 0.0, 1.0);
+float tone = 1.0 + chf("../detail_gain") * (hn - 0.5) * 0.5 + chf("../cavity_dark") * clamp(cav * 3.0, -0.5, 0.2);
+vector white = lin3(%(white)s) * chf("../white_gain"); vector flush = lin3(%(flush)s); vector mag = lin3(%(mag)s) * chf("../magenta_gain"); vector purple = lin3(%(purple)s);
+vector orange = lin3(%(orange)s); vector olive = lin3(%(olive)s); vector brown = lin3(0.32, 0.16, 0.17); vector lime = lin3(%(lime)s); vector stem = lin3(%(stem)s) * chf("../green_gain"); vector leaf = lin3(%(leaf)s) * chf("../green_gain");
+vector col = white;
+if (band == 0) {                                   // tepal inside: satin white, pink flush towards the base of the petal, veins darker
+    col = lerp(white * 0.8, white, hn); col = lerp(col, flush, sm(0.55, 1.0, lv) * chf("../pink_flush") * (0.4 + 0.6 * (1.0 - hn)));
+} else if (band == 1) {                            // tepal outside: magenta stripes in the dark of the relief, white margins, purple base
+    col = lerp(mag, white * 0.85, sm(0.38, 0.62, h)); col = lerp(col, purple, sm(0.78, 1.0, lv) * (1.0 - hn) * 0.7);
+} else if (band == 2) {                            // stamens: orange anthers on the high relief, olive filaments, brown stigma knobs
+    float knob = 0.0; for (int k = 0; k < 3; k++) { float cx = 0.13 + 0.37 * k; knob = max(knob, (1.0 - sm(0.06, 0.09, abs(u - cx))) * (1.0 - sm(0.55, 0.75, lv))); }
+    col = lerp(olive * 0.7, olive, sm(0.44, 0.52, h)); col = lerp(col, orange, sm(0.52, 0.60, h)); col = lerp(col, brown, knob * sm(0.46, 0.55, h));
+} else if (band == 3) {                            // calyx and pedicel: lime
+    col = lerp(lime * 0.65, lime, hn); col = lerp(col, stem, sm(0.75, 0.95, lv) * 0.5);
+} else if (band == 4) {                            // stem: grey green, fine hairs lighter
+    col = lerp(stem * 0.7, stem * 1.25, hn);
+} else if (band == 5) {                            // leaf: green, brighter midrib and veins
+    col = lerp(leaf * 0.55, leaf * 1.1, sm(0.30, 0.65, h));
+} else {                                           // bud: magenta in the grooves, white pink on the ridges
+    col = lerp(mag, white * 0.9, sm(0.35, 0.62, h));
+}
+col *= tone;
+vector hv = set(h, h, h);
+float mode = chf("../basecolor_mode");
+p@C = set(lerp(hv.x, col.x, mode), lerp(hv.y, col.y, mode), lerp(hv.z, col.z, mode), 1.0);

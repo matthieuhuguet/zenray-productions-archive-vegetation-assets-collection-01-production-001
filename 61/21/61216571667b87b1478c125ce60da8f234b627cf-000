@@ -1,22 +1,27 @@
-# 5 October 2026 : Copernicus graph of the LILY TRIM SHEET (/obj/Lily_Trim): the seamless height (maps/trim/trim_height_seamless_2048.png, made by MakeTrimSeamless.py from the AI sheet) is read, detail layers are derived (fine and wide blur), and the BASE COLOUR is generated FROM the height, band by band, with colours measured on the reference photographs by masks (ref-maps/lily_colours.json). The parameter basecolor_mode chooses what the FINAL base colour shows: 0 = the height itself (to look at it at once), 1 = the generated colour. Seven bands, band table in ONE place (BANDS). Eight parameters at most per folder. Usage: hython Scripts/BuildLilyTrim.py <hip> <hip out>, or live with sys.argv = ['x', 'LIVE', 'LIVE']. FR : graphe Copernicus de la trim sheet du lys.
-import hou, sys, json, os
+# 5 October 2026 : Copernicus graph of the LILY TRIM SHEET (/obj/Lily_Trim), version 2: the height is GENERATED (Scripts/TrimGen.vex, seven bands, periodic so seamless by construction), the base colour is generated from that height (Scripts/TrimColour.vex). NO image is read: the reference is only used by TrimLab.py to measure. basecolor_mode 0 shows the height in the base colour, 1 the generated colour. Eight parameters at most per folder. Usage: hython Scripts/BuildLilyTrim.py <hip> <hip out> [res], or live with sys.argv = ['x', 'LIVE', 'LIVE']. FR : graphe de la trim sheet, version procedurale.
+import hou, sys, json
 B = '/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/'
 LIVE = sys.argv[1] == 'LIVE'
 if not LIVE: hou.hipFile.load(sys.argv[1], suppress_save_prompt=True, ignore_load_warnings=True)
+RES = int(sys.argv[3]) if len(sys.argv) > 3 else 2048
 COL = json.load(open(B + 'ref-maps/lily_colours.json'))
-def c3(n, fix=None): return ', '.join('%.4f' % x for x in (fix or COL[n]['srgb']))
-BANDS = [('tepal_inner', 0.0, 0.193), ('tepal_outer', 0.193, 0.388), ('stamens', 0.388, 0.507), ('calyx', 0.507, 0.609), ('stem', 0.609, 0.725), ('leaf', 0.725, 0.837), ('bud', 0.837, 1.0)]   # v from the top, measured by MeasureTrim.py
+def c3(n): return ', '.join('%.4f' % x for x in COL[n]['srgb'])
+BANDS = [('tepal_inner', 0.0, 0.193), ('tepal_outer', 0.193, 0.388), ('stamens', 0.388, 0.507), ('calyx', 0.507, 0.609), ('stem', 0.609, 0.725), ('leaf', 0.725, 0.837), ('bud', 0.837, 1.0)]
+FIT = B + 'ref-maps/trim_fit.json'
+SPEC = {'HDA Tepals': [('a_neck', 'Inner petal neck (half width)', 0.225, 0.1, 0.4), ('a_small_w', 'Small curled petal width', 0.15, 0.05, 0.3), ('a_veins', 'Inner petal vein count', 42.0, 10.0, 90.0), ('a_vein_amp', 'Inner petal vein depth', 0.07, 0.0, 0.2), ('b_ridges', 'Outer tepal ridge count', 5.0, 2.0, 12.0), ('b_stripe', 'Outer tepal dark stripes', 1.0, 0.0, 1.5)],
+        'HDA Stamens': [('c_anther_w', 'Anther half width', 0.030, 0.015, 0.06), ('c_anther_l', 'Anther half length', 0.30, 0.15, 0.5), ('c_pollen', 'Pollen relief', 0.20, 0.0, 0.5), ('c_stigma_w', 'Stigma head half width', 0.060, 0.03, 0.12)],
+        'HDA Green': [('d_fan', 'Calyx fan spread', 1.0, 0.5, 1.4), ('e_hair', 'Stem hair strength', 0.35, 0.1, 0.8), ('f_width', 'Leaf half width', 0.36, 0.2, 0.46), ('f_wave', 'Leaf edge wave', 0.06, 0.0, 0.2), ('f_veins', 'Leaf vein count', 14.0, 4.0, 40.0), ('g_width', 'Bud half width', 0.40, 0.2, 0.48), ('g_groove', 'Bud groove depth', 0.15, 0.0, 0.4)],
+        'HDA Colour': [('basecolor_mode', 'Base colour shows (0 height, 1 generated)', 1, 0, 1), ('cavity_dark', 'Cavity darkening', 0.55, 0.0, 1.5), ('detail_gain', 'Height to tone gain', 0.7, 0.0, 1.5), ('fine_blur', 'Fine blur (px)', 3.0, 1.0, 12.0), ('wide_blur', 'Wide blur (px)', 28.0, 8.0, 80.0), ('white_gain', 'Tepal white gain', 1.0, 0.7, 1.3), ('magenta_gain', 'Magenta strength', 1.0, 0.5, 1.5), ('pink_flush', 'Pink flush at the petal base', 0.7, 0.0, 1.0)]}
+try: FITV = json.load(open(FIT))
+except Exception: FITV = {}
 obj = hou.node('/obj')
 if obj.node('Lily_Trim'): obj.node('Lily_Trim').destroy()
-net = obj.createNode('copnet', 'Lily_Trim'); net.parm('res1').set(2048); net.parm('res2').set(2048)
-# ---- interface: HDA Trim (what it shows) and HDA Colour (how the colour behaves), 8 parameters at most each
-SPEC = {'HDA Trim': [('basecolor_mode', 'Base colour shows (0 height, 1 generated)', 1, 0, 1), ('cavity_dark', 'Cavity darkening', 0.55, 0.0, 1.5), ('detail_gain', 'Height to tone gain', 0.7, 0.0, 1.5), ('fine_blur', 'Fine blur (px)', 3.0, 1.0, 12.0), ('wide_blur', 'Wide blur (px)', 28.0, 8.0, 80.0)],
-        'HDA Colour': [('white_gain', 'Tepal white gain', 1.0, 0.7, 1.3), ('magenta_gain', 'Magenta strength', 1.0, 0.5, 1.5), ('pink_flush', 'Pink flush at the petal base', 0.7, 0.0, 1.0), ('green_gain', 'Green gain', 1.0, 0.6, 1.4)]}
+net = obj.createNode('copnet', 'Lily_Trim'); net.parm('res1').set(RES); net.parm('res2').set(RES); net.parm('setborder').set(1); net.parm('border').set(3)
 ptg = net.parmTemplateGroup()
 for folder, rows in SPEC.items():
-    assert len(rows) <= 8
+    assert len(rows) <= 8, folder
     f = hou.FolderParmTemplate(folder.lower().replace(' ', '_'), folder, folder_type=hou.folderType.Simple)
-    for n, lab, dv, lo, hi in rows: f.addParmTemplate((hou.IntParmTemplate if isinstance(dv, int) else hou.FloatParmTemplate)(n, lab, 1, default_value=(dv,), min=lo, max=hi))
+    for n, lab, dv, lo, hi in rows: f.addParmTemplate((hou.IntParmTemplate if isinstance(dv, int) else hou.FloatParmTemplate)(n, lab, 1, default_value=(FITV.get(n, dv),), min=lo, max=hi))
     ptg.append(f)
 net.setParmTemplateGroup(ptg)
 def node(kind, name, inputs=(), **parms):
@@ -24,57 +29,21 @@ def node(kind, name, inputs=(), **parms):
     for k, v in parms.items(): x.parm(k).set(v)
     for i, s in enumerate(inputs): x.setInput(i, s)
     return x
-f = node('file', 'A1_height__seamless_file', filename=B + 'maps/trim/trim_height_seamless_2048.png')
-f.parm('border').set(4)   # Wrap: the layer repeats outside its frame, so the blurs read the opposite edge and the generated colour stays seamless
-net.parm('setborder').set(1); net.parm('border').set(3)   # network default border = Wrap too
-f.parm('aovs').set(1); f.parm('aov1').set('C'); f.parm('type1').set(0); f.parm('raw1').set(1)   # one AOV named C, read as MONO (the height), raw: no colour conversion
-h = f   # the seamless PNG is a one channel (mono) image: no channel extraction needed
-bf = node('blur', 'B1_detail__fine_blur', [h]); bf.parm('units').set(1); bf.parm('size_pixel').setExpression('ch("../fine_blur")')
-bw = node('blur', 'B2_detail__wide_blur', [h]); bw.parm('units').set(1); bw.parm('size_pixel').setExpression('ch("../wide_blur")')
-one = node('constant', 'B3_alpha__one'); 
-for k in ('colorr', 'colorg', 'colorb', 'colora'):
-    if one.parm(k): one.parm(k).set(1.0)
-j = node('channeljoin', 'C1_pack__height_fine_wide', [h, bf, bw, h])
-VEX = '''
-// band table: v0, v1 from the top of the sheet (MeasureTrim.py)
-float V0[] = {%(v0)s}; float V1[] = {%(v1)s};
-float srgb2lin(float x) { return x <= 0.04045 ? x / 12.92 : pow((x + 0.055) / 1.055, 2.4); }
-vector lin3(float cr; float cg; float cb) { return set(srgb2lin(cr), srgb2lin(cg), srgb2lin(cb)); }
-float sm(float a; float b; float x) { float t = clamp((x - a) / (b - a), 0.0, 1.0); return t * t * (3.0 - 2.0 * t); }
-float h = p@C.x; float hf = p@C.y; float hw = p@C.z; float cav = hf - hw;
-float u = 0.5 + 0.5 * @P.x; float vt = 0.5 - 0.5 * @P.y;
-int band = 0; for (int i = 0; i < 7; i++) if (vt >= V0[i] && vt < V1[i] + 0.0001) band = i;
-float lv = (vt - V0[band]) / (V1[band] - V0[band]);                           // 0 top of the band, 1 bottom
-float hn = clamp((h - 0.30) / 0.55, 0.0, 1.0);
-float tone = 1.0 + chf("../detail_gain") * (hn - 0.5) * 0.5 + chf("../cavity_dark") * clamp(cav * 3.0, -0.5, 0.2);
-vector white = lin3(%(white)s) * chf("../white_gain"); vector flush = lin3(%(flush)s); vector mag = lin3(%(mag)s) * chf("../magenta_gain"); vector purple = lin3(%(purple)s);
-vector orange = lin3(%(orange)s); vector olive = lin3(%(olive)s); vector brown = lin3(0.32, 0.16, 0.17); vector lime = lin3(%(lime)s); vector stem = lin3(%(stem)s) * chf("../green_gain"); vector leaf = lin3(%(leaf)s) * chf("../green_gain");
-vector col = white;
-if (band == 0) {                                   // tepal inside: satin white, pink flush towards the base of the petal, veins darker
-    col = lerp(white * 0.8, white, hn); col = lerp(col, flush, sm(0.55, 1.0, lv) * chf("../pink_flush") * (0.4 + 0.6 * (1.0 - hn)));
-} else if (band == 1) {                            // tepal outside: magenta stripes in the dark of the relief, white margins, purple base
-    col = lerp(mag, white * 0.85, sm(0.38, 0.62, h)); col = lerp(col, purple, sm(0.78, 1.0, lv) * (1.0 - hn) * 0.7);
-} else if (band == 2) {                            // stamens: orange anthers on the high relief, olive filaments, brown stigma knobs
-    float knob = 0.0; for (int k = 0; k < 3; k++) { float cx = 0.13 + 0.37 * k; knob = max(knob, (1.0 - sm(0.06, 0.09, abs(u - cx))) * (1.0 - sm(0.55, 0.75, lv))); }
-    col = lerp(olive * 0.7, olive, sm(0.44, 0.52, h)); col = lerp(col, orange, sm(0.52, 0.60, h)); col = lerp(col, brown, knob * sm(0.46, 0.55, h));
-} else if (band == 3) {                            // calyx and pedicel: lime
-    col = lerp(lime * 0.65, lime, hn); col = lerp(col, stem, sm(0.75, 0.95, lv) * 0.5);
-} else if (band == 4) {                            // stem: grey green, fine hairs lighter
-    col = lerp(stem * 0.7, stem * 1.25, hn);
-} else if (band == 5) {                            // leaf: green, brighter midrib and veins
-    col = lerp(leaf * 0.55, leaf * 1.1, sm(0.30, 0.65, h));
-} else {                                           // bud: magenta in the grooves, white pink on the ridges
-    col = lerp(mag, white * 0.9, sm(0.35, 0.62, h));
-}
-col *= tone;
-vector hv = set(h, h, h);
-float mode = chf("../basecolor_mode");
-p@C = set(lerp(hv.x, col.x, mode), lerp(hv.y, col.y, mode), lerp(hv.z, col.z, mode), 1.0);
-''' % dict(v0=', '.join('%.4f' % b[1] for b in BANDS), v1=', '.join('%.4f' % b[2] for b in BANDS), white=c3('tepal_white'), flush=c3('tepal_pink_flush'), mag=c3('tepal_magenta'), purple=c3('tepal_purple_base'), orange=c3('anther_orange'), olive=c3('filament_olive'), lime=c3('pedicel_lime'), stem=c3('stem_grey_green'), leaf=c3('leaf_green'))
-w = node('wrangle', 'D1_colour__generated_from_height', [j]); w.parm('vexsnippet').set(VEX)
-fin = node('null', 'FINAL_BASECOLOR', [w]); finh = node('null', 'FINAL_HEIGHT', [h])
+canvas = node('constant', 'A1_canvas__size_only')
+for k in ('colorr', 'colorg', 'colorb'):
+    if canvas.parm(k): canvas.parm(k).set(0.0)
+v0 = ', '.join('%.4f' % b[1] for b in BANDS); v1 = ', '.join('%.4f' % b[2] for b in BANDS)
+gen = node('wrangle', 'B1_height__generated_seven_bands', [canvas]); gen.parm('vexsnippet').set(open(B + 'Scripts/TrimGen.vex').read() % dict(v0=v0, v1=v1))
+hm = node('channelextract', 'B2_height__mono', [gen], channel=0)
+bf = node('blur', 'C1_detail__fine_blur', [hm]); bf.parm('units').set(1); bf.parm('size_pixel').setExpression('ch("../fine_blur")')
+bw = node('blur', 'C2_detail__wide_blur', [hm]); bw.parm('units').set(1); bw.parm('size_pixel').setExpression('ch("../wide_blur")')
+pk = node('channeljoin', 'C3_pack__height_fine_wide', [hm, bf, bw, hm])
+col = node('wrangle', 'D1_colour__generated_from_height', [pk])
+col.parm('vexsnippet').set(open(B + 'Scripts/TrimColour.vex').read() % dict(v0=v0, v1=v1, white=c3('tepal_white'), flush=c3('tepal_pink_flush'), mag=c3('tepal_magenta'), purple=c3('tepal_purple_base'), orange=c3('anther_orange'), olive=c3('filament_olive'), lime=c3('pedicel_lime'), stem=c3('stem_grey_green'), leaf=c3('leaf_green')))
+fin = node('null', 'FINAL_BASECOLOR', [col]); finh = node('null', 'FINAL_HEIGHT', [hm])
 for nm, src, path in (('VX_export__basecolor', fin, 'maps/trim/lily_trim_basecolor.png'), ('VX_export__height', finh, 'maps/trim/lily_trim_height.png')):
     r = node('rop_image', nm, [src]); r.parm('copoutput').set(B + path)
-net.layoutChildren(); bad = [(c.name(), list(c.errors())[:2]) for c in net.children() if c.errors()]
+net.layoutChildren(); bad = [(c.name(), [str(e)[:200] for e in c.errors()]) for c in net.children()]
+bad = [b for b in bad if b[1]]
 print('nodes', len(net.children()), 'errors', bad)
 if not LIVE: hou.hipFile.save(sys.argv[2])

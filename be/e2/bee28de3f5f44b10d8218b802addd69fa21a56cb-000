@@ -1,0 +1,68 @@
+// 5 October 2026 : PROCEDURAL height of the lily trim sheet, seven bands, no image read anywhere. Every pattern is periodic in u (an integer number of repeats per width), so the sheet is seamless by construction. The numbers come from the measurement of the reference (MeasureTrimBands.py), the reference itself is never an input. FR : height procedurale, aucune image lue.
+#define PI 3.14159265
+float sm(float a; float b; float x) { float t = clamp((x - a) / (b - a), 0.0, 1.0); return t * t * (3.0 - 2.0 * t); }
+float pn(float x; float y; float z; float kx) { return 0.5 + 0.5 * pnoise(set(x * kx, y, z), set(kx, 1000.0, 1000.0)); }   // periodic noise 0..1: kx lattice cells across the width
+float fr(float x) { return x - floor(x); }
+float wrapd(float a; float b) { float d = abs(a - b); return min(d, 1.0 - d); }
+float u = 0.5 + 0.5 * @P.x; float vt = 0.5 - 0.5 * @P.y;
+float V0[] = {%(v0)s}; float V1[] = {%(v1)s};
+int band = 0; for (int i = 0; i < 7; i++) if (vt >= V0[i] && vt < V1[i] + 0.0001) band = i;
+float lv = clamp((vt - V0[band]) / (V1[band] - V0[band]), 0.0, 1.0);          // 0 top of the band, 1 bottom
+float h = 0.4;
+if (band == 0) {                                   // ---- A tepal inside: big petals with a fan of veins, small curled petals between them, 3 cells
+    float cx = fr(u * 3.0) - 0.5; float g = 0.30;
+    float wb = chf("../a_neck") + (0.5 - chf("../a_neck")) * sm(0.08, 0.9, lv);
+    float mb = 1.0 - sm(wb - 0.012, wb + 0.012, abs(cx)); float tb = abs(cx) / max(wb, 0.01);
+    float ang = atan2(cx, 1.35 - lv * 0.95); float veins = pow(abs(sin(ang * chf("../a_veins"))), 0.6);
+    float hb = 0.60 + 0.10 * (1.0 - tb * tb) + chf("../a_vein_amp") * (veins - 0.5) - 0.08 * exp(-pow(cx / 0.010, 2.0)) + 0.05 * (1.0 - sm(0.0, 0.04, wb - abs(cx)));
+    float cs = 0.5 - abs(cx); float ws = chf("../a_small_w") * pow(sin(PI * clamp(0.03 + 0.94 * lv, 0.0, 1.0)), 0.75);
+    float ms = 1.0 - sm(ws - 0.012, ws + 0.012, cs);
+    float hs = 0.70 + 0.10 * (cs / max(ws, 0.01)) + 0.03 * (pow(abs(sin(cs * 90.0 + lv * 6.0)), 0.7) - 0.5);
+    h = lerp(g, hs, ms); h = lerp(h, hb, mb); h += 0.012 * (pn(u, vt * 90.0, 1.1, 96.0) - 0.5);
+} else if (band == 1) {                            // ---- B tepal outside: wedges narrowing to the base, parallel ridges, dark stripes, arched gaps, 3 cells
+    float cx = fr(u * 3.0) - 0.5; int cell = int(floor(u * 3.0));
+    float ww = 0.50 * pow(1.0 - lv * 0.97, 0.9) + 0.045; float inW = 1.0 - sm(ww - 0.012, ww + 0.012, abs(cx)); float t = cx / ww;
+    float ridges = 0.5 + 0.5 * cos(t * PI * chf("../b_ridges")); float stripe = exp(-pow((abs(t) - 0.45) / 0.14, 2.0)) * (cell != 1 ? 1.0 : 0.0) * chf("../b_stripe");
+    float hw = 0.58 + 0.12 * ridges - 0.22 * stripe + 0.05 * (1.0 - abs(t)) + 0.02 * (pn(u, vt * 300.0, 2.2, 150.0) - 0.5);
+    float bg = 0.27 + 0.07 * abs(cx) + 0.015 * pn(u, vt * 40.0, 3.3, 60.0);
+    h = lerp(bg, hw, inW);
+} else if (band == 2) {                            // ---- C stamens: anthers with a pollen relief, thin filaments, a stigma with a stalk, 3 cells
+    float s = fr(u * 3.0); h = 0.40 + 0.03 * pn(u, vt * 30.0, 4.4, 30.0);
+    float AX[] = {0.06, 0.18, 0.55, 0.70, 0.86}; float FX[] = {0.27, 0.45, 0.97};
+    for (int i = 0; i < 5; i++) {
+        float dx = wrapd(s, AX[i]) * 3.0 * 0.333; float ex = dx / chf("../c_anther_w"); float ey = (lv - 0.30) / chf("../c_anther_l"); float r = sqrt(ex * ex + ey * ey);
+        float m = 1.0 - sm(0.88, 1.0, r); float pol = pn(u, vt, 5.5, 400.0) * 0.5 + 0.5 * noise(set(u * 420.0, vt * 420.0, 6.1));
+        float hh = 0.62 + 0.16 * (1.0 - r * r) + chf("../c_pollen") * (pol - 0.5); h = max(h, lerp(h, hh, m));
+        float st = (1.0 - sm(0.006, 0.010, dx)) * sm(0.45, 0.50, lv); h = max(h, lerp(h, 0.55, st));
+    }
+    for (int i = 0; i < 3; i++) {
+        float dx = wrapd(s, FX[i]) * 3.0 * 0.333; float top = 0.36 + 0.06 * float(i); float ex = dx / 0.010; float ey = (lv - top) / 0.07; float r = sqrt(ex * ex + ey * ey);
+        float m = max(1.0 - sm(0.9, 1.0, r), (1.0 - sm(0.006, 0.009, dx)) * sm(top, top + 0.02, lv)); h = max(h, lerp(h, 0.56, m));
+    }
+    { float dx = wrapd(s, 0.37) * 3.0 * 0.333; float stw = 0.020 + 0.012 * sm(0.5, 1.0, lv);
+      float ex = dx / chf("../c_stigma_w"); float ey = (lv - 0.15) / 0.11; float r = sqrt(ex * ex + ey * ey);
+      float mh = 1.0 - sm(0.9, 1.0, r); float ms = (1.0 - sm(stw - 0.003, stw + 0.003, dx)) * sm(0.2, 0.26, lv);
+      float rough = noise(set(u * 300.0, vt * 300.0, 7.7));
+      h = max(h, lerp(h, 0.66 + 0.10 * (1.0 - r * r) + 0.10 * (rough - 0.5), mh)); h = max(h, lerp(h, 0.58 + 0.05 * (1.0 - dx / stw), ms)); }
+} else if (band == 3) {                            // ---- D calyx and pedicel: seven fans on a short stalk, arched gaps
+    float s = fr(u * 7.0); float cx = s - 0.5; float fan = 0.10 + 0.40 * pow(1.0 - clamp(lv / 0.72, 0.0, 1.0), 1.7) * chf("../d_fan");
+    float w = lv < 0.72 ? fan : 0.125; float inW = 1.0 - sm(w - 0.012, w + 0.012, abs(cx)); float t = cx / max(w, 0.02);
+    float ribs = 0.5 + 0.5 * cos(t * PI * 5.0); float hh = 0.52 + 0.10 * ribs + 0.05 * (1.0 - abs(t)) + 0.02 * (pn(u, vt * 200.0, 8.8, 140.0) - 0.5);
+    float cup = lv > 0.72 ? 0.06 * sm(0.72, 0.76, lv) : 0.0; float bg = 0.30 + 0.06 * abs(cx);
+    h = lerp(bg, hh + cup, inW);
+} else if (band == 4) {                            // ---- E stem: fibres along the length, fine hairs, small nodules
+    float f1 = pn(u, lv * 150.0, 9.9, 80.0); float f2 = pn(u + lv * 0.02, lv * 260.0, 10.1, 160.0); float dots = pow(pn(u, lv * 60.0, 11.3, 220.0), 6.0);
+    h = 0.40 + chf("../e_hair") * (0.55 * f1 + 0.45 * f2 - 0.5) + 0.20 * dots + 0.05 * (1.0 - abs(2.0 * lv - 1.0));
+} else if (band == 5) {                            // ---- F leaf: lens with a wavy edge, midrib, oblique veins, 2 cells
+    float s = fr(u * 2.0 + 0.5); float w = chf("../f_width") * pow(sin(PI * clamp(s, 0.0, 1.0)), 0.7) * (1.0 + chf("../f_wave") * sin(s * PI * 14.0));
+    float y = abs(lv - 0.5); float inW = 1.0 - sm(w - 0.012, w + 0.012, y); float t = y / max(w, 0.02);
+    float vein = 0.5 + 0.5 * cos((y * 1.0 + s * 0.9) * 2.0 * PI * chf("../f_veins"));
+    float hh = 0.52 + 0.06 * (1.0 - t * t) + 0.04 * vein - 0.10 * sm(0.014, 0.0, y) * 0.0 + 0.14 * (1.0 - sm(0.0, 0.016, y)) + 0.05 * (1.0 - sm(0.0, 0.03, w - y));
+    h = lerp(0.36 + 0.03 * y, hh, inW);
+} else {                                           // ---- G bud: three lobed lens with grooves, 3 cells
+    float s = fr(u * 3.0); float w = chf("../g_width") * pow(sin(PI * clamp(s, 0.0, 1.0)), 0.85); float y = lv - 0.5; float inW = 1.0 - sm(w - 0.012, w + 0.012, abs(y)); float t = y / max(w, 0.02);
+    float dome = 0.50 + 0.20 * (1.0 - t * t); float groove = exp(-pow((abs(t) - 0.34) / 0.05, 2.0)) * chf("../g_groove");
+    float hh = dome - groove + 0.02 * (pn(u, vt * 120.0, 12.7, 90.0) - 0.5) + 0.04 * (1.0 - sm(0.0, 0.04, w - abs(y)));
+    h = lerp(0.36, hh, inW);
+}
+p@C = set(h, h, h, 1.0);
