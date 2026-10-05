@@ -15,6 +15,22 @@ def subnet_band(net, k):
     sn = net.createNode('subnet', 'Band%d' % k); out = BUILDERS[k](sn)
     out = T.node(sn, 'channelextract', 'OUT_mono', [out], channel=0)   # a subnet hands back RGBA: keep the first channel so every consumer reads MONO
     on = sn.createNode('null', 'OUT'); on.setInput(0, out); [c for c in sn.children() if c.type().name() == 'output'][0].setInput(0, on); return sn
+def tidy(net, bands, maps):
+    """6 October 2026 (Matthieu: tidy the graph, align the final maps in one column to flip between them quickly). Columns, left to right: the seven band subnets (x 0), the windows and assembly (x 8 to 18), the colour chain (x 26), the FINAL MAPS column (x 40: height, base colour, normal, AO, roughness, opacity, then the VIEW switch). Network boxes named per column. FR : rangement du graphe."""
+    for n in list(net.networkBoxes()): n.destroy()
+    for k, sn in enumerate(bands): sn.setPosition(hou.Vector2(0, -3.2 * k))
+    groups = {'T': (8, 4.0, 'WINDOWS AND HEIGHT ASSEMBLY'), 'O': (18, 3.0, 'OPACITY MASKS'), 'U': (26, 4.0, 'BASE COLOUR'), 'N': (34, 3.0, 'NORMAL AND AO'), 'R': (34, 3.0, 'ROUGHNESS')}
+    col = {}
+    for n in net.children():
+        if n in bands or n.name().startswith('Band') or n.name() in [m.name() for m in maps.values()]: continue
+        ch = n.name()[0]; x, dy, title = groups.get(ch, (14, 2.5, 'OTHER'))
+        i = col.setdefault(ch, 0); col[ch] = i + 1; n.setPosition(hou.Vector2(x + 2.5 * (i // 28), -dy * 0.35 * (i % 28)))
+    for j, nm in enumerate(('height', 'basecolor', 'normal', 'ao', 'roughness', 'opacity')): maps[nm].setPosition(hou.Vector2(44, -3.2 * j)); maps[nm].setColor(hou.Color((0.4, 0.75, 0.45)))
+    maps['view'].setPosition(hou.Vector2(52, -8)); maps['view'].setColor(hou.Color((1.0, 0.75, 0.2)))
+    for nm, (title, color, nodes) in {'bands': ('SEVEN BAND SUBNETS, ONE PER BAND', (0.5, 0.7, 1.0), bands), 'maps': ('FINAL MAPS: height, base colour, normal, AO, roughness, opacity (aligned) and the VIEW switch', (0.4, 0.85, 0.5), list(maps.values()))}.items():
+        b = net.createNetworkBox(nm); b.setComment(title); b.setColor(hou.Color(color))
+        for n in nodes: b.addNode(n)
+        b.fitAroundContents()
 def build(net, with_maps=True):
     ry = T.node(net, 'ramp', 'T00_ramp__down_y', signature='f1', rotation=90.0); rx3 = T.node(net, 'ramp', 'T01_ramp__three_cycles_x', signature='f1', cycles=3.0, method=1)
     EJ = {0: 0.0, 1: 0.016, 2: 0.008, 3: 0.008, 4: 0.008, 5: 0.008, 6: 0.008, 7: 0.0}     # half width of the cross fade at each junction (canvas): wide between the petal band and the outer petal band (Matthieu, 6 October 2026: soft transition between the two pinks)
@@ -39,7 +55,7 @@ def build(net, with_maps=True):
         m = T.node(net, 'monotorgb', 'U1%d_colour_band%d' % (k, k), [bands[k]]); m.parm('ramp').set(color_ramp(keys))
         if k == 6:
             gmask = T.lin(net, 'U60_ground_mask', B6.opacity(net, ry, rx3), 0.0, 1.0, 1.0, 0.0)
-            m = T.node(net, 'blend', 'U61_ground', [m, flat_colour(net, 'U61a_dark', ry, (0.17, 0.18, 0.16)), gmask], mode=0)
+            m = T.node(net, 'blend', 'U61_ground', [m, flat_colour(net, 'U61a_dark', ry, (0.62, 0.66, 0.40)), gmask], mode=0)
         if k == 2:
             ax = T.mix(net, 'U20_ax', T.lin(net, 'U20a_cx', rx3, 0.0, 1.0, -1.0 / 6, 1.0 / 6), T.const(net, 'U20b_zero', ry, 0.0), 9)
             lvb = T.lin(net, 'U21_lv_band2', ry, 0.388, 0.507, 0.0, 1.0)
@@ -53,6 +69,9 @@ def build(net, with_maps=True):
         if k == 0:
             lv0 = T.lin(net, 'U05_lv_band0', ry, 0.0, 0.193, 0.0, 1.0)
             m = T.node(net, 'blend', 'U06_pink_to_base', [m, flat_colour(net, 'U06a_pink', ry, (0.80, 0.50, 0.58)), T.lin(net, 'U06b_amount', T.smooth(net, 'U06c', lv0, 0.45, 1.0), 0.0, 1.0, 0.0, 0.55)], mode=0)   # the petal turns pink toward its base, where it meets the outer petal
+        if k in (0, 5):     # colour PADDING: the part that opacity cuts away gets the colour of the object edge (no dark or pink halo at the cut)
+            pad_rgb = (0.90, 0.84, 0.84) if k == 0 else (0.30, 0.45, 0.20)
+            m = T.node(net, 'blend', 'U7%d_padding' % k, [m, flat_colour(net, 'U7%da_pad' % k, ry, pad_rgb), T.lin(net, 'U7%db_outside' % k, (B0.opacity(net, ry, rx3) if k == 0 else B56.leaf_opacity(net, ry, rx3)), 0.0, 1.0, 1.0, 0.0)], mode=0)
         bw = T.mix(net, 'U3%d_colour%d_windowed' % (k, k), m, wins[k], 5); rgb = bw if rgb is None else T.mix(net, 'U4%d_colour_plus_band%d' % (k, k), rgb, bw, 3)
     base = T.node(net, 'null', 'BASECOLOR', [rgb])
     nrm = T.node(net, 'null', 'NORMAL', [T.node(net, 'heighttonormal', 'N10_normal', [fin], scale=2.2)])
@@ -62,12 +81,25 @@ def build(net, with_maps=True):
         c = T.mix(net, 'R1%d_level_band%d' % (k, k), T.const(net, 'R0%d_const' % k, ry, ROUGH[k]), wins[k], 5); lvl = c if lvl is None else T.mix(net, 'R2%d_level_plus_band%d' % (k, k), lvl, c, 3)
     crev = T.lin(net, 'R30_crevice', fin, 0.0, 1.0, 0.18, -0.20)          # low height = rougher, high = smoother
     rough = T.node(net, 'null', 'ROUGHNESS', [T.node(net, 'clamp', 'R40_clamp', [T.mix(net, 'R31_rough', lvl, crev, 3)])])
+    hard = []                                                       # opacity must NOT cross fade between bands: hard windows of 2 px
+    for k, (a_, b_) in enumerate(EDGES):
+        eh = 0.0010
+        up = T.smooth(net, 'OW%d_in' % k, ry, a_ - eh, a_ + eh) if k > 0 else T.const(net, 'OW%d_in' % k, ry, 1.0)
+        dn = T.smooth(net, 'OW%d_out' % k, ry, b_ - eh, b_ + eh, 1.0, 0.0) if k < 6 else T.const(net, 'OW%d_out' % k, ry, 1.0)
+        hard.append(T.mix(net, 'OW%d' % k, up, dn, 5))
     masks = {0: B0.opacity(net, ry, rx3), 5: B56.leaf_opacity(net, ry, rx3), 6: B6.opacity(net, ry, rx3)}      # petals, leaf lens and buds are cut out; every other band is opaque
     acc = None
     for k in range(7):
-        mk = masks.get(k, T.const(net, 'O1%d_one' % k, ry, 1.0)); c = T.mix(net, 'O2%d_mask_band%d' % (k, k), mk, wins[k], 5); acc = c if acc is None else T.mix(net, 'O3%d_plus_band%d' % (k, k), acc, c, 3)
+        mk = masks.get(k, T.const(net, 'O1%d_one' % k, ry, 1.0)); c = T.mix(net, 'O2%d_mask_band%d' % (k, k), mk, hard[k], 5); acc = c if acc is None else T.mix(net, 'O3%d_plus_band%d' % (k, k), acc, c, 3)
     opac = T.node(net, 'null', 'OPACITY', [acc])
-    return dict(height=fin, basecolor=base, normal=nrm, ao=ao, roughness=rough, opacity=opac)
+    maps = dict(height=fin, basecolor=base, normal=nrm, ao=ao, roughness=rough, opacity=opac)
+    sw_in = []
+    for nm in ('height', 'basecolor', 'normal', 'ao', 'roughness', 'opacity'):
+        src = maps[nm]; sw_in.append(src if nm in ('basecolor', 'normal') else T.node(net, 'monotorgb', 'V0_%s_as_rgb' % nm, [src]))      # one signature (RGB) so the switch can flip between all maps
+    view = T.node(net, 'switch', 'VIEW_switch_between_maps', sw_in)
+    maps['view'] = view
+    tidy(net, bands, maps)
+    return maps
 if __name__ == '__main__':
     hou.hipFile.clear(suppress_save_prompt=True); net = hou.node('/obj').createNode('copnet', 'Lily_Trim_test'); res = int(sys.argv[3]) if len(sys.argv) > 3 else 2048
     outs = build(net); print('nodes', len(net.children()), 'errors', [(c.name(), str(c.errors())[:100]) for c in net.children() if c.errors()][:4])
