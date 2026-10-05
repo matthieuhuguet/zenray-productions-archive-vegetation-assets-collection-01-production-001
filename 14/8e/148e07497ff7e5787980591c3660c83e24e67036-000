@@ -1,0 +1,93 @@
+{
+  "component": "Eucalyptus",
+  "version": "v007",
+  "label": "raw02_measured_axes_tricolor",
+  "timestamp": "2026-10-05 14:49:18",
+  "saved_at_iso": "2026-10-05T14:49:18+02:00",
+  "src_hip": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/hip/VegetationCollection01.hiplc",
+  "node_path": "/obj/Eucalyptus",
+  "children": [
+    {
+      "name": "M_components",
+      "type": "merge"
+    },
+    {
+      "name": "N_normals",
+      "type": "normal"
+    },
+    {
+      "name": "OUT_eucalyptus",
+      "type": "null"
+    },
+    {
+      "name": "TRUNK_point_vop",
+      "type": "attribvop"
+    },
+    {
+      "name": "C1_measured_axis",
+      "type": "attribwrangle"
+    },
+    {
+      "name": "C1_resample_skeleton",
+      "type": "resample"
+    },
+    {
+      "name": "C1_sweep_forks",
+      "type": "sweep::2.0"
+    },
+    {
+      "name": "C1_point_normals",
+      "type": "normal"
+    },
+    {
+      "name": "C1_growth_ridges",
+      "type": "attribwrangle"
+    },
+    {
+      "name": "C3_measured_shoots",
+      "type": "attribwrangle"
+    },
+    {
+      "name": "C3_sweep_twigs",
+      "type": "sweep::2.0"
+    },
+    {
+      "name": "C3_twig_colour",
+      "type": "attribwrangle"
+    },
+    {
+      "name": "C4_attached_leaf_points",
+      "type": "attribwrangle"
+    },
+    {
+      "name": "C4_lanceolate_leaf",
+      "type": "attribwrangle"
+    },
+    {
+      "name": "C4_copy_leaves",
+      "type": "copytopoints::2.0"
+    },
+    {
+      "name": "C1_semantic_roles",
+      "type": "attribwrangle"
+    }
+  ],
+  "external_inputs": [],
+  "hip_file": "graph.hiplc",
+  "proof_geo": {
+    "points": 1162580,
+    "prims": 732336,
+    "bbox": [
+      [
+        -1.8203893899917603,
+        -0.2134517878293991,
+        -2.582242965698242
+      ],
+      [
+        5.525103569030762,
+        7.967586517333984,
+        3.810288667678833
+      ]
+    ]
+  }
+}

@@ -1,0 +1,101 @@
+{
+  "component": "Eucalyptus",
+  "version": "v008",
+  "label": "raw02_instanced_reference_scale_leaves",
+  "timestamp": "2026-10-05 17:26:07",
+  "saved_at_iso": "2026-10-05T17:26:07+02:00",
+  "src_hip": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/hip/VegetationCollection01.hiplc",
+  "node_path": "/obj/Eucalyptus",
+  "children": [
+    {
+      "name": "M_components",
+      "type": "merge"
+    },
+    {
+      "name": "N_normals",
+      "type": "normal"
+    },
+    {
+      "name": "OUT_eucalyptus",
+      "type": "null"
+    },
+    {
+      "name": "TRUNK_point_vop",
+      "type": "attribvop"
+    },
+    {
+      "name": "C1_measured_axis",
+      "type": "attribwrangle"
+    },
+    {
+      "name": "C1_resample_skeleton",
+      "type": "resample"
+    },
+    {
+      "name": "C1_sweep_forks",
+      "type": "sweep::2.0"
+    },
+    {
+      "name": "C1_point_normals",
+      "type": "normal"
+    },
+    {
+      "name": "C1_growth_ridges",
+      "type": "attribwrangle"
+    },
+    {
+      "name": "C3_measured_shoots",
+      "type": "attribwrangle"
+    },
+    {
+      "name": "C3_sweep_twigs",
+      "type": "sweep::2.0"
+    },
+    {
+      "name": "C3_twig_colour",
+      "type": "attribwrangle"
+    },
+    {
+      "name": "C4_attached_leaf_points",
+      "type": "attribwrangle"
+    },
+    {
+      "name": "C4_lanceolate_leaf",
+      "type": "attribwrangle"
+    },
+    {
+      "name": "C4_copy_leaves",
+      "type": "copytopoints::2.0"
+    },
+    {
+      "name": "C1_semantic_roles",
+      "type": "attribwrangle"
+    },
+    {
+      "name": "C1_surface_attributes",
+      "type": "attribwrangle"
+    },
+    {
+      "name": "C4_leaf_roles",
+      "type": "attribwrangle"
+    }
+  ],
+  "external_inputs": [],
+  "hip_file": "graph.hiplc",
+  "proof_geo": {
+    "points": 641406,
+    "prims": 608556,
+    "bbox": [
+      [
+        -1.7530628442764282,
+        -0.24473482370376587,
+        -2.498567581176758
+      ],
+      [
+        5.458240509033203,
+        7.987680435180664,
+        3.766792058944702
+      ]
+    ]
+  }
+}

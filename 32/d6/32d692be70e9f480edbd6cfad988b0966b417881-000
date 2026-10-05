@@ -1,0 +1,26 @@
+# 5 October 2026 : ablation for the version 2 big petal. For every layer node (_added) of the listed boxes, bypass it and report the change of the mean tone and of the detail energy on the central cell, plus the change of the structure error to the reference. FR : ablation de la version 2.
+import hou, sys, os, numpy as np
+from PIL import Image
+from PIL import ImageFilter
+def blur(x, sg): return np.asarray(Image.fromarray(np.clip(x * 255, 0, 255).astype(np.uint8)).filter(ImageFilter.GaussianBlur(sg)), np.float32) / 255
+sys.path.insert(0, '/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/Scripts')
+import TrimNodes as T, BuildBand0V2 as V
+RES = 1024; H = int(0.193 * RES)
+hou.hipFile.clear(suppress_save_prompt=True)
+net = hou.node('/obj').createNode('copnet', 'abl'); out = V.build(net)
+ref = np.asarray(Image.open('/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/refs/flower-sheets/trimsheet-height-flower.png').convert('L').resize((RES, RES), Image.LANCZOS), np.float32)[:H] / 255
+ref = (ref + ref[:, ::-1]) / 2; a, b = RES // 3, 2 * RES // 3 + 1; refc = ref[:, a:b]
+def render():
+    p = '/tmp/ablv2.png'; os.path.exists(p) and os.remove(p)
+    r = net.node('abl_rop') or net.createNode('rop_image', 'abl_rop'); r.setInput(0, out); r.parm('copoutput').set(p); r.parm('colorconversion').set(2); r.parm('setres').set(1); r.parm('res1').set(RES); r.parm('res2').set(RES); r.parm('execute').pressButton()
+    return np.asarray(Image.open(p).convert('L'), np.float32)[:H, a:b] / 255
+def grad(x): return float(np.abs(np.diff(x, axis=1)).mean() + np.abs(np.diff(x, axis=0)).mean())
+def err(x): return float(np.abs(blur(x, 2) - blur(refc, 2)).mean())
+base = render(); m0, g0, e0 = base.mean(), grad(base), err(base)
+print('base mean %.3f grad %.4f structure err %.4f (reference grad %.4f mean %.3f)' % (m0, g0, e0, grad(refc), refc.mean()))
+tags = tuple(sys.argv[1:]) or ('J',)
+rows = []
+for n in [c for c in net.children() if c.name().endswith('_added') and c.name()[0] in tags]:
+    n.bypass(True); x = render(); n.bypass(False); rows.append((x.mean() - m0, grad(x) - g0, err(x) - e0, n.name()))
+print('%8s %8s %8s  (change when the layer is REMOVED)' % ('dmean', 'dgrad', 'derr'))
+for r in sorted(rows, key=lambda r: r[2], reverse=True): print('%+8.3f %+8.4f %+8.4f  %s' % r)

@@ -1,0 +1,50 @@
+# 5 October 2026 : Copernicus graph of the LILY TRIM SHEET HEIGHT (/obj/Lily_Trim), version 3, phase 1 of the two phase rule: SEVEN BANDS x 64 NODES (448 small wrangle COPs, Scripts/TrimStages.py) merged by maximum. The height is GENERATED, no image is read; the base colour output simply SHOWS the height (Matthieu, 5 October 2026: height applied as base colour to see the nuances, no colour yet). Every band pattern is periodic in u, so seamless by construction. Eight parameters at most per folder. Usage: hython Scripts/BuildLilyTrim.py <hip> <hip out> [res], or live with sys.argv = ['x', 'LIVE', 'LIVE', res]. FR : graphe de la height de la trim sheet, 7 bandes de 64 noeuds.
+import hou, sys, json, os
+sys.path.insert(0, '/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/Scripts')
+import importlib, TrimStages; importlib.reload(TrimStages)
+B = '/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/'
+LIVE = sys.argv[1] == 'LIVE'
+if not LIVE: hou.hipFile.load(sys.argv[1], suppress_save_prompt=True, ignore_load_warnings=True)
+RES = int(sys.argv[3]) if len(sys.argv) > 3 else 2048
+BANDS = [('tepal_inner', 0.0, 0.193, 'A', (0.85, 0.85, 0.9)), ('tepal_outer', 0.193, 0.388, 'B', (0.9, 0.6, 0.75)), ('stamens', 0.388, 0.507, 'C', (0.95, 0.65, 0.3)), ('calyx', 0.507, 0.609, 'D', (0.6, 0.85, 0.4)), ('stem', 0.609, 0.725, 'E', (0.5, 0.7, 0.45)), ('leaf', 0.725, 0.837, 'F', (0.3, 0.75, 0.35)), ('bud', 0.837, 1.0, 'G', (0.85, 0.5, 0.65))]
+SPEC = {'HDA Tepals': [('a_neck', 'Inner petal neck (half width)', 0.225, 0.08, 0.45), ('a_small_w', 'Small curled petal width', 0.15, 0.04, 0.32), ('a_open', 'Inner petal opening curve', 1.0, 0.4, 2.5), ('b_w0', 'Outer wedge width', 0.50, 0.25, 0.7), ('b_pow', 'Outer wedge taper curve', 0.9, 0.3, 2.5), ('b_stripe', 'Outer tepal dark stripes', 1.0, 0.0, 1.5)],
+        'HDA Stamens': [('c_anther_w', 'Anther half width', 0.030, 0.015, 0.06), ('c_anther_l', 'Anther half length', 0.30, 0.15, 0.5), ('c_pollen', 'Pollen relief', 0.20, 0.0, 0.5), ('c_stigma_w', 'Stigma head half width', 0.060, 0.03, 0.12)],
+        'HDA Green': [('d_fan', 'Calyx fan spread', 1.0, 0.5, 1.4), ('f_width', 'Leaf half width', 0.36, 0.2, 0.46), ('f_wave', 'Leaf edge wave', 0.06, 0.0, 0.2), ('g_width', 'Bud half width', 0.40, 0.2, 0.48), ('g_groove', 'Bud groove depth', 0.15, 0.0, 0.4)]}
+try: FITV = json.load(open(B + 'ref-maps/trim_fit.json'))
+except Exception: FITV = {}
+obj = hou.node('/obj')
+if obj.node('Lily_Trim'): obj.node('Lily_Trim').destroy()
+net = obj.createNode('copnet', 'Lily_Trim'); net.parm('res1').set(RES); net.parm('res2').set(RES); net.parm('setborder').set(1); net.parm('border').set(3)
+ptg = net.parmTemplateGroup()
+for folder, rows in SPEC.items():
+    assert len(rows) <= 8, folder
+    f = hou.FolderParmTemplate(folder.lower().replace(' ', '_'), folder, folder_type=hou.folderType.Simple)
+    for n, lab, dv, lo, hi in rows: f.addParmTemplate(hou.FloatParmTemplate(n, lab, 1, default_value=(FITV.get(n, dv),), min=lo, max=hi))
+    ptg.append(f)
+net.setParmTemplateGroup(ptg)
+v0 = ', '.join('%.4f' % b[1] for b in BANDS); v1 = ', '.join('%.4f' % b[2] for b in BANDS)
+canvas = net.createNode('constant', 'A00_canvas__size_only'); canvas.setPosition(hou.Vector2(-4, 0))
+for k in ('colorr', 'colorg', 'colorb'):
+    if canvas.parm(k): canvas.parm(k).set(0.0)
+tails = []; total = 0
+for bi, (bname, a, b, L, color) in enumerate(BANDS):
+    prev = canvas; uses_occ = bi in (0, 1, 3, 5, 6); head0 = TrimStages.HEAD % dict(v0=v0, v1=v1, bid=bi, occ=(TrimStages.occ_code(bi) + '\nfloat OCV = occ(OCC, cellx, lv);') if uses_occ else 'float OCV = 0.0;'); head1 = TrimStages.HEAD % dict(v0=v0, v1=v1, bid=bi, occ='float OCV = p@C.y;   // the measured occupancy is computed once, in the first node of the band, and carried in the green channel'); pre0 = TrimStages.PRELUDE[bi]; pre1 = pre0.replace('occ(OCC, cellx, lv)', 'OCV'); stg = TrimStages.stages(bi); assert len(stg) == 64
+    box = net.createNetworkBox('Band_%s_%s' % (L, bname)); box.setComment('BAND %s %s : 64 nodes' % (L, bname)); box.setColor(hou.Color(color))
+    for k, (nm, body) in enumerate(stg):
+        n = net.createNode('wrangle', '%s%02d_%s__%s' % (L, k + 1, nm.split('_')[0], '_'.join(nm.split('_')[1:]) or 'layer'))
+        n.parm('vexsnippet').set((head0 + pre0 if k == 0 else head1 + pre1) + '\nif (on) {\n' + body + '\n}\np@C = set(h, OCV, 0.0, 1.0);\n'); n.setInput(0, prev); n.setColor(hou.Color(color))
+        n.setPosition(hou.Vector2((k % 16) * 2.1, -(bi * 7.2 + (k // 16) * 1.5))); box.addNode(n); prev = n; total += 1
+    box.fitAroundContents(); tails.append(prev)
+merge = tails[0]
+for i in range(1, 7):
+    m = net.createNode('blend', 'M%02d_bands__merge_%s' % (i, BANDS[i][3])); m.parm('mode').set(12); m.setInput(0, merge); m.setInput(1, tails[i]); m.setPosition(hou.Vector2(36 + i * 2.1, -i * 1.8)); merge = m
+hmono = net.createNode('channelextract', 'M07_height__mono'); hmono.parm('channel').set(0); hmono.setInput(0, merge); hmono.setPosition(hou.Vector2(50, -12))
+finh = net.createNode('null', 'FINAL_HEIGHT'); finh.setInput(0, hmono); finh.setPosition(hou.Vector2(52, -14))
+finc = net.createNode('null', 'FINAL_BASECOLOR'); finc.setInput(0, hmono); finc.setPosition(hou.Vector2(52, -17))   # the base colour output shows the height
+for nm, src, path in (('VX_export__basecolor', finc, 'maps/trim/lily_trim_basecolor.png'), ('VX_export__height', finh, 'maps/trim/lily_trim_height.png')):
+    r = net.createNode('rop_image', nm); r.setInput(0, src); r.parm('copoutput').set(B + path); r.parm('colorconversion').set(2);   # 2 = raw: the height is data, no colour transform
+    r.setPosition(hou.Vector2(56, -14 if 'height' in nm else -17))
+finc.setDisplayFlag(True) if hasattr(finc, 'setDisplayFlag') else None
+bad = [(c.name(), [str(e)[:160] for e in c.errors()]) for c in net.children() if c.errors()]
+print('nodes', len(net.children()), 'stages', total, 'errors', bad[:3])
+if not LIVE: hou.hipFile.save(sys.argv[2])

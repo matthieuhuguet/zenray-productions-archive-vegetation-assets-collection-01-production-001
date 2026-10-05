@@ -1,0 +1,411 @@
+{
+  "component": "Eucalyptus",
+  "active_version": "v015",
+  "versions": [
+    {
+      "version": "v001",
+      "label": "before_mask_fit",
+      "dir_name": "v001_before_mask_fit",
+      "timestamp": "2026-10-05 13:27:30",
+      "saved_at_iso": "2026-10-05T13:27:30+02:00",
+      "kind": "object",
+      "node_path": "/obj/Eucalyptus",
+      "hip_file": "graph.hiplc",
+      "proof_geo": {
+        "points": 6576,
+        "prims": 4278,
+        "bbox": [
+          [
+            -2.3925764560699463,
+            -0.00535054923966527,
+            -2.7026052474975586
+          ],
+          [
+            2.819315195083618,
+            6.067200183868408,
+            2.4133412837982178
+          ]
+        ]
+      },
+      "children_count": 7
+    },
+    {
+      "version": "v002",
+      "label": "measured_components_v002",
+      "dir_name": "v002_measured_components_v002",
+      "timestamp": "2026-10-05 13:40:34",
+      "saved_at_iso": "2026-10-05T13:40:34+02:00",
+      "kind": "object",
+      "node_path": "/obj/Eucalyptus",
+      "hip_file": "graph.hiplc",
+      "proof_geo": {
+        "points": 70350,
+        "prims": 41694,
+        "bbox": [
+          [
+            -2.401665449142456,
+            -0.016753053292632103,
+            -1.6842848062515259
+          ],
+          [
+            3.7925567626953125,
+            5.52531099319458,
+            3.2881152629852295
+          ]
+        ]
+      },
+      "children_count": 7
+    },
+    {
+      "version": "v003",
+      "label": "before_native_trunk_vop",
+      "dir_name": "v003_before_native_trunk_vop",
+      "timestamp": "2026-10-05 13:49:44",
+      "saved_at_iso": "2026-10-05T13:49:44+02:00",
+      "kind": "object",
+      "node_path": "/obj/Eucalyptus",
+      "hip_file": "graph.hiplc",
+      "proof_geo": {
+        "points": 70350,
+        "prims": 41694,
+        "bbox": [
+          [
+            -2.401665449142456,
+            -0.016753053292632103,
+            -1.6842848062515259
+          ],
+          [
+            3.7925567626953125,
+            5.52531099319458,
+            3.2881152629852295
+          ]
+        ]
+      },
+      "children_count": 8
+    },
+    {
+      "version": "v004",
+      "label": "native_trunk_point_vop",
+      "dir_name": "v004_native_trunk_point_vop",
+      "timestamp": "2026-10-05 13:52:47",
+      "saved_at_iso": "2026-10-05T13:52:47+02:00",
+      "kind": "object",
+      "node_path": "/obj/Eucalyptus",
+      "hip_file": "graph.hiplc",
+      "proof_geo": {
+        "points": 74628,
+        "prims": 45962,
+        "bbox": [
+          [
+            -2.401665449142456,
+            -0.014261340722441673,
+            -1.6842848062515259
+          ],
+          [
+            3.7925567626953125,
+            5.52531099319458,
+            3.2881152629852295
+          ]
+        ]
+      },
+      "children_count": 12
+    },
+    {
+      "version": "v005",
+      "label": "before_four_view_rebuild",
+      "dir_name": "v005_before_four_view_rebuild",
+      "timestamp": "2026-10-05 13:59:24",
+      "saved_at_iso": "2026-10-05T13:59:24+02:00",
+      "kind": "object",
+      "node_path": "/obj/Eucalyptus",
+      "hip_file": "graph.hiplc",
+      "proof_geo": {
+        "points": 74628,
+        "prims": 45962,
+        "bbox": [
+          [
+            -2.401665449142456,
+            -0.014261340722441673,
+            -1.6842848062515259
+          ],
+          [
+            3.7925567626953125,
+            5.52531099319458,
+            3.2881152629852295
+          ]
+        ]
+      },
+      "children_count": 12
+    },
+    {
+      "version": "v006",
+      "label": "four_view_axes_before_raw_semantics",
+      "dir_name": "v006_four_view_axes_before_raw_semantics",
+      "timestamp": "2026-10-05 14:40:06",
+      "saved_at_iso": "2026-10-05T14:40:06+02:00",
+      "kind": "object",
+      "node_path": "/obj/Eucalyptus",
+      "hip_file": "graph.hiplc",
+      "proof_geo": {
+        "points": 1173140,
+        "prims": 742866,
+        "bbox": [
+          [
+            -1.8180720806121826,
+            -0.2925335168838501,
+            -2.577362060546875
+          ],
+          [
+            5.535999298095703,
+            7.967586517333984,
+            3.800452470779419
+          ]
+        ]
+      },
+      "children_count": 15
+    },
+    {
+      "version": "v007",
+      "label": "raw02_measured_axes_tricolor",
+      "dir_name": "v007_raw02_measured_axes_tricolor",
+      "timestamp": "2026-10-05 14:49:18",
+      "saved_at_iso": "2026-10-05T14:49:18+02:00",
+      "kind": "object",
+      "node_path": "/obj/Eucalyptus",
+      "hip_file": "graph.hiplc",
+      "proof_geo": {
+        "points": 1162580,
+        "prims": 732336,
+        "bbox": [
+          [
+            -1.8203893899917603,
+            -0.2134517878293991,
+            -2.582242965698242
+          ],
+          [
+            5.525103569030762,
+            7.967586517333984,
+            3.810288667678833
+          ]
+        ]
+      },
+      "children_count": 16
+    },
+    {
+      "version": "v008",
+      "label": "raw02_instanced_reference_scale_leaves",
+      "dir_name": "v008_raw02_instanced_reference_scale_leaves",
+      "timestamp": "2026-10-05 17:26:07",
+      "saved_at_iso": "2026-10-05T17:26:07+02:00",
+      "kind": "object",
+      "node_path": "/obj/Eucalyptus",
+      "hip_file": "graph.hiplc",
+      "proof_geo": {
+        "points": 641406,
+        "prims": 608556,
+        "bbox": [
+          [
+            -1.7530628442764282,
+            -0.24473482370376587,
+            -2.498567581176758
+          ],
+          [
+            5.458240509033203,
+            7.987680435180664,
+            3.766792058944702
+          ]
+        ]
+      },
+      "children_count": 18
+    },
+    {
+      "version": "v009",
+      "label": "raw02_native_junctions_growth_bark_v011",
+      "dir_name": "v009_raw02_native_junctions_growth_bark_v011",
+      "timestamp": "2026-10-05 23:14:41",
+      "saved_at_iso": "2026-10-05T23:14:41+02:00",
+      "kind": "object",
+      "node_path": "/obj/Eucalyptus",
+      "hip_file": "graph.hiplc",
+      "proof_geo": {
+        "points": 1661142,
+        "prims": 1632686,
+        "bbox": [
+          [
+            -1.7340959310531616,
+            -0.22998104989528656,
+            -2.4719080924987793
+          ],
+          [
+            5.435905456542969,
+            7.958617210388184,
+            3.767483711242676
+          ]
+        ]
+      },
+      "children_count": 23
+    },
+    {
+      "version": "v010",
+      "label": "raw02_preserve_thin_branches_v012",
+      "dir_name": "v010_raw02_preserve_thin_branches_v012",
+      "timestamp": "2026-10-05 23:19:07",
+      "saved_at_iso": "2026-10-05T23:19:07+02:00",
+      "kind": "object",
+      "node_path": "/obj/Eucalyptus",
+      "hip_file": "graph.hiplc",
+      "proof_geo": {
+        "points": 1773402,
+        "prims": 1744885,
+        "bbox": [
+          [
+            -1.7092360258102417,
+            -0.22998104989528656,
+            -2.453735589981079
+          ],
+          [
+            5.410961627960205,
+            7.957277774810791,
+            3.760498046875
+          ]
+        ]
+      },
+      "children_count": 27
+    },
+    {
+      "version": "v011",
+      "label": "raw02_hanging_clusters_native_v013",
+      "dir_name": "v011_raw02_hanging_clusters_native_v013",
+      "timestamp": "2026-10-05 23:22:09",
+      "saved_at_iso": "2026-10-05T23:22:09+02:00",
+      "kind": "object",
+      "node_path": "/obj/Eucalyptus",
+      "hip_file": "graph.hiplc",
+      "proof_geo": {
+        "points": 1836393,
+        "prims": 1805212,
+        "bbox": [
+          [
+            -1.7092360258102417,
+            -0.22998104989528656,
+            -2.453735589981079
+          ],
+          [
+            5.410961627960205,
+            7.957277774810791,
+            3.760498046875
+          ]
+        ]
+      },
+      "children_count": 29
+    },
+    {
+      "version": "v012",
+      "label": "raw02_exact_lower_attachments_v014",
+      "dir_name": "v012_raw02_exact_lower_attachments_v014",
+      "timestamp": "2026-10-05 23:23:28",
+      "saved_at_iso": "2026-10-05T23:23:28+02:00",
+      "kind": "object",
+      "node_path": "/obj/Eucalyptus",
+      "hip_file": "graph.hiplc",
+      "proof_geo": {
+        "points": 1835888,
+        "prims": 1804707,
+        "bbox": [
+          [
+            -1.7092360258102417,
+            -0.22998104989528656,
+            -2.453735589981079
+          ],
+          [
+            5.410961627960205,
+            7.957277774810791,
+            3.760498046875
+          ]
+        ]
+      },
+      "children_count": 29
+    },
+    {
+      "version": "v013",
+      "label": "raw02_longitudinal_growth_v015",
+      "dir_name": "v013_raw02_longitudinal_growth_v015",
+      "timestamp": "2026-10-05 23:25:11",
+      "saved_at_iso": "2026-10-05T23:25:11+02:00",
+      "kind": "object",
+      "node_path": "/obj/Eucalyptus",
+      "hip_file": "graph.hiplc",
+      "proof_geo": {
+        "points": 1835888,
+        "prims": 1804707,
+        "bbox": [
+          [
+            -1.7092360258102417,
+            -0.22407086193561554,
+            -2.453735589981079
+          ],
+          [
+            5.410961627960205,
+            7.957277774810791,
+            3.760498046875
+          ]
+        ]
+      },
+      "children_count": 29
+    },
+    {
+      "version": "v014",
+      "label": "geometry_only_shallow_trunk_cross_cards_v016",
+      "dir_name": "v014_geometry_only_shallow_trunk_cross_cards_v016",
+      "timestamp": "2026-10-05 23:35:36",
+      "saved_at_iso": "2026-10-05T23:35:36+02:00",
+      "kind": "object",
+      "node_path": "/obj/Eucalyptus",
+      "hip_file": "graph.hiplc",
+      "proof_geo": {
+        "points": 257653,
+        "prims": 254252,
+        "bbox": [
+          [
+            -1.7118457555770874,
+            -0.21159085631370544,
+            -2.4758074283599854
+          ],
+          [
+            5.418168067932129,
+            7.934225559234619,
+            3.6653358936309814
+          ]
+        ]
+      },
+      "children_count": 29
+    },
+    {
+      "version": "v015",
+      "label": "archive_rejected_v016_before_native_rebuild",
+      "dir_name": "v015_archive_rejected_v016_before_native_rebuild",
+      "timestamp": "2026-10-05 23:45:42",
+      "saved_at_iso": "2026-10-05T23:45:42+02:00",
+      "kind": "object",
+      "node_path": "/obj/Eucalyptus",
+      "hip_file": "graph.hiplc",
+      "proof_geo": {
+        "points": 257653,
+        "prims": 254252,
+        "bbox": [
+          [
+            -1.7118457555770874,
+            -0.21159085631370544,
+            -2.4758074283599854
+          ],
+          [
+            5.418168067932129,
+            7.934225559234619,
+            3.6653358936309814
+          ]
+        ]
+      },
+      "children_count": 29
+    }
+  ]
+}

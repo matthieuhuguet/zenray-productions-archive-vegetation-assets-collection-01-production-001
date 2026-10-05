@@ -1,0 +1,57 @@
+{
+  "component": "Eucalyptus",
+  "version": "v001",
+  "label": "before_mask_fit",
+  "timestamp": "2026-10-05 13:27:30",
+  "saved_at_iso": "2026-10-05T13:27:30+02:00",
+  "src_hip": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/hip/VegetationCollection01.hiplc",
+  "node_path": "/obj/Eucalyptus",
+  "children": [
+    {
+      "name": "C1_trunk",
+      "type": "python"
+    },
+    {
+      "name": "C2_branches",
+      "type": "python"
+    },
+    {
+      "name": "C3_twigs",
+      "type": "python"
+    },
+    {
+      "name": "C4_leaf_cards",
+      "type": "python"
+    },
+    {
+      "name": "M_components",
+      "type": "merge"
+    },
+    {
+      "name": "N_normals",
+      "type": "normal"
+    },
+    {
+      "name": "OUT_eucalyptus",
+      "type": "null"
+    }
+  ],
+  "external_inputs": [],
+  "hip_file": "graph.hiplc",
+  "proof_geo": {
+    "points": 6576,
+    "prims": 4278,
+    "bbox": [
+      [
+        -2.3925764560699463,
+        -0.00535054923966527,
+        -2.7026052474975586
+      ],
+      [
+        2.819315195083618,
+        6.067200183868408,
+        2.4133412837982178
+      ]
+    ]
+  }
+}

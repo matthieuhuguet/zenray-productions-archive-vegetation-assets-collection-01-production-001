@@ -1,0 +1,145 @@
+{
+  "component": "Eucalyptus",
+  "version": "v013",
+  "label": "raw02_longitudinal_growth_v015",
+  "timestamp": "2026-10-05 23:25:11",
+  "saved_at_iso": "2026-10-05T23:25:11+02:00",
+  "src_hip": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/hip/VegetationCollection01.hiplc",
+  "node_path": "/obj/Eucalyptus",
+  "children": [
+    {
+      "name": "M_components",
+      "type": "merge"
+    },
+    {
+      "name": "N_normals",
+      "type": "normal"
+    },
+    {
+      "name": "OUT_eucalyptus",
+      "type": "null"
+    },
+    {
+      "name": "C1_semantic_roles",
+      "type": "attribwrangle"
+    },
+    {
+      "name": "C1_surface_attributes",
+      "type": "attribwrangle"
+    },
+    {
+      "name": "C4_leaf_roles",
+      "type": "attribwrangle"
+    },
+    {
+      "name": "C1_axis_frame",
+      "type": "attribwrangle"
+    },
+    {
+      "name": "C1_union_sdf",
+      "type": "vdbfrompolygons"
+    },
+    {
+      "name": "C1_union_mesh",
+      "type": "convertvdb"
+    },
+    {
+      "name": "C3_curved_shoots",
+      "type": "resample"
+    },
+    {
+      "name": "C1_peeling_bark",
+      "type": "attribwrangle"
+    },
+    {
+      "name": "C1_major_wood_only",
+      "type": "blast"
+    },
+    {
+      "name": "C2_measured_fine_branches",
+      "type": "blast"
+    },
+    {
+      "name": "C4_measured_hanging_leaf_points",
+      "type": "attribwrangle"
+    },
+    {
+      "name": "C4_all_leaf_points",
+      "type": "merge"
+    },
+    {
+      "name": "C3_raw_hanging_clusters",
+      "type": "attribwrangle"
+    },
+    {
+      "name": "C3_all_measured_shoots",
+      "type": "merge"
+    },
+    {
+      "name": "TRUNK_point_vop",
+      "type": "attribvop"
+    },
+    {
+      "name": "C1_measured_axis",
+      "type": "attribwrangle"
+    },
+    {
+      "name": "C1_resample_skeleton",
+      "type": "resample"
+    },
+    {
+      "name": "C1_sweep_forks",
+      "type": "sweep::2.0"
+    },
+    {
+      "name": "C1_point_normals",
+      "type": "normal"
+    },
+    {
+      "name": "C1_growth_ridges",
+      "type": "attribwrangle"
+    },
+    {
+      "name": "C3_measured_shoots",
+      "type": "attribwrangle"
+    },
+    {
+      "name": "C3_sweep_twigs",
+      "type": "sweep::2.0"
+    },
+    {
+      "name": "C3_twig_colour",
+      "type": "attribwrangle"
+    },
+    {
+      "name": "C4_attached_leaf_points",
+      "type": "attribwrangle"
+    },
+    {
+      "name": "C4_lanceolate_leaf",
+      "type": "attribwrangle"
+    },
+    {
+      "name": "C4_copy_leaves",
+      "type": "copytopoints::2.0"
+    }
+  ],
+  "external_inputs": [],
+  "hip_file": "graph.hiplc",
+  "proof_geo": {
+    "points": 1835888,
+    "prims": 1804707,
+    "bbox": [
+      [
+        -1.7092360258102417,
+        -0.22407086193561554,
+        -2.453735589981079
+      ],
+      [
+        5.410961627960205,
+        7.957277774810791,
+        3.760498046875
+      ]
+    ]
+  }
+}

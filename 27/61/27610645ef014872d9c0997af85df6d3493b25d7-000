@@ -1,0 +1,77 @@
+{
+  "component": "Eucalyptus",
+  "version": "v004",
+  "label": "native_trunk_point_vop",
+  "timestamp": "2026-10-05 13:52:47",
+  "saved_at_iso": "2026-10-05T13:52:47+02:00",
+  "src_hip": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/hip/VegetationCollection01.hiplc",
+  "node_path": "/obj/Eucalyptus",
+  "children": [
+    {
+      "name": "M_components",
+      "type": "merge"
+    },
+    {
+      "name": "N_normals",
+      "type": "normal"
+    },
+    {
+      "name": "OUT_eucalyptus",
+      "type": "null"
+    },
+    {
+      "name": "TRUNK_point_vop",
+      "type": "attribvop"
+    },
+    {
+      "name": "C2_branches",
+      "type": "python"
+    },
+    {
+      "name": "C3_twigs",
+      "type": "python"
+    },
+    {
+      "name": "C4_leaf_cards",
+      "type": "python"
+    },
+    {
+      "name": "TRUNK_vex_backbone",
+      "type": "attribwrangle"
+    },
+    {
+      "name": "TRUNK_sweep_volume",
+      "type": "sweep::2.0"
+    },
+    {
+      "name": "TRUNK_outward_normals",
+      "type": "normal"
+    },
+    {
+      "name": "TRUNK_buttress_ridges",
+      "type": "attribwrangle"
+    },
+    {
+      "name": "TRUNK_final_normals",
+      "type": "normal"
+    }
+  ],
+  "external_inputs": [],
+  "hip_file": "graph.hiplc",
+  "proof_geo": {
+    "points": 74628,
+    "prims": 45962,
+    "bbox": [
+      [
+        -2.401665449142456,
+        -0.014261340722441673,
+        -1.6842848062515259
+      ],
+      [
+        3.7925567626953125,
+        5.52531099319458,
+        3.2881152629852295
+      ]
+    ]
+  }
+}
