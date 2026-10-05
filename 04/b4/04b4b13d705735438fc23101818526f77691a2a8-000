@@ -1,0 +1,40 @@
+# 5 October 2026 : puts the lily trim sheet in /stage (Solaris, Karma) so it can be seen in the Look Dev viewport: a 2 m plane with square UV 0..1 in /obj/Lily_TrimPlane, a Principled Shader /mat/LilyTrim_Material whose base colour reads maps/trim/lily_trim_basecolor.png (the height shown as colour) and whose displacement reads maps/trim/lily_trim_height.png, a material library, an assignment, a top camera, a dome and a key light, Karma render properties and a USD Render ROP. All nodes are prefixed lt_ and the chain ends in lt_render (display flag). Run live with sys.argv = ['x', 'LIVE', 'LIVE']. FR : la trim sheet dans /stage pour le Look Dev.
+import hou
+B = '/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/'
+P = dict(size=2.0, disp_scale=0.04, disp_offset=0.45, cam_height=2.6, focal=35.0, aperture=24.0, dome_exposure=0.0, key_exposure=1.5)
+obj, mat, st = hou.node('/obj'), hou.node('/mat'), hou.node('/stage')
+# ---- geometry: a plane with UV 0..1 (v flipped like the ceramic plane so the sheet is not upside down)
+if obj.node('Lily_TrimPlane'): obj.node('Lily_TrimPlane').destroy()
+geo = obj.createNode('geo', 'Lily_TrimPlane'); geo.setPosition(hou.Vector2(0, -4))
+grid = geo.createNode('grid', 'plane'); grid.parm('sizex').set(P['size']); grid.parm('sizey').set(P['size']); grid.parm('rows').set(257); grid.parm('cols').set(257)
+uv = geo.createNode('texture', 'uv_0_to_1'); uv.setInput(0, grid); uv.parm('sv').set(-1.0); uv.parm('offsetv').set(1.0)
+out = geo.createNode('null', 'OUT'); out.setInput(0, uv); out.setDisplayFlag(True); out.setRenderFlag(True); geo.layoutChildren()
+# ---- material
+if mat.node('LilyTrim_Material'): mat.node('LilyTrim_Material').destroy()
+sh = mat.createNode('principledshader::2.0', 'LilyTrim_Material')
+sh.parm('basecolor_useTexture').set(1); sh.parm('basecolor_texture').set(B + 'maps/trim/lily_trim_basecolor.png')
+if sh.parm('basecolor_textureColorSpace'): sh.parm('basecolor_textureColorSpace').set('linear' if 'linear' in sh.parm('basecolor_textureColorSpace').menuItems() else sh.parm('basecolor_textureColorSpace').menuItems()[0])
+sh.parm('rough').set(0.7); sh.parm('dispTex_enable').set(1); sh.parm('dispTex_texture').set(B + 'maps/trim/lily_trim_height.png'); sh.parm('dispTex_scale').set(P['disp_scale']); sh.parm('dispTex_offset').set(P['disp_offset'])
+if sh.parm('dispTex_textureColorSpace'): sh.parm('dispTex_textureColorSpace').set('linear' if 'linear' in sh.parm('dispTex_textureColorSpace').menuItems() else sh.parm('dispTex_textureColorSpace').menuItems()[0])
+# ---- stage chain
+for n in list(st.children()):
+    if n.name().startswith('lt_'): n.destroy()
+imp = st.createNode('sopimport', 'lt_plane'); imp.parm('soppath').set('/obj/Lily_TrimPlane/OUT'); imp.parm('pathprefix').set('/lt_plane'); imp.setPosition(hou.Vector2(14, 0))
+ml = st.createNode('materiallibrary', 'lt_materials'); ml.setInput(0, imp); ml.parm('matnet').set('/mat'); ml.parm('matpathprefix').set('/materials/'); ml.parm('fillmaterials').pressButton()
+asg = st.createNode('assignmaterial', 'lt_assign'); asg.setInput(0, ml); asg.parm('nummaterials').set(1); asg.parm('primpattern1').set('/lt_plane/*'); asg.parm('matspecpath1').set('/materials/LilyTrim_Material')
+cam = st.createNode('camera', 'lt_camera'); cam.setInput(0, asg)
+for k, v in dict(tx=0.0, ty=P['cam_height'], tz=0.0, rx=-90.0).items(): cam.parm(k).set(v)
+cam.parm('focalLength').set(P['focal']); cam.parm('horizontalAperture').set(P['aperture']); cam.parm('primpath').set('/cameras/lt_camera')
+dome = st.createNode('domelight::3.0', 'lt_dome'); dome.setInput(0, cam); dome.parm('xn__inputsexposure_vya').set(P['dome_exposure'])
+key = st.createNode('distantlight::2.0', 'lt_key'); key.setInput(0, dome); key.parm('rx').set(-40); key.parm('ry').set(-35); key.parm('xn__inputsexposure_control_wcb').set('set'); key.parm('xn__inputsexposure_vya').set(P['key_exposure'])
+kp = st.createNode('karmarenderproperties', 'lt_karma'); kp.setInput(0, key); kp.parm('camera').set('/cameras/lt_camera')
+rop = st.createNode('usdrender_rop', 'lt_render'); rop.setInput(0, kp); rop.parm('loppath').set(kp.path()); rop.parm('override_res').set('specific'); rop.parm('res_user1').set(1280); rop.parm('res_user2').set(1280)
+rop.parm('outputimage').set(B + 'render/lily_trim_lookdev.png')
+st.layoutChildren()
+for n in st.children():
+    if n.name().startswith('lt_'): n.setColor(hou.Color((0.55, 0.8, 0.95)))
+kp.setDisplayFlag(True)
+for t in hou.ui.paneTabs():
+    if t.type() == hou.paneTabType.SceneViewer: t.setPwd(st) if hasattr(t, 'setPwd') else None
+bad = [(n.name(), [str(e)[:120] for e in n.errors()]) for n in st.children() if n.name().startswith('lt_') and n.errors()]
+print('stage nodes', [n.name() for n in st.children() if n.name().startswith('lt_')], 'errors', bad)

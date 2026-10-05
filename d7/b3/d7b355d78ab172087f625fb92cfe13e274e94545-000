@@ -1,0 +1,10 @@
+# 5 October 2026 : exports the generated trim sheet maps (height and base colour = height) at a chosen resolution WITHOUT touching the live Houdini: builds the graph in a scratch copy of the hip and runs the two export ROPs. Usage: python3 ExportTrimHeadless.py [res=2048]. FR : exporte la trim sheet en haute resolution hors session.
+import subprocess, sys
+B = '/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/'
+HY = '/Users/zenray/Create/Build/Houdini22/Houdini22.0.368/Frameworks/Houdini.framework/Versions/Current/Resources/bin/hython'
+res = sys.argv[1] if len(sys.argv) > 1 else '2048'
+subprocess.run(['cp', B + 'hip/VegetationCollection01.hiplc', '/tmp/veg_exp.hiplc'])
+print(subprocess.run([HY, B + 'Scripts/BuildLilyTrim.py', '/tmp/veg_exp.hiplc', '/tmp/veg_exp.hiplc', res], capture_output=True, text=True).stdout.strip().splitlines()[-1])
+code = "import hou,os\nhou.hipFile.load('/tmp/veg_exp.hiplc',suppress_save_prompt=True,ignore_load_warnings=True)\nn=hou.node('/obj/Lily_Trim')\nfor nm in ('VX_export__height','VX_export__basecolor'):\n    r=n.node(nm); o=r.parm('copoutput').eval()\n    os.path.exists(o) and os.remove(o)\n    r.parm('execute').pressButton(); print(nm, os.path.exists(o))\n"
+open('/tmp/exp_trim.py', 'w').write(code)
+print(subprocess.run([HY, '/tmp/exp_trim.py'], capture_output=True, text=True).stdout.strip())

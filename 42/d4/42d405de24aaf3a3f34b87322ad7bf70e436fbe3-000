@@ -1,5 +1,8 @@
 # 5 October 2026 : STAGE FACTORY of the lily trim sheet height. Every band is a chain of exactly 64 small wrangle COPs (phase 1 of the two phase rule: explore with many nodes, optimise later). A stage adds ONE layer to the running height h of the band: a shape, a relief, one vein, one fibre noise, a grain, an edge, a curve. The shapes and numbers come from the measurements of the reference (MeasureTrimBands.py, TrimLab.py); no image is read. Every pattern is periodic in u, so the sheet is seamless by construction. FR : fabrique des 64 etages par bande.
-import random, math
+import random, math, json, os
+_CAL = '/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/ref-maps/trim_calib.json'
+CAL = json.load(open(_CAL)) if os.path.exists(_CAL) else {'detail': [1.0] * 7, 'gain': [1.0] * 7, 'offset': [0.0] * 7}   # written by Calibrate.py from the measurements: detail multiplier, level gain and offset per band
+MUL = [1.0]
 HEAD = '''#define PI 3.14159265
 float sm(float a; float b; float x) { float t = clamp((x - a) / (b - a), 0.0, 1.0); return t * t * (3.0 - 2.0 * t); }
 float pn(float x; float y; float z; float kx) { return 0.5 + 0.5 * pnoise(set(x * kx, y, z), set(kx, 1000.0, 1000.0)); }
@@ -32,18 +35,20 @@ def lines(rnd, n, mask, coord, f0, f1, a0, a1, power=0.6, tag='line'):
     out = []
     for k in range(n):
         f = rnd.uniform(f0, f1); a = rnd.uniform(a0, a1); ph = rnd.uniform(0, 6.28)
-        out.append(('%s_%02d' % (tag, k + 1), 'h += %.4f * (pow(abs(sin((%s) * %.2f + %.2f)), %.2f) - 0.5) * (%s);' % (a, coord, f, ph, power, mask)))
+        out.append(('%s_%02d' % (tag, k + 1), 'h += %.4f * (pow(abs(sin((%s) * %.2f + %.2f)), %.2f) - 0.5) * (%s);' % (a * MUL[0], coord, f, ph, power, mask)))
     return out
 def noises(rnd, n, mask, kx0, kx1, ky0, ky1, a0, a1, tag='noise', coordv='vt'):
     out = []
     for k in range(n):
+        if ('grain' in tag or 'fibre_fine' in tag or 'wrinkle' in tag) and k % 2 == 0:   # per pixel hash: the finest detail of the reference lives at one or two pixels
+            a = rnd.uniform(a0, a1) * 3.0 * MUL[0]; out.append(('%s_px_%02d' % (tag, k + 1), 'h += %.4f * (rand(float(@ix) * 0.7311 + float(@iy) * 1.9317 + %.2f) - 0.5) * (%s);' % (a, rnd.uniform(0, 99), mask))); continue
         kx = int(rnd.uniform(kx0, kx1)); ky = rnd.uniform(ky0, ky1); a = rnd.uniform(a0, a1)
-        out.append(('%s_%02d' % (tag, k + 1), 'h += %.4f * (pn(u, %s * %.1f, %.2f, %d.0) - 0.5) * (%s);' % (a, coordv, ky, rnd.uniform(0, 50), kx, mask)))
+        out.append(('%s_%02d' % (tag, k + 1), 'h += %.4f * (pn(u, %s * %.1f, %.2f, %d.0) - 0.5) * (%s);' % (a * MUL[0], coordv, ky, rnd.uniform(0, 50), kx, mask)))
     return out
-def finish(extra_mask='1.0'):
-    return [('contrast_soft', 'h = 0.5 + (h - 0.5) * 1.04;'), ('contrast_mid', 'h = lerp(h, smooth(0.0, 1.0, h), 0.15);'), ('clamp_floor', 'h = max(h, 0.02);'), ('clamp_ceiling', 'h = min(h, 0.98);')]
+def finish(band):
+    return [('level_fit', 'h = h * %.4f + %.4f;' % (CAL['gain'][band], CAL['offset'][band])), ('contrast_mid', 'h = lerp(h, smooth(0.0, 1.0, h), 0.15);'), ('clamp_floor', 'h = max(h, 0.02);'), ('clamp_ceiling', 'h = min(h, 0.98);')]
 def stages(band):
-    r = random.Random(100 + band); S = []
+    r = random.Random(100 + band); S = []; MUL[0] = CAL['detail'][band]
     if band == 0:
         S += [('ground', 'h = g + 0.012 * (pn(u, vt * 90.0, 1.1, 96.0) - 0.5);'), ('ground_shade', 'h += 0.05 * abs(cx) * (1.0 - lv);'), ('big_fill', 'h = lerp(h, 0.60, mb);'), ('big_dome', 'h += 0.10 * (1.0 - tb * tb) * mb;'),
               ('big_rim', 'h += 0.05 * (1.0 - sm(0.0, 0.04, wb - abs(cx))) * mb;'), ('big_midrib', 'h -= 0.08 * exp(-pow(cx / 0.010, 2.0)) * mb;'), ('big_midrib_flank', 'h += 0.025 * exp(-pow((abs(cx) - 0.03) / 0.012, 2.0)) * mb;'),
@@ -110,7 +115,7 @@ def stages(band):
         S += noises(r, 8, 'inW', 150, 450, 150, 450, 0.002, 0.006, 'wrinkle')
         S += noises(r, 6, '1.0', 150, 500, 150, 500, 0.002, 0.005, 'grain')
         S += [('groove_depth_1', 'h -= 0.03 * exp(-pow((abs(t) - 0.34) / 0.02, 2.0)) * inW;'), ('groove_depth_2', 'h -= 0.02 * exp(-pow((abs(t) - 0.66) / 0.02, 2.0)) * inW;')]
-    S += finish()
+    S += finish(band)
     # exactly 64 stages: pad with fine grain layers or cut the finest grain layers
     while len(S) < 64: S.insert(len(S) - 4, ('extra_grain_%02d' % (len(S)), 'h += 0.003 * (pn(u, vt * %.1f, %.1f, %d.0) - 0.5);' % (r.uniform(200, 700), r.uniform(0, 90), int(r.uniform(200, 600)))))
     while len(S) > 64: del S[len(S) - 5]
