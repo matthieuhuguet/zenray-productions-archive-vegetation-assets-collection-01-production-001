@@ -1,0 +1,16 @@
+# 6 October 2026 13:48: Measure each petal separately, save every comparison and its regional errors.
+import json,sys
+from pathlib import Path
+import numpy as np
+from PIL import Image,ImageFilter
+P=Path('/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01');D=P/'versions/petal_colour_match'
+ref=Image.open('/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/refs/flower-sheets/11_mix_basecolor-v2_band1-houdini.png').convert('RGB').crop((0,0,1254,242))
+label=sys.argv[1];im=Image.open(D/(label+'.png')).convert('RGB').resize((1254,1254),Image.Resampling.LANCZOS).crop((0,0,1254,242))
+a=np.array(ref,float)/255;b=np.array(im,float)/255
+m=np.asarray(Image.open(D/'ReferenceMask.png'))[:242]>128
+r=np.array(ref.filter(ImageFilter.GaussianBlur(5)),float)/255;g=np.array(im.filter(ImageFilter.GaussianBlur(5)),float)/255
+stats=[]
+for i in range(3):
+ mask=m.copy();mask[:,:i*418]=False;mask[:,(i+1)*418:]=False
+ stats.append(dict(petal=i,mae=float(abs(a-b)[mask].mean()),macro_mae=float(abs(r-g)[mask].mean()),ref_mean=a[mask].mean(0).tolist(),output_mean=b[mask].mean(0).tolist()))
+canvas=Image.new('RGB',(1254,484));canvas.paste(ref);canvas.paste(im,(0,242));canvas.save(D/(label+'_comparison.png'));json.dump(stats,open(D/(label+'_metrics.json'),'w'),indent=2);print(json.dumps(stats))

@@ -1,0 +1,44 @@
+# 6 October 2026 : measures the petals of ref 06 into tables (ref-maps/petal_measured.json): silhouette half width per lv, MEDIAN tone per (row band, t bin) = the vaulted tone surface, rib profile, dot density by t and by lv, dot size and depth. The reference never enters the graph, only these numbers. FR : tables mesurees des petales.
+import sys, json, numpy as np
+sys.argv = ['x', R if (R := '/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/previews/band0v3_nodes.png') else '']
+src = open('/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/Scripts/PetalMeasure.py').read().split("print('half width")[0]
+exec(src)
+def coords(hw):
+    Y, X = np.mgrid[0:H, 0:1254]; C = (X // W).clip(0, 2); cx = C * W + W // 2
+    h = hw[Y, C]; dx = np.abs(X - cx); t = dx / np.maximum(h, 1); d = h - dx
+    return Y, t, d, h
+hwa = maps(a); Ya, ta, da, ha = coords(hwa); ina = (da > 0) & (ha > 5)
+out = {}
+# silhouette: mean half width of the six edges per row, smoothed, in canvas units, keyed by lv = row / H
+hwm = hwa.mean(axis=1); k = np.ones(7) / 7; hws = np.convolve(np.pad(hwm, 3, mode='edge'), k, mode='valid')
+out['silhouette'] = [[round(r / H, 4), round(float(hws[r]) / 1254, 4)] for r in list(range(2, H, 8)) + [H - 1]]
+# vaulted tone surface: median tone per (row band, t bin), rim (d < 14) and rib (t < 0.06) excluded
+rows = [(10, 45), (45, 80), (80, 115), (115, 150), (150, 190), (190, 235)]; tb = np.linspace(0.06, 1.0, 9)
+tone = []
+for r0, r1 in rows:
+    s = np.zeros((H, 1254), bool); s[r0:r1] = True; line = []
+    for i in range(8):
+        m = ina & s & (da > 14) & (ta >= tb[i]) & (ta < tb[i + 1]); line.append(round(float(np.median(a[m])), 3) if m.sum() > 100 else None)
+    tone.append(line)
+out['tone_rows_lv'] = [round(((r0 + r1) / 2) / H, 3) for r0, r1 in rows]; out['tone_t_centres'] = [round(float((tb[i] + tb[i + 1]) / 2), 3) for i in range(8)]; out['tone'] = tone
+# rib: median tone vs |dx| px (0..21), rows 40..230
+sel = np.zeros((H, 1254), bool); sel[40:230] = True; dxa = np.abs(np.arange(1254) % W - W // 2)[None, :].repeat(H, 0)
+out['rib_px'] = [round(float(np.median(a[sel & ina & (dxa == k)])), 3) for k in range(0, 26)]
+# rib, row dependent: the centre line is an ABSOLUTE tone (~0.80) whatever the vault is, the ridge and groove beside it are small RELATIVE deltas. weight w(dx) = (tone - base) / (centre - base) over the three lower row groups; rel(dx) = tone - base, averaged over all four groups, for dx >= 4 (base = mean tone for dx 22..25)
+w = np.zeros(26); rel = np.zeros(26); ng = 0
+for (r0, r1) in [(8, 50), (50, 100), (100, 150), (150, 232)]:
+    s_ = np.zeros((H, 1254), bool); s_[r0:r1] = True
+    tn = np.array([np.median(a[s_ & ina & (dxa == k)]) for k in range(26)]); base = tn[22:26].mean(); centre = tn[0:2].mean()
+    rel += tn - base; ng += 1
+    if r0 >= 50: w += np.clip((tn - base) / max(centre - base, 0.05), 0, 1) * 1.0 / 3
+out['rib_centre_abs'] = round(float(np.median(a[sel & ina & (dxa <= 1)])), 3)
+out['rib_weight'] = [round(float(v), 3) for v in w]
+out['rib_rel'] = [round(float(v / ng), 3) if k >= 4 else 0.0 for k, v in enumerate(rel)]
+# dots: pits darker than the local mean by 0.07; density by t and by lv, counted per petal; blob size
+loc = a - np.asarray(Image.fromarray((a * 255).astype('uint8')).filter(ImageFilter.GaussianBlur(5)), float) / 255
+dm = ina & (da > 14) & (ta > 0.08) & (loc < -0.07)
+out['dots_by_t'] = [int(((ta >= q) & (ta < q + 0.15) & dm).sum()) for q in np.arange(0.05, 1.0, 0.15)]
+out['dots_by_lv'] = [int(dm[r:r + 40].sum()) for r in range(0, 240, 40)]
+out['dots_depth_p1'] = round(float(np.percentile(a[dm], 1)), 3) if dm.sum() else None
+json.dump(out, open('/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/ref-maps/petal_measured.json', 'w'), indent=1)
+print(json.dumps(out)[:1800])

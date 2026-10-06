@@ -1,0 +1,129 @@
+# 6 October 2026 : MEASURE the petals of ref 06 and of our height in the SAME coordinates (row = lv, t = |x - cx| / half width, d = distance to the edge) and print the differences feature by feature. Masks: silhouette, rim band, rib, dots, fibres. FR : mesures des petales, feature par feature.
+import sys, numpy as np
+from PIL import Image, ImageFilter
+B = '/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/'
+R = '/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/refs/flower-sheets/06_gen_trimsheet-height_v2.png'
+OURS = sys.argv[1] if len(sys.argv) > 1 and sys.argv[1] else B + 'previews/band0v3_nodes.png'
+H = 242; W = 418
+def load(p): return np.asarray(Image.open(p).convert('L').resize((1254, 1254), Image.LANCZOS), float)[:H] / 255
+a = load(R); b = load(OURS)
+def edges(img, y):
+    """half width per row and petal: first steep crossing of 0.55 going inward from the background."""
+    row = img[y]; out = []
+    for c in range(3):
+        cx = c * W + W // 2
+        for sgn in (-1, 1):
+            e = None
+            for d in range(int(W / 2) - 1, 3, -1):
+                x = cx + sgn * d
+                if 0 <= x < 1254 and row[x] > 0.55 and row[max(0, x - sgn * 3)] > 0.5: e = d; break
+            out.append(e)
+    return out
+def maps(img):
+    hw = np.zeros((H, 3)); 
+    for y in range(H):
+        e = edges(img, y)
+        for c in range(3):
+            ee = [v for v in e[2 * c:2 * c + 2] if v is not None]; hw[y, c] = np.mean(ee) if ee else 0
+    return hw
+hwa, hwb = maps(a), maps(b)
+print('half width (px of 1254) every 24 rows ref|ours:', [(y, round(float(hwa[y].mean()), 1), round(float(hwb[y].mean()), 1)) for y in range(4, H, 24)])
+def coords(hw):
+    Y, X = np.mgrid[0:H, 0:1254]; C = (X // W).clip(0, 2); cx = C * W + W // 2
+    h = hw[Y, C]; dx = np.abs(X - cx); t = dx / np.maximum(h, 1); d = h - dx
+    return Y, t, d, h
+Ya, ta, da, ha = coords(hwa); Yb, tb, db, hb = coords(hwb)
+ina = (da > 0) & (ha > 5); inb = (db > 0) & (hb > 5)
+def prof(img, d, inside, lo, hi, step):
+    out = []
+    for k in range(lo, hi, step):
+        m = inside & (d >= k) & (d < k + step); out.append(round(float(img[m].mean()), 2) if m.sum() > 20 else None)
+    return out
+print('\nEDGE PROFILE (tone vs distance to the edge, px, 2 px bins, rows 60..200):')
+sel = np.zeros((H, 1254), bool); sel[60:200] = True
+print(' ref ', prof(a, da, ina & sel, 0, 30, 2)); print(' ours', prof(b, db, inb & sel, 0, 30, 2))
+print('\nACROSS PROFILE (tone vs t, no rim d>14, rib t>0.06), by row band:')
+for (r0, r1) in [(20, 80), (80, 140), (140, 235)]:
+    s = np.zeros((H, 1254), bool); s[r0:r1] = True
+    ma = ina & s & (da > 14) & (ta > 0.06); mb = inb & s & (db > 14) & (tb > 0.06)
+    bins = np.linspace(0.06, 1.0, 9)
+    ra = [round(float(a[ma & (ta >= bins[i]) & (ta < bins[i + 1])].mean()), 2) for i in range(8)]; rb = [round(float(b[mb & (tb >= bins[i]) & (tb < bins[i + 1])].mean()), 2) for i in range(8)]
+    print(' rows %d-%d ref ' % (r0, r1), ra); print('           ours', rb)
+print('\nRIB PROFILE (tone vs |dx| px, rows 40..230):')
+sel = np.zeros((H, 1254), bool); sel[40:230] = True
+dxa = np.abs(np.arange(1254) % W - W // 2)[None, :].repeat(H, 0)
+for nm, img, ins in (('ref ', a, ina), ('ours', b, inb)):
+    print(' ', nm, [round(float(img[sel & ins & (dxa == k)].mean()), 2) for k in range(0, 22)])
+print('\nVERTICAL LEVEL (mean tone vs row, t in 0.15..0.6, d>14):')
+la = [round(float(a[r:r + 20][(ina & (ta > 0.15) & (ta < 0.6) & (da > 14))[r:r + 20]].mean()), 2) for r in range(10, 230, 20)]
+lb = [round(float(b[r:r + 20][(inb & (tb > 0.15) & (tb < 0.6) & (db > 14))[r:r + 20]].mean()), 2) for r in range(10, 230, 20)]
+print(' ref ', la); print(' ours', lb)
+def hp(x, s): return x - np.asarray(Image.fromarray((x * 255).astype('uint8')).filter(ImageFilter.GaussianBlur(s)), float) / 255
+print('\nDETAIL ENERGY (std of highpass sigma 2 / sigma 6), interior d>14, t>0.06:')
+for nm, img, ins, tt, dd in (('ref ', a, ina, ta, da), ('ours', b, inb, tb, db)):
+    m = ins & (dd > 14) & (tt > 0.06); print(' ', nm, round(float(hp(img, 2)[m].std()), 4), round(float(hp(img, 6)[m].std()), 4))
+# energy outside the dots (so the dots do not hide the fibre energy): computed after the dot masks exist, see below
+# dots: local minima blobs darker than their surroundings
+def dots(img, ins, dd, tt):
+    loc = hp(img, 5); m = ins & (dd > 14) & (tt > 0.08) & (loc < -0.07)
+    ys, xs = np.nonzero(m); return len(ys), m
+na, ma_ = dots(a, ina, da, ta); nb, mb_ = dots(b, inb, db, tb)
+print('\nDOT PIXELS (darker than the local mean by 0.07): ref', na, 'ours', nb)
+for nm, mm, tt in (('ref ', ma_, ta), ('ours', mb_, tb)):
+    print(' ', nm, 'by t', [int(((tt >= q) & (tt < q + 0.15) & mm).sum()) for q in np.arange(0.05, 1.0, 0.15)], 'by row', [int(mm[r:r + 40].sum()) for r in range(0, 240, 40)])
+# fibre orientation: structure tensor angle, mean over blocks
+def orient(img, ins, dd):
+    gy, gx = np.gradient(hp(img, 1.2)); out = np.full((H // 20, 1254 // 20), np.nan)
+    for i in range(H // 20):
+        for j in range(1254 // 20):
+            sl = (slice(i * 20, i * 20 + 20), slice(j * 20, j * 20 + 20))
+            if ins[sl].all() and (dd[sl] > 14).all():
+                jxx = (gx[sl] ** 2).sum(); jyy = (gy[sl] ** 2).sum(); jxy = (gx[sl] * gy[sl]).sum()
+                out[i, j] = 0.5 * np.degrees(np.arctan2(2 * jxy, jxx - jyy))
+    return out
+oa, ob = orient(a, ina, da), orient(b, inb, db)
+ok = ~np.isnan(oa) & ~np.isnan(ob); dif = np.abs(((oa - ob + 90) % 180) - 90)[ok]
+print('\nFIBRE ORIENTATION: blocks compared', int(ok.sum()), 'mean abs angle difference %.1f deg (0 = same direction field; 45 = unrelated)' % dif.mean())
+print(' mean angle by block row ref ', [round(float(np.nanmean(oa[i])), 0) for i in range(0, H // 20)]); print('                         ours', [round(float(np.nanmean(ob[i])), 0) for i in range(0, H // 20)])
+# fibre angle tables per side (structure tensor, degrees from vertical gradient convention: 0 = vertical fibres); rows 20-60...180-232, t 0.1-0.25...0.7-0.9
+SIG = float(sys.argv[2]) if len(sys.argv) > 2 else 1.2
+def otable(img, ins, dd, tt, side):
+    gy, gx = np.gradient(hp(img, SIG)); X = np.arange(1254)[None, :].repeat(H, 0); right = ((X % W) > W // 2) if side > 0 else ((X % W) < W // 2)
+    out = []
+    for r0, r1 in [(20, 60), (60, 100), (100, 140), (140, 180), (180, 232)]:
+        line = []
+        for t0, t1 in [(0.1, 0.25), (0.25, 0.4), (0.4, 0.55), (0.55, 0.7), (0.7, 0.9)]:
+            m = ins & (dd > 14) & (tt >= t0) & (tt < t1) & right; m[:r0] = False; m[r1:] = False
+            if m.sum() < 200: line.append(None); continue
+            jxx = (gx[m] ** 2).sum(); jyy = (gy[m] ** 2).sum(); jxy = (gx[m] * gy[m]).sum(); line.append(round(float(0.5 * np.degrees(np.arctan2(2 * jxy, jxx - jyy))), 0))
+        out.append(line)
+    return out
+def nodots(mm): return ~(np.asarray(Image.fromarray((mm * 255).astype('uint8')).filter(ImageFilter.MaxFilter(25)), float) > 0)
+for side in (1, -1):
+    print('\nFIBRE ANGLE TABLE (dots masked out), side', 'right' if side > 0 else 'left')
+    def nodots(mm): return ~(np.asarray(Image.fromarray((mm * 255).astype('uint8')).filter(ImageFilter.MaxFilter(25)), float) > 0)
+    for nm, img, ins, dd, tt, mm in (('ref ', a, ina, da, ta, ma_), ('ours', b, inb, db, tb, mb_)): print(' ', nm, otable(img, ins & nodots(mm), dd, tt, side))
+
+print('\nDETAIL ENERGY WITHOUT THE DOTS (mask dilated 25 px):')
+for nm, img, ins, tt, dd, mm in (('ref ', a, ina, ta, da, ma_), ('ours', b, inb, tb, db, mb_)):
+    m = ins & (dd > 14) & (tt > 0.06) & nodots(mm); print(' ', nm, round(float(hp(img, 2)[m].std()), 4), round(float(hp(img, 6)[m].std()), 4), 'pixels', int(m.sum()))
+
+print('\nFIBRE ENERGY IN DOT FREE ZONES (std of highpass sigma 1.5 / 4):')
+for nm, img, ins, tt, dd in (('ref ', a, ina, ta, da), ('ours', b, inb, tb, db)):
+    z1 = ins & (dd > 16) & (tt > 0.72); z2 = ins & (dd > 16) & (tt > 0.1); z2[70:] = False
+    print(' ', nm, 'outer t>0.72:', round(float(hp(img, 1.5)[z1].std()), 4), round(float(hp(img, 4)[z1].std()), 4), '| upper rows<70:', round(float(hp(img, 1.5)[z2].std()), 4), round(float(hp(img, 4)[z2].std()), 4))
+
+print('\nRIB PROFILE BY ROW GROUP (median tone vs |dx| px 0..25):')
+for (r0, r1) in [(8, 50), (50, 100), (100, 150), (150, 232)]:
+    s_ = np.zeros((H, 1254), bool); s_[r0:r1] = True
+    for nm, img, ins in (('ref ', a, ina), ('ours', b, inb)):
+        print(' rows %3d-%3d %s' % (r0, r1, nm), [round(float(np.median(img[s_ & ins & (dxa == k)])), 2) for k in range(0, 26, 1)])
+
+# summary number: mean absolute angle difference over the cells that exist in both tables (both sides), dots masked out
+dif = []
+for side in (1, -1):
+    ta_, tb_ = otable(a, ina & nodots(ma_), da, ta, side), otable(b, inb & nodots(mb_), db, tb, side)
+    for ra_, rb_ in zip(ta_, tb_):
+        for va, vb in zip(ra_, rb_):
+            if va is not None and vb is not None: dif.append(abs(va - vb))
+print('\nFIBRE ANGLE: mean abs difference ref vs ours over %d cells: %.1f deg' % (len(dif), float(np.mean(dif))))

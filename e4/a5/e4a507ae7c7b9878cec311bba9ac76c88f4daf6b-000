@@ -1,0 +1,41 @@
+# 6 October 2026 13:45: Native colour profiles for Band0 only; existing height and other bands preserved.
+import json,sys
+from pathlib import Path
+import hou
+import TrimNodes as T
+P=Path('/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01')
+D=P/'versions/petal_colour_match'
+MEASURE=json.load(open(D/'Profiles.json'))
+def build():
+ net=hou.node('/obj/Lily_Trim');before=set(net.children());lv=net.node('A03_band__lv_0_top_1_bottom');ax=net.node('A06_cell__abs_cx');wb=net.node('B01s_scalloped')
+ q=T.node(net,'clamp','PC_q',[T.mix(net,'PC_ratio',ax,T.mix(net,'PC_width_floor',wb,T.const(net,'PC_floor',lv,.001),12),6)])
+ combined=None
+ for i,rows in enumerate(MEASURE['profiles']):
+  colour=None
+  for j,(y,row) in enumerate(zip(MEASURE['y'],rows)):
+   tag='PC_p%d_row%d'%(i,j)
+   c=T.node(net,'monotorgb',tag+'_pigment',[q]);c.parm('ramp').set(hou.Ramp([hou.rampBasis.MonotoneCubic]*len(row),MEASURE['q'],[tuple(x) for x in row]))
+   ys=MEASURE['y'];keys=[(k,1.0 if n==j else 0.0) for n,k in enumerate(ys)]
+   w=T.curve(net,tag+'_vertical_weight',lv,keys,1)
+   term=T.mix(net,tag+'_weighted',c,w,5);colour=term if colour is None else T.mix(net,tag+'_sum',colour,term,3)
+  # 6 October 2026: suppress the height-derived bead halo in base colour; pigment dots remain dark.
+  dotcolour=[(.64,.015,.15),(.57,.0,.12),(.48,.0,.09)][i]
+  dot=T.node(net,'monotorgb','PC_p%d_dot_colour'%i,[q]);dot.parm('ramp').set(hou.Ramp([hou.rampBasis.Linear]*2,[0,1],[dotcolour,dotcolour]))
+  colour=T.node(net,'blend','PC_p%d_with_dots'%i,[colour,dot,net.node('SC06_mask')],mode=0)
+  colour=T.mix(net,'PC_p%d_windowed'%i,colour,net.node('U9%d_petal_window'%i),5)
+  combined=colour if combined is None else T.mix(net,'PC_p%d_plus'%i,combined,colour,3)
+ source=T.node(net,'fetch','PC_FibreSource',coppath='/obj/Lily_Trim/Band0/G43_contact__added')
+ soft=T.node(net,'blur','PC_FibreSoft',[source],units=1,size_pixel=14)
+ hp=T.mix(net,'PC_FibreDetail',source,soft,4);shade=T.lin(net,'PC_fibre_gain',hp,-.12,.12,.80,1.20)
+ nodots=T.lin(net,'PC_not_dots',T.node(net,'blur','PC_dot_halo_region',[net.node('SC06_mask')],units=1,size_pixel=4),0,.01,1,0)
+ shade=T.node(net,'blend','PC_shade_no_halo',[T.const(net,'PC_neutral',lv,1),shade,nodots],mode=0)
+ out=T.mix(net,'PC_FINAL',combined,shade,5)
+ net.node('U30_colour0_windowed').setInput(0,out)
+ created=set(net.children())-before
+ box=net.findNetworkBox('PetalColourMeasured') or net.createNetworkBox('PetalColourMeasured');box.setComment('6 October 2026: Band0 measured pigment profiles')
+ for n in created:box.addItem(n)
+ net.layoutChildren(items=tuple(created));box.fitAroundContents()
+ return out
+if __name__=='__main__':
+ out=build();T.export(out.parent(),out.parent().node('BASECOLOR'),str(D/(sys.argv[1]+'.png')),2048)
+ result={'output':out.path(),'iteration':sys.argv[1]}

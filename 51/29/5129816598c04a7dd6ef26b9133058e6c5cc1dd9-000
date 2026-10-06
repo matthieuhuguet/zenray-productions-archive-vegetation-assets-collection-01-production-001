@@ -1,0 +1,39 @@
+# 6 October 2026 : fits the fibre direction field of ref 06 (structure tensor angle per block, dots masked at their core only) with a fan model: tan(phi) = k * x / (yp - y) (x = distance to the axis in px, y = row px, yp = pivot row below the band). FR : ajuste le champ de direction des fibres.
+import sys, numpy as np
+sys.argv = ['x', '', '2.0']
+exec(open('/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/Scripts/PetalMeasure.py').read().split("print('\\nEDGE PROFILE")[0].replace("print('half width", "pass #"))
+exec('''
+def coords2(hw):
+    Y, X = np.mgrid[0:H, 0:1254]; C = (X // W).clip(0, 2); cx = C * W + W // 2
+    h = hw[Y, C]; dx = np.abs(X - cx); return Y, dx / np.maximum(h, 1), h - dx, h, X - cx
+''')
+Ya, ta, da, ha, sx = coords2(hwa); ina = (da > 0) & (ha > 5)
+loc = a - np.asarray(Image.fromarray((a * 255).astype('uint8')).filter(ImageFilter.GaussianBlur(5)), float) / 255
+dotc = ina & (loc < -0.05); dotm = np.asarray(Image.fromarray((dotc * 255).astype('uint8')).filter(ImageFilter.MaxFilter(7)), float) > 0
+def hp(x, s): return x - np.asarray(Image.fromarray((x * 255).astype('uint8')).filter(ImageFilter.GaussianBlur(s)), float) / 255
+gy, gx = np.gradient(hp(a, 2.0)); pts = []
+for i in range(0, H - 32, 10):
+    for j in range(0, 1254 - 32, 10):
+        sl = (slice(i, i + 32), slice(j, j + 32))
+        if not (ina[sl].all() and (da[sl] > 16).all() and ta[sl].min() > 0.12): continue
+        m = ~dotm[sl]
+        if m.sum() < 500: continue
+        jxx = (gx[sl][m] ** 2).sum(); jyy = (gy[sl][m] ** 2).sum(); jxy = (gx[sl][m] * gy[sl][m]).sum()
+        phi = 0.5 * np.degrees(np.arctan2(2 * jxy, jxx - jyy)); coh = np.hypot(jxx - jyy, 2 * jxy) / (jxx + jyy + 1e-9)
+        if coh < 0.12: continue
+        x = abs(float(sx[sl].mean())); sign = 1 if sx[sl].mean() > 0 else -1; pts.append((i + 16, x, sign * phi, float(ta[sl].mean())))
+pts = np.array(pts); print('blocks', len(pts))
+best = None
+for yp in range(260, 1500, 20):
+    for k in np.arange(0.3, 8.0, 0.2):
+        for pw in (0.7, 1.0, 1.3, 1.6):
+            pred = np.degrees(np.arctan(k * (pts[:, 1] / 100.0) ** pw * 100.0 / (yp - pts[:, 0])))
+            err = np.abs(pts[:, 2] - pred).mean()
+            if best is None or err < best[0]: best = (err, yp, k, pw)
+print('best fan model: mean abs error %.1f deg, pivot row %d px (band 242 px), k %.2f, power %.1f' % best)
+# also a free table by (t, row) from the blocks
+for r0, r1 in [(0, 60), (60, 120), (120, 180), (180, 240)]:
+    line = []
+    for t0, t1 in [(0.12, 0.3), (0.3, 0.5), (0.5, 0.7), (0.7, 0.95)]:
+        mm = (pts[:, 0] >= r0) & (pts[:, 0] < r1) & (pts[:, 3] >= t0) & (pts[:, 3] < t1); line.append(round(float(np.median(pts[mm, 2])), 0) if mm.sum() > 2 else None)
+    print('rows %3d-%3d' % (r0, r1), line)

@@ -1,0 +1,31 @@
+# 6 October 2026 13:40: Measure coarse colour profiles, never use reference pixels as graph inputs.
+import json,sys
+from pathlib import Path
+import numpy as np
+from PIL import Image,ImageFilter
+P=Path('/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01')
+D=P/'versions/petal_colour_match'
+R=Path('/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/refs/flower-sheets/11_mix_basecolor-v2_band1-houdini.png')
+a=np.asarray(Image.open(R).convert('RGB'),float)/255
+mask=(a[:,:,0]>=a[:,:,1]*0.98)&(a[:,:,0]>0.65)
+mask[242:]=False
+Image.fromarray((mask*255).astype('uint8')).save(D/'ReferenceMask.png')
+ys=np.array([0,.08,.17,.29,.42,.55,.68,.81,.93,1.0]);qs=np.array([0,.01,.025,.05,.08,.14,.23,.36,.50,.65,.78,.88,.95,1.0])
+profiles=[]
+for i in range(3):
+ cell=a[:242,i*418:(i+1)*418];m=mask[:242,i*418:(i+1)*418]; yy,xx=np.indices(m.shape);axis=209
+ widths=np.array([max(abs(np.where(row)[0]-axis),default=1) for row in m]);widths=np.maximum(widths,1)
+ q=abs(xx-axis)/widths[:,None];v=yy/241
+ # 6 October 2026: exclude dark speckles, estimate pigment with regional medians.
+ pigment=m&(cell[:,:,0]>.72)&(cell[:,:,1]>.15)
+ rows=[]
+ for y in ys:
+  vals=[]
+  for t in qs:
+   z=pigment&(abs(v-y)<.055)&(abs(q-t)<(.007 if t<.08 else .045))
+   if z.sum()<3:z=pigment&(abs(v-y)<.12)&(abs(q-t)<.12)
+   vals.append(np.median(cell[z],axis=0).tolist() if z.any() else [1,1,1])
+  rows.append(vals)
+ profiles.append(rows)
+json.dump(dict(date='6 October 2026',reference=str(R),y=ys.tolist(),q=qs.tolist(),profiles=profiles),open(D/'Profiles.json','w'),indent=2)
+print('Three pigment profiles measured; reference mask archived')

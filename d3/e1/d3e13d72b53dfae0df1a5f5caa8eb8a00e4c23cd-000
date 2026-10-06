@@ -96,7 +96,7 @@ def build(net, with_maps=True):
                     mi = T.node(net, 'blend', 'U9%dp_washed' % i, [mi, flat_colour(net, 'U9%dq_wash' % i, ry, pc['wash']), T.lin(net, 'U9%dr_wash_amount' % i, wp, 0.0, 1.0, 0.0, 0.70)], mode=0)
                 ci = T.mix(net, 'U9%dj_petal_colour' % i, mi, wi, 5); cols = ci if cols is None else T.mix(net, 'U9%dk_plus' % i, cols, ci, 3)
             hp = T.mix(net, 'U84_height_detail', bands[0], T.node(net, 'blur', 'U84a_height_soft', [bands[0]], units=1, size_pixel=14.0), 4)      # high pass of the height: fibres, rib, rim
-            shade = T.lin(net, 'U85_shade', hp, -0.12, 0.12, 0.82, 1.12)
+            shade = T.lin(net, 'U85_shade', hp, -0.20, 0.20, 0.84, 1.10)
             m = T.mix(net, 'U86_colour_shaded', cols, shade, 5)
         if k == 1:      # GREEN CORE of the outer tepal (Matthieu, 6 October 2026): the dark central strip of each tepal is green, like the lily in the photo
             ax1 = T.mix(net, 'U30_ax1', T.lin(net, 'U30a_cx1', rx3, 0.0, 1.0, -1.0 / 6, 1.0 / 6), T.const(net, 'U30b_zero', ry, 0.0), 9)
