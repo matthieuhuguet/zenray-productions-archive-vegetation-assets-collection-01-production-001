@@ -1,0 +1,164 @@
+# Lily movie, height map evolution to Karma renders (6 October 2026)
+
+6 October 2026 : project `vegetation-assets-collection-01` (ZenRay Assets V2), folder `ZenRayHoudini/VegetationCollection01/video/`. Built by `Scripts/AssembleLilyMovie.py`, this index by `Scripts/WriteMovieIndex.py`.
+
+6 October 2026 : SQUARE format 1920 x 1920 (black bars top and bottom around a 1920 x 1112 picture, petal ratio 1.727), 24 fps, HEVC `hvc1` in `.mov` (iPhone Photos) and H.264 in `.mp4`, AAC 320 k. Order asked by Matthieu: height map storyboard (0.33 s per image, last one held 1 s), 3 petal base colours (1 s each), 4 Karma renders (1.5 s each: front, side, three quarter, top), 72 frame top turn over (3 s), title movie keyed on the first 5 s, music from 3:59 to the end of Grandbrothers Sonic Riots.
+
+## Movies
+
+| File | Seconds | Turn over included | Date |
+|---|---|---|---|
+| `LilyHeightToRender_v003.mov` and `LilyHeightToRender_v003.mp4` | 43.67 | yes | 6 October 2026 |
+| `LilyHeightToRender_v004.mov` and `LilyHeightToRender_v004.mp4` | 46.67 | yes | 6 October 2026 |
+
+## Sources (6 October 2026)
+
+| Role | Path |
+|---|---|
+| Height storyboard frames (84 images, first petal, Houdini half, 418 x 242) | `~/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f001.png` to `f084.png`, order and sources in `petal_movie/manifest.json` |
+| Storyboard sheet | `petal_movie/storyboard_sheet.png` |
+| 3 petal base colours | `maps/trim/petals/lily_petal_01_basecolor.png`, `02`, `03` |
+| 4 Karma renders (RGBA, put on grey 118 for the movie) | `render/lily_4views_front_4k.png`, `side`, `three_quarter`, `top` (and `_grey` copies) |
+| Turn over frames | `render/turntable_top/turn_0001.png` to `turn_0072.png` (Karma CPU, 1866 x 1080, 16 samples) |
+| Title | `maps/trim/petals/title-animation/vogun-pop/vogun-mixed-pop-1s.mov` (opaque cream background rebuilt into an alpha: white text above the cream, shadow below it) |
+| Music | `~/.claude/tmp/tmp-vegetation-assets-collection-01/audio/Grandbrothers - Sonic Riots (3m59 to end).mp3` |
+
+## Timeline of the latest movie
+
+6 October 2026 : `LilyHeightToRender_v004`, 46.67 s.
+
+| Start | End | Shot | Source |
+|---|---|---|---|
+| 0.00 | 6.00 | hook_turn_over_72_frames_half_speed | `render/turntable_top/turn_0001..0072.png` |
+| 6.00 | 7.50 | trimsheet_basecolor | `maps/trim/lily_trim_basecolor.png` |
+| 7.50 | 9.00 | trimsheet_height | `maps/trim/lily_trim_height.png` |
+| 9.00 | 9.33 | h001 | `/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f001.png` |
+| 9.33 | 9.67 | h002 | `/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f002.png` |
+| 9.67 | 10.00 | h003 | `/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f003.png` |
+| 10.00 | 10.33 | h004 | `/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f004.png` |
+| 10.33 | 10.67 | h005 | `/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f005.png` |
+| 10.67 | 11.00 | h006 | `/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f006.png` |
+| 11.00 | 11.33 | h007 | `/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f007.png` |
+| 11.33 | 11.67 | h008 | `/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f008.png` |
+| 11.67 | 12.00 | h009 | `/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f009.png` |
+| 12.00 | 12.33 | h010 | `/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f010.png` |
+| 12.33 | 12.67 | h011 | `/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f011.png` |
+| 12.67 | 13.00 | h012 | `/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f012.png` |
+| 13.00 | 13.33 | h013 | `/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f013.png` |
+| 13.33 | 13.67 | h014 | `/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f014.png` |
+| 13.67 | 14.00 | h015 | `/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f015.png` |
+| 14.00 | 14.33 | h016 | `/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f016.png` |
+| 14.33 | 14.67 | h017 | `/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f017.png` |
+| 14.67 | 15.00 | h018 | `/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f018.png` |
+| 15.00 | 15.33 | h019 | `/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f019.png` |
+| 15.33 | 15.67 | h020 | `/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f020.png` |
+| 15.67 | 16.00 | h021 | `/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f021.png` |
+| 16.00 | 16.33 | h022 | `/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f022.png` |
+| 16.33 | 16.67 | h023 | `/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f023.png` |
+| 16.67 | 17.00 | h024 | `/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f024.png` |
+| 17.00 | 17.33 | h025 | `/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f025.png` |
+| 17.33 | 17.67 | h026 | `/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f026.png` |
+| 17.67 | 18.00 | h027 | `/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f027.png` |
+| 18.00 | 18.33 | h028 | `/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f028.png` |
+| 18.33 | 18.67 | h029 | `/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f029.png` |
+| 18.67 | 19.00 | h030 | `/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f030.png` |
+| 19.00 | 19.33 | h031 | `/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f031.png` |
+| 19.33 | 19.67 | h032 | `/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f032.png` |
+| 19.67 | 20.00 | h033 | `/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f033.png` |
+| 20.00 | 20.33 | h034 | `/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f034.png` |
+| 20.33 | 20.67 | h035 | `/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f035.png` |
+| 20.67 | 21.00 | h036 | `/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f036.png` |
+| 21.00 | 21.33 | h037 | `/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f037.png` |
+| 21.33 | 21.67 | h038 | `/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f038.png` |
+| 21.67 | 22.00 | h039 | `/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f039.png` |
+| 22.00 | 22.33 | h040 | `/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f040.png` |
+| 22.33 | 22.67 | h041 | `/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f041.png` |
+| 22.67 | 23.00 | h042 | `/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f042.png` |
+| 23.00 | 23.33 | h043 | `/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f043.png` |
+| 23.33 | 23.67 | h044 | `/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f044.png` |
+| 23.67 | 24.00 | h045 | `/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f045.png` |
+| 24.00 | 24.33 | h046 | `/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f046.png` |
+| 24.33 | 24.67 | h047 | `/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f047.png` |
+| 24.67 | 25.00 | h048 | `/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f048.png` |
+| 25.00 | 25.33 | h049 | `/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f049.png` |
+| 25.33 | 25.67 | h050 | `/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f050.png` |
+| 25.67 | 26.00 | h051 | `/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f051.png` |
+| 26.00 | 26.33 | h052 | `/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f052.png` |
+| 26.33 | 26.67 | h053 | `/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f053.png` |
+| 26.67 | 27.00 | h054 | `/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f054.png` |
+| 27.00 | 27.33 | h055 | `/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f055.png` |
+| 27.33 | 27.67 | h056 | `/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f056.png` |
+| 27.67 | 28.00 | h057 | `/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f057.png` |
+| 28.00 | 28.33 | h058 | `/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f058.png` |
+| 28.33 | 28.67 | h059 | `/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f059.png` |
+| 28.67 | 29.00 | h060 | `/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f060.png` |
+| 29.00 | 29.33 | h061 | `/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f061.png` |
+| 29.33 | 29.67 | h062 | `/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f062.png` |
+| 29.67 | 30.00 | h063 | `/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f063.png` |
+| 30.00 | 30.33 | h064 | `/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f064.png` |
+| 30.33 | 30.67 | h065 | `/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f065.png` |
+| 30.67 | 31.00 | h066 | `/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f066.png` |
+| 31.00 | 31.33 | h067 | `/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f067.png` |
+| 31.33 | 31.67 | h068 | `/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f068.png` |
+| 31.67 | 32.00 | h069 | `/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f069.png` |
+| 32.00 | 32.33 | h070 | `/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f070.png` |
+| 32.33 | 32.67 | h071 | `/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f071.png` |
+| 32.67 | 33.00 | h072 | `/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f072.png` |
+| 33.00 | 33.33 | h073 | `/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f073.png` |
+| 33.33 | 33.67 | h074 | `/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f074.png` |
+| 33.67 | 34.00 | h075 | `/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f075.png` |
+| 34.00 | 34.33 | h076 | `/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f076.png` |
+| 34.33 | 34.67 | h077 | `/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f077.png` |
+| 34.67 | 35.00 | h078 | `/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f078.png` |
+| 35.00 | 35.33 | h079 | `/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f079.png` |
+| 35.33 | 35.67 | h080 | `/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f080.png` |
+| 35.67 | 36.00 | h081 | `/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f081.png` |
+| 36.00 | 36.33 | h082 | `/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f082.png` |
+| 36.33 | 36.67 | h083 | `/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f083.png` |
+| 36.67 | 37.67 | h084 | `/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f084.png` |
+| 37.67 | 38.67 | petal1 | `maps/trim/petals/lily_petal_01_basecolor.png` |
+| 38.67 | 39.67 | petal2 | `maps/trim/petals/lily_petal_02_basecolor.png` |
+| 39.67 | 40.67 | petal3 | `maps/trim/petals/lily_petal_03_basecolor.png` |
+| 40.67 | 42.17 | render_front | `render/lily_4views_front_4k.png` |
+| 42.17 | 43.67 | render_side | `render/lily_4views_side_4k.png` |
+| 43.67 | 45.17 | render_three_quarter | `render/lily_4views_three_quarter_4k.png` |
+| 45.17 | 46.67 | render_top | `render/lily_4views_top_4k.png` |
+
+## Numbered production steps, 6 October 2026
+
+[LilySteps_v004.mov](LilySteps_v004.mov): seven screenshots in numerical order, 1920 x 1920, 30 fps, 28 seconds, white Vogun Medium animated captions, one second in / two seconds hold / one second out. Source screenshots fit without cropping. (6 October 2026)
+
+[Reusable subtitle style](SubtitleStyle.md), [parameters](steps/Animation.json), [verification](steps/Verification.json). Original v004 montage remains unchanged. (6 October 2026)
+
+## 6 October 2026 : two new movies, v005 (hook = flower bed, title at full resolution)
+
+- 6 October 2026 : built by `Scripts/AssembleLilyMovieV5.py petals|trim v005` (title keyed by `Scripts/KeyTitleFrame.py` at 3840 x 2160). Canvas 2048 x 2048, 24 fps, HEVC `hvc1` `.mov` and H.264 `.mp4`. No Karma render, no turn over, no trim sheet stills. (6 October 2026)
+- 6 October 2026 : `LilyHeight_petals_v005` (42.67 s) : bed orbit hook 6 s with the title from 1.0 s, height storyboard (84 images) and the 3 petal base colours, end on the single flower close orbit compressed to 5 s. (6 October 2026)
+- 6 October 2026 : `LilyHeight_trim_v005` (61.33 s) : same hook, `versions/height_evolution/height_evolution_complete.mp4` (50.33 s), same end. (6 October 2026)
+- 6 October 2026 : sources: `render/bed_orbit_flat_2k/flat_0000..0239.png` (Shoji lighting), `render/flower_close_orbit_2k/close_0000..0239.png`, manifests `LilyHeight_*_v005.manifest.json` list every shot with its time. (6 October 2026)
+- 6 October 2026 : `FlowerCloseOrbit_2K_240f.mp4` and `.mov` : the single flower close orbit, 240 frames, 10 s, 2048 x 2048, no music, from `render/flower_close_orbit_2k/`. (6 October 2026)
+- 6 October 2026 : audio of `LilyHeight_petals_v005` and `LilyHeight_trim_v005` normalised to -14 LUFS, true peak -1.5 dB (two-pass loudnorm, video stream copied untouched, .mp4 and .mov). (6 October 2026)
+- 6 October 2026 : correction of the line above, which was written before the first attempt failed: the normalisation really ran afterwards with `Scripts/NormalizeAudio.py`. Measured: before -8.47 and -8.36 LUFS with a true peak of +0.48 dB (clipping), after -14.02 LUFS and true peaks of -5.06 and -4.84 dB, video stream copied. (6 October 2026)
+- 6 October 2026 : the two v005 movies (petals and trim, .mp4, .mov and manifests) now live in `video/LilyHeight_v005/`. The audio of `LilyHeight_trim_v005` is now fox capture plan - Butterfly Effect (mp3 downloaded with yt-dlp from the YouTube album upload, 4:56) starting at 2:24, fades 0.4 s in and 1.5 s out, normalised to -14 LUFS again; the petals movie keeps Sonic Riots. (6 October 2026)
+
+## Lily comparison and short (6 October 2026)
+
+- LilyComparison_4K_v001.mov: 10 seconds, 4096 square, clean centered split-screen comparison, 20.47 MB. (6 October 2026)
+- LilyShort_4K_v001.mov: 38 seconds, 4096 square, yellow Vogun cyber title, seven steps, Feverkin from 2:16, electric title cue, -14.01 LUFS, 74.49 MB. (6 October 2026)
+- Sources, centralized parameters, verification and Assets mapping: shorts-lily/Montage.md, Montage.json, Verification.json, AssetsMapping.json. Post: shorts-lily/post.md links canonical project Memory. (6 October 2026)
+
+## 6 October 2026 : FINAL VIDEOS, the montage as it stands (read this section first, the rows above are older)
+
+- 6 October 2026 : Matthieu renamed the folder holding the finished movies to `video/final videos`; it was then renamed to `video/FinalVideos` (PascalCase, no space) with his permission. Full path: `/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/FinalVideos/`. The Assets V2 `houdini` source `production` covers the whole `VegetationCollection01` folder (no include list), so the renamed folder is inventoried automatically; any older note that quotes `video/LilyHeight_v005/` or `video/final videos/` is out of date. (6 October 2026)
+- 6 October 2026 : the three movies of `FinalVideos/` (all with the title keyed over the hook and the SFX at 1.0 s): (6 October 2026)
+
+| File | Seconds | Size | What it is | Audio (6 October 2026) |
+|---|---|---|---|---|
+| `LilyHeight_petals_v005.mp4` and `.mov` | 42.67 | 2048 x 2048, 24 fps | hook bed orbit, 84 height storyboard images, 3 petal base colours, end on the single flower | Sonic Riots (Grandbrothers), music from the start |
+| `LilyHeight_trim_v005.mp4` and `.mov` | 61.33 | 2048 x 2048, 24 fps | same hook, then `versions/height_evolution/height_evolution_complete.mp4` (50.33 s), same end | Butterfly Effect (fox capture plan) from 2:24 of the track, fades 0.4 s in and 1.5 s out |
+| `howIcreatethoseshots.mov` | 38.00 | 4096 x 4096, 30 fps | made with Codex, title "How did I create these shots?" then FLEUR DE LYS, bed then close flower shots | its own audio, already at -14 LUFS |
+
+- 6 October 2026 : TIMELINE of the two v005 cuts. Hook 0.00 to 6.00 s : `render/bed_orbit_flat_2k/flat_0000..0239.png` (240 frames, 10 s, compressed to 6 s, Shoji lighting, easing kept), title keyed at 3840 x 2160 from 1.0 s for 5 s (`maps/trim/petals/title-animation/vogun-cyber/vogun-cyber-pingpong-yellow.mov`, keyed by `Scripts/KeyTitleFrame.py`). Petals cut : 6.00 to 37.67 s height storyboard `petal_movie/frames/f001..f084.png` (0.333 s each, last 1 s) and the 3 petals (1 s each). Trim cut : 6.00 to 56.33 s the height evolution video. End, last 5 s : `render/flower_close_orbit_2k/close_0000..0239.png` (10 s compressed to 5 s). Built by `Scripts/AssembleLilyMovieV5.py petals|trim v005`; each movie has its manifest next to it. No Karma render, no turn over and no trim sheet stills any more. (6 October 2026)
+- 6 October 2026 : SFX at the title: `DS 13. Prompt.mp3` (1.02 s, from Downloads, copy in `~/.claude/tmp/tmp-vegetation-assets-collection-01/audio/`), measured -28.22 LUFS, normalised to -17 LUFS with a true peak of -1.5 dB (`DS13_Prompt_norm.wav`), mixed at 1.0 s in the five files by `Scripts/MixSfxAtTitle.py`, then the whole track renormalised to -14 LUFS (two passes, `Scripts/NormalizeAudio.py`): -14.07 to -14.09 LUFS, true peaks -1.4 to -1.63 dB. The title of `howIcreatethoseshots.mov` starts at about 1.0 s on the frames inspected, so the same time was used; not auditioned. (6 October 2026)
+- 6 October 2026 : other movies in `video/` made by Codex and left untouched: `LilyComparison_4K_v001.mov`, `LilySteps_v004.mov`, `SubtitleStyle.md`, the folders `shorts-lily/` and `steps/`. The renders of this montage stay in `render/bed_orbit_flat_2k/`, `render/flower_close_orbit_2k/` and the encoded `FlowerCloseOrbit_2K_240f.mp4/.mov`, `LilyBedOrbitFlat_2K_v001.mp4`. (6 October 2026)
+- 6 October 2026 : `FinalVideos/howIcreatethoseshots.mp4` added (H.264 crf 17, 4096 x 4096, audio stream copied from the .mov, SFX included). (6 October 2026)
