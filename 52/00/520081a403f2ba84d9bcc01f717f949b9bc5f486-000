@@ -1,10 +1,10 @@
-# 5 October 2026 : the measuring bench of the trim sheet. It builds the generated graph (BuildLilyTrim.py) in a scratch copy, exports the height, and compares every band with the REFERENCE height (trimsheet-height-flower.png, used ONLY here, never in the graph) by measurements: mean, standard deviation, percentiles, gradient energy (detail density), horizontal period (autocorrelation), vertical profile correlation, histogram distance, and the seam percentile. Writes previews/trim_lab_<label>.png (reference | generated, band by band). Usage: python3 TrimLab.py <label> [res=1024]. FR : banc de mesure de la trim sheet.
+# 5 October 2026 : the measuring bench of the trim sheet. It builds the generated graph (BuildLilyTrim.py) in a scratch copy, exports the height, and compares every band with the REFERENCE height (03_gen_trimsheet-height_v1.png, used ONLY here, never in the graph) by measurements: mean, standard deviation, percentiles, gradient energy (detail density), horizontal period (autocorrelation), vertical profile correlation, histogram distance, and the seam percentile. Writes previews/trim_lab_<label>.png (reference | generated, band by band). Usage: python3 TrimLab.py <label> [res=1024]. FR : banc de mesure de la trim sheet.
 import subprocess, sys, json
 import numpy as np
 from PIL import Image
 B = '/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/'
 HY = '/Users/zenray/Create/Build/Houdini22/Houdini22.0.368/Frameworks/Houdini.framework/Versions/Current/Resources/bin/hython'
-REFP = '/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/refs/flower-sheets/trimsheet-height-flower.png'
+REFP = '/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/refs/flower-sheets/03_gen_trimsheet-height_v1.png'
 label = sys.argv[1]; RES = int(sys.argv[2]) if len(sys.argv) > 2 else 1024
 BANDS = [('tepal_inner', 0.0, 0.193), ('tepal_outer', 0.193, 0.388), ('stamens', 0.388, 0.507), ('calyx', 0.507, 0.609), ('stem', 0.609, 0.725), ('leaf', 0.725, 0.837), ('bud', 0.837, 1.0)]
 subprocess.run(['cp', B + 'hip/VegetationCollection01.hiplc', '/tmp/veg_lab.hiplc'])

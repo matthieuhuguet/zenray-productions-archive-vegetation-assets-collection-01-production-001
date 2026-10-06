@@ -3,7 +3,7 @@ import numpy as np, json
 from PIL import Image
 import TrimMask as M
 N = 2048
-im = np.asarray(Image.open('/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/refs/flower-sheets/trimsheet-height-flower.png').convert('L').resize((N, N), Image.LANCZOS), np.float32) / 255
+im = np.asarray(Image.open('/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/refs/flower-sheets/03_gen_trimsheet-height_v1.png').convert('L').resize((N, N), Image.LANCZOS), np.float32) / 255
 B = [('tepal_inner', 0.0, 0.193), ('tepal_outer', 0.193, 0.388), ('stamens', 0.388, 0.507), ('calyx', 0.507, 0.609), ('stem', 0.609, 0.725), ('leaf', 0.725, 0.837), ('bud', 0.837, 1.0)]
 THR = {'tepal_inner': 0.47, 'tepal_outer': 0.45, 'calyx': 0.44}
 out = {}; NX, NY = 320, 32

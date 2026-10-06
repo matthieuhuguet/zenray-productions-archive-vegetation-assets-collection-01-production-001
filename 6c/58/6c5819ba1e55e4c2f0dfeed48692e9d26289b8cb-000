@@ -2,7 +2,7 @@
 import json, numpy as np
 from PIL import Image
 B = '/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/'
-REF = np.asarray(Image.open('/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/refs/flower-sheets/trimsheet-basecolor-flower-REFERENCE-ONLY.png').convert('RGB'), np.float64) / 255
+REF = np.asarray(Image.open('/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/refs/flower-sheets/04_gen_trimsheet-basecolor_v1.png').convert('RGB'), np.float64) / 255
 N = REF.shape[0]
 # base colour sheet rows (fraction of height) assigned to each height band: 0 tepal inner <- 0..0.195, 1 tepal outer <- 0.195..0.375, 2 stamens <- 0.375..0.555, 3 calyx <- smooth green stalk 0.555..0.67, 4 stem <- speckled stem 0.67..0.815, 5 leaf <- 0.815..0.985, 6 bud <- smooth green stalk (pink tinged) 0.555..0.67
 ROWS = {0: (0.003, 0.192), 1: (0.198, 0.372), 2: (0.378, 0.552), 3: (0.558, 0.665), 4: (0.675, 0.812), 5: (0.822, 0.982), 6: (0.558, 0.665)}

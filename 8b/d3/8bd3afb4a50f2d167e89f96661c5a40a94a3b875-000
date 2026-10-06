@@ -14,7 +14,7 @@ def render():
     r = net.node('abl_rop') or net.createNode('rop_image', 'abl_rop'); r.setInput(0, out); r.parm('copoutput').set(p); r.parm('colorconversion').set(2); r.parm('execute').pressButton()
     return np.asarray(Image.open(p).convert('L').resize((RES, RES), Image.LANCZOS), np.float32)   # the ROP writes 1024 whatever the net resolution
 base = render(); H = int(0.193 * RES); b0 = base[:H]
-ref = np.asarray(Image.open('/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/refs/flower-sheets/trimsheet-height-flower.png').convert('L').resize((RES, RES)), np.float32)[:H]
+ref = np.asarray(Image.open('/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/refs/flower-sheets/03_gen_trimsheet-height_v1.png').convert('L').resize((RES, RES)), np.float32)[:H]
 print('band stats  mean ref/gen %.0f/%.0f  std %.0f/%.0f' % (ref.mean(), b0.mean(), ref.std(), b0.std()))
 def grad(a): return float(np.abs(np.diff(a, axis=1)).mean() + np.abs(np.diff(a, axis=0)).mean()) / 255.0
 from PIL import ImageFilter

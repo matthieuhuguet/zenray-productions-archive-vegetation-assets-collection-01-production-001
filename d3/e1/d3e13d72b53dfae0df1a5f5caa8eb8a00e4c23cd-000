@@ -7,7 +7,7 @@ B = '/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01
 EDGES = [(0.0, 0.193), (0.193, 0.388), (0.388, 0.507), (0.507, 0.609), (0.609, 0.725), (0.725, 0.837), (0.837, 1.0)]
 BUILDERS = [B0.build, B1.build, B2.build, B3.build, B4.build, B56.leaf, B6.build]
 ROUGH = [0.55, 0.55, 0.42, 0.62, 0.72, 0.38, 0.52]          # base roughness per band
-GREEN = (0.52, 0.60, 0.20); PURPLE = (0.34, 0.12, 0.20)      # band 2 accents, from the colour reference
+GREEN = (0.72, 0.82, 0.42); PURPLE = (0.82, 0.20, 0.34)      # 6 October 2026: v2 reference, pale green filaments and style, pink crimson stigma head      # band 2 accents, from the colour reference
 def color_ramp(keys): return hou.Ramp([hou.rampBasis.Linear] * len(keys), [k[0] for k in keys], [tuple(k[1:]) for k in keys])
 def flat_colour(net, name, like, rgb):
     n = T.node(net, 'monotorgb', name, [T.const(net, name + '_src', like, 0.5)]); n.parm('ramp').set(color_ramp([(0.0,) + rgb, (1.0,) + rgb])); return n
@@ -46,6 +46,7 @@ def build(net, with_maps=True):
     fin = T.node(net, 'null', 'FINAL_HEIGHT', [tot])
     if not with_maps: return dict(height=fin)
     pal = json.load(open(B + 'ref-maps/band_palettes.json')); rgb = None
+    pal['2'] = [[0.0, 0.18, 0.28, 0.07], [0.34, 0.22, 0.32, 0.09], [0.42, 0.45, 0.30, 0.07], [0.50, 0.78, 0.30, 0.05], [0.62, 0.93, 0.47, 0.07], [0.80, 0.98, 0.60, 0.12], [1.0, 1.0, 0.72, 0.22]]      # 6 October 2026: band 2 from the v2 reference: dark green ground, deep orange anthers (measured 0.95 0.5 0.1)
     for k in range(7):
         keys = [tuple(x) for x in pal[str(k)]]
         if keys[0][0] > 0.0: keys = [(0.0,) + keys[0][1:]] + keys
@@ -72,21 +73,21 @@ def build(net, with_maps=True):
         if k == 0:      # THREE PETALS, THREE PINKS (Matthieu, 6 October 2026): white pink, pink, deep fuchsia, with a deeper centre, a pale edge and dark speckles like the photo
             lv0, ax0, wb0, mb0 = B0.coords(net, ry, rx3); spk = B0.speckles(net, lv0, ax0, wb0, mb0, 'SC')
             rx1 = T.node(net, 'ramp', 'U80_ramp__one_cycle_x', signature='f1')
-            # measured on the reference photo (petal-colour-reference-tmp1.webp): the OUTER EDGE of the petal is almost white, the colour is carried by the inside, saturated and deeper toward the centre. Palettes: edge white, body, deep, speckle.
-            PET = [dict(edge=(0.97, 0.94, 0.93), body=(0.99, 0.78, 0.86), deep=(0.95, 0.56, 0.62), dot=(0.85, 0.25, 0.38)),      # pale pink (white pink lily)
-                   dict(edge=(0.98, 0.94, 0.92), body=(0.86, 0.46, 0.55), deep=(0.70, 0.20, 0.32), dot=(0.60, 0.10, 0.24)),      # pink (top petal of the photo)
-                   dict(edge=(0.98, 0.94, 0.93), body=(0.90, 0.54, 0.64), deep=(0.78, 0.30, 0.44), dot=(0.64, 0.14, 0.30), wash=(0.985, 0.88, 0.91))]      # WASHED pink: a variation of the middle pink, bleached in patches like the centre lily of the photo (Matthieu, 6 October 2026)
+            # measured on the reference photo (05_photo_petal-colour-reference.webp): the OUTER EDGE of the petal is almost white, the colour is carried by the inside, saturated and deeper toward the centre. Palettes: edge white, body, deep, speckle.
+            PET = [dict(edge=(0.97, 0.94, 0.93), body=(0.99, 0.78, 0.86), deep=(0.95, 0.56, 0.62), dot=(0.72, 0.08, 0.28)),      # pale pink (white pink lily)
+                   dict(edge=(0.98, 0.94, 0.92), body=(0.98, 0.64, 0.76), deep=(0.95, 0.40, 0.58), dot=(0.62, 0.04, 0.22)),      # pink (top petal of the photo)
+                   dict(edge=(0.98, 0.94, 0.93), body=(0.97, 0.62, 0.74), deep=(0.91, 0.42, 0.58), dot=(0.66, 0.06, 0.25), wash=(0.985, 0.88, 0.91))]      # WASHED pink: a variation of the middle pink, bleached in patches like the centre lily of the photo (Matthieu, 6 October 2026)
             d_sil = T.mix(net, 'U82_distance_to_edge', wb0, ax0, 4)
             d_top = T.lin(net, 'U82a_distance_to_top', lv0, 0.017, 1.017, 0.0, 0.193)
             d_in = T.mix(net, 'U82b_distance_inside', d_sil, d_top, 13)
             edge_amt = T.curve(net, 'U83_edge_white_amount', T.lin(net, 'U83a_scaled', d_in, 0.0, 0.12, 0.0, 1.0), [(0.0, 1.0), (0.04, 0.97), (0.08, 0.62), (0.14, 0.14), (0.20, 0.0), (1.0, 0.0)], 1.0, 0.0, 1.0, T.SMOOTH)      # 1 at the contour, white until 0.011 canvas, gone by 0.066
-            deepmask = T.mix(net, 'U81_deep_mask', T.lin(net, 'U81a_near_axis', T.smooth(net, 'U81b', ax0, 0.0, 0.10), 0.0, 1.0, 1.0, 0.0), T.smooth(net, 'U81c_below_neck', lv0, 0.10, 0.70), 5)
+            deepmask = T.mix(net, 'U81_deep_mask', T.lin(net, 'U81a_near_axis', T.smooth(net, 'U81b', ax0, 0.0, 0.17), 0.0, 1.0, 1.0, 0.0), T.smooth(net, 'U81c_below_neck', lv0, 0.10, 0.70), 5)
             cols = None
             for i, pc in enumerate(PET):
                 wi = T.mix(net, 'U9%d_petal_window' % i, T.smooth(net, 'U9%da_in' % i, rx1, i / 3.0 - 0.0006, i / 3.0 + 0.0006) if i > 0 else T.const(net, 'U9%da_in' % i, ry, 1.0), T.smooth(net, 'U9%db_out' % i, rx1, (i + 1) / 3.0 - 0.0006, (i + 1) / 3.0 + 0.0006, 1.0, 0.0) if i < 2 else T.const(net, 'U9%db_out' % i, ry, 1.0), 5)
                 mi = flat_colour(net, 'U9%dc_body' % i, ry, pc['body'])
-                mi = T.node(net, 'blend', 'U9%dd_deeper' % i, [mi, flat_colour(net, 'U9%de_deep' % i, ry, pc['deep']), T.lin(net, 'U9%df_amount' % i, deepmask, 0.0, 1.0, 0.0, 0.85)], mode=0)
-                mi = T.node(net, 'blend', 'U9%dg_dots' % i, [mi, flat_colour(net, 'U9%dh_dot' % i, ry, pc['dot']), T.lin(net, 'U9%di_dotamount' % i, spk, 0.0, 1.0, 0.0, 0.9)], mode=0)
+                mi = T.node(net, 'blend', 'U9%dd_deeper' % i, [mi, flat_colour(net, 'U9%de_deep' % i, ry, pc['deep']), T.lin(net, 'U9%df_amount' % i, deepmask, 0.0, 1.0, 0.0, 1.0)], mode=0)
+                mi = T.node(net, 'blend', 'U9%dg_dots' % i, [mi, flat_colour(net, 'U9%dh_dot' % i, ry, pc['dot']), T.lin(net, 'U9%di_dotamount' % i, spk, 0.0, 1.0, 0.0, 1.0)], mode=0)
                 mi = T.node(net, 'blend', 'U9%dl_white_edge' % i, [mi, flat_colour(net, 'U9%dm_edge' % i, ry, pc['edge']), edge_amt], mode=0)
                 if 'wash' in pc:
                     wn = T.node(net, 'fractalnoise', 'U9%dn_wash_noise' % i, [lv0], amp=0.5, center=0.5, elementsize=0.16, noisetype=1, offx=3.7, tilesizex=2.0 / 3.0, oct=3)
@@ -99,7 +100,7 @@ def build(net, with_maps=True):
         if k == 1:      # GREEN CORE of the outer tepal (Matthieu, 6 October 2026): the dark central strip of each tepal is green, like the lily in the photo
             ax1 = T.mix(net, 'U30_ax1', T.lin(net, 'U30a_cx1', rx3, 0.0, 1.0, -1.0 / 6, 1.0 / 6), T.const(net, 'U30b_zero', ry, 0.0), 9)
             lv1 = T.lin(net, 'U31_lv_band1', ry, 0.193, 0.388, 0.0, 1.0)
-            core1 = T.mix(net, 'U32_core_mask', T.lin(net, 'U32a_near_axis', T.smooth(net, 'U32b', ax1, 0.0, 0.075), 0.0, 1.0, 1.0, 0.0), T.smooth(net, 'U32c_from_top', lv1, 0.0, 0.03), 5)      # 6 October 2026: a wide GRADIENT, full green on the axis, fading into the pink
+            core1 = T.mix(net, 'U32_core_mask', T.lin(net, 'U32a_near_axis', T.smooth(net, 'U32b', ax1, 0.0, 0.075), 0.0, 1.0, 1.0, 0.0), T.smooth(net, 'U32c_from_top', lv1, 0.05, 0.12), 5)      # 6 October 2026: a wide GRADIENT, full green on the axis, fading into the pink
             gr = T.node(net, 'monotorgb', 'U33_green_ramp', [bands[1]]); gr.parm('ramp').set(color_ramp([(0.0, 0.20, 0.32, 0.10), (0.35, 0.40, 0.53, 0.22), (0.6, 0.62, 0.73, 0.40), (1.0, 0.86, 0.91, 0.70)]))      # green version of the band tone: the texture stays, the hue is green (no magenta left)
             m = T.node(net, 'blend', 'U34_with_green_core', [m, gr, core1], mode=0)
         if k == 6:      # GREEN CORE of the bud: the middle of each lobe is green

@@ -6,7 +6,7 @@ sys.path.insert(0, '/Users/zenray/Create/Build/Productions/ZenRayHoudini/Vegetat
 import TrimMask as M
 B = '/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/'
 HY = '/Users/zenray/Create/Build/Houdini22/Houdini22.0.368/Frameworks/Houdini.framework/Versions/Current/Resources/bin/hython'
-REFP = '/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/refs/flower-sheets/trimsheet-height-flower.png'
+REFP = '/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/refs/flower-sheets/03_gen_trimsheet-height_v1.png'
 rounds = int(sys.argv[1]) if len(sys.argv) > 1 else 4; RES = int(sys.argv[2]) if len(sys.argv) > 2 else 512
 BANDS = [(0.0, 0.193), (0.193, 0.388), (0.388, 0.507), (0.507, 0.609), (0.609, 0.725), (0.725, 0.837), (0.837, 1.0)]
 # per band: (parameter, start, step, lo, hi)

@@ -3,7 +3,7 @@ import sys
 from PIL import Image
 V = {0: (0.0, 0.193), 1: (0.193, 0.388), 2: (0.388, 0.507), 3: (0.507, 0.609), 4: (0.609, 0.725), 5: (0.725, 0.837), 6: (0.837, 1.0)}
 B = '/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/'
-R = Image.open('/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/refs/flower-sheets/trimsheet-height-flower.png').convert('L').resize((2048, 2048), Image.LANCZOS)
+R = Image.open('/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/refs/flower-sheets/03_gen_trimsheet-height_v1.png').convert('L').resize((2048, 2048), Image.LANCZOS)
 strips = []
 for k in map(int, sys.argv[3:]):
     a, b = V[k]; g = Image.open(B + 'previews/band%d_%s.png' % (k, sys.argv[2])).convert('L')

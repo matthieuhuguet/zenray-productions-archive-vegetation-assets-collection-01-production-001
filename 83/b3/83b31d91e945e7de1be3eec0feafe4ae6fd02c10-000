@@ -15,5 +15,5 @@ w /= w.sum(0, keepdims=True) + 1e-9
 for i in range(7): out += imgs[i] * w[i][:, None]
 res = Image.fromarray((np.clip(out, 0, 1) * 255).astype(np.uint8)); tag = sys.argv[1]
 res.save(B + 'maps/trim/lily_trim_height_%s.png' % tag); res.save(B + 'maps/trim/lily_trim_height.png')
-R = Image.open('/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/refs/flower-sheets/trimsheet-height-flower.png').convert('L').resize((1024, 1024), Image.LANCZOS)
+R = Image.open('/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/refs/flower-sheets/03_gen_trimsheet-height_v1.png').convert('L').resize((1024, 1024), Image.LANCZOS)
 s = Image.new('L', (2058, 1024), 255); s.paste(R, (0, 0)); s.paste(res.resize((1024, 1024), Image.LANCZOS), (1034, 0)); s.save(B + 'versions/full_trim/full_%s_ref_left_generated_right.png' % tag); print('saved', tag)

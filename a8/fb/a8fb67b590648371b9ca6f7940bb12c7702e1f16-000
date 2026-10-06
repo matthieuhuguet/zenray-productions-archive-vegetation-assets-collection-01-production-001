@@ -1,9 +1,9 @@
-# 5 October 2026 : measures the 4 view sheet of the lily (perfect-4-views.png): foreground masks, plant height, stem axis, green (leaf) half width per row, flower and bud blobs with their centroid and size in the front, side and top views. Output ref-maps/lily_views.json in metres once the total height is fixed (SCALE_H). FR : mesure la planche 4 vues du lys.
+# 5 October 2026 : measures the 4 view sheet of the lily (01_gen_flower-4views-perfect.png): foreground masks, plant height, stem axis, green (leaf) half width per row, flower and bud blobs with their centroid and size in the front, side and top views. Output ref-maps/lily_views.json in metres once the total height is fixed (SCALE_H). FR : mesure la planche 4 vues du lys.
 import numpy as np, json
 from PIL import Image
 from scipy import ndimage as ndi
 B = '/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/'
-im = np.asarray(Image.open('/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/refs/flower-sheets/perfect-4-views.png').convert('RGB'), np.float32)
+im = np.asarray(Image.open('/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/refs/flower-sheets/01_gen_flower-4views-perfect.png').convert('RGB'), np.float32)
 H, W, _ = im.shape; qw, qh = W // 2, H // 2
 quads = {'front': (0, 0), 'side': (qw, 0), 'top': (0, qh), 'three_quarter': (qw, qh)}
 def masks(q):

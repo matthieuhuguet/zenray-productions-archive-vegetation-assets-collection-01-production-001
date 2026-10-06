@@ -52,18 +52,19 @@ def speckles(net, lv, ax, wb, mb, tag='SP'):
     """THE SPECKLES of the petal (Matthieu, 6 October 2026: add small random dots, like the photo): scattered round dots, dense around the centre and the lower middle of the petal, rarer toward the white edge. Returns a 0..1 mask. The same function builds the same pattern in the height AND in the base colour (deterministic noise), so the dot is dark pink in the colour exactly where it is a bump in the height. 11 nodes. FR : points aleatoires du petale."""
     t = T.node(net, 'clamp', tag + '01_across', [T.mix(net, tag + '01a', ax, T.mix(net, tag + '01b', wb, T.const(net, tag + '01c', lv, 0.01), 12), 6)])
     region = T.mix(net, tag + '02_region', T.smooth(net, tag + '02a_below_neck', lv, 0.22, 0.52), T.lin(net, tag + '02b_inside', T.smooth(net, tag + '02c', t, 0.55, 0.92), 0.0, 1.0, 1.0, 0.0), 5)
-    nz = T.node(net, 'fractalnoise', tag + '03_dots', [lv], amp=0.5, center=0.5, elementsize=0.013, noisetype=1, offx=21.3, tilesizex=2.0 / 3.0)
-    dots = T.curve(net, tag + '04_cut', nz, [(0.0, 0.0), (0.69, 0.0), (0.72, 1.0), (1.0, 1.0)], 1.0, 0.0, 1.0)
+    nz = T.node(net, 'worleynoise', tag + '03_dots', [lv], elementsize=0.032, jitter=1.0, offx=7.0)      # 6 October 2026: Worley F1 distance, thresholded below, gives perfectly ROUND dots (fractal noise blobs were angular), one per cell, like the pits of the v2 reference
+    dots = T.smooth(net, tag + '04_round', nz, 0.085, 0.125, 1.0, 0.0)
     dens = V.modulation(net, tag + '05_density', lv, 0.14, 1.0, 1.0, 5.3, 0.35)
+    region = T.mix(net, tag + '02d_region_off_axis', region, T.smooth(net, tag + '02e_off_axis', ax, 0.014, 0.034), 5)      # no dot on the central ridge
     return T.mix(net, tag + '06_mask', T.mix(net, tag + '06a_in_region', dots, region, 5), T.mix(net, tag + '06b_with_density', mb, dens, 5), 5)
 def iteration2(net, h, c):
     """ITERATION 2 (64 nodes): the speckles in the height: small raised dots with a tiny dimple ring, plus fine pores scattered over the whole petal."""
     lv, ax, wb, mb = c['lv'], c['ax'], c['wb'], c['mb']
     n0 = len(net.children()); b = V.box(net, 'H', 'BAND 0 V3 ITERATION 2 : 64 nodes, speckles', (1.0, 0.8, 0.85))
     spk = speckles(net, lv, ax, wb, mb)
-    h = T.mix(net, 'H11_speckles__added', h, T.lin(net, 'H11a_gain', spk, 0.0, 1.0, 0.0, 0.10), 3)
+    h = T.mix(net, 'H11_speckles__added', h, T.lin(net, 'H11a_gain', spk, 0.0, 1.0, 0.0, -0.42), 3)   # 6 October 2026: the dots of the v2 reference are dark PITS (p1 of the petal 0.34 against 0.55 before), not raised bumps
     ring = T.mix(net, 'H12_ring', T.node(net, 'blur', 'H12a_soft', [spk], units=1, size_pixel=3.0), spk, 4)
-    h = T.mix(net, 'H13_dimple__added', h, T.mix(net, 'H13a_gain', ring, T.const(net, 'H13b_k', lv, -0.5), 5), 3)
+    h = T.mix(net, 'H13_dimple__added', h, T.mix(net, 'H13a_gain', ring, T.const(net, 'H13b_k', lv, 0.35), 5), 3)
     h = V.dots_layer(net, 'H21_pores', h, lv, mb, 0.0022, 9.9, 0.66, 0.045)
     h = V.dots_layer(net, 'H22_pores_dark', h, lv, mb, 0.0017, 14.1, 0.70, -0.04)
     h = V.pads(net, 'H', h, n0); V.close(net, b, 'H', n0); return h

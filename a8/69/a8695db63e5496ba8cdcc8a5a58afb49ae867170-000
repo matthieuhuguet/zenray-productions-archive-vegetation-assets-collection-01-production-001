@@ -1,0 +1,9 @@
+# 6 October 2026 : side by side crop of band 0 (height, base colour): v2 reference above, Houdini below. Usage: CmpPetal.py out.png [y0 y1 x1]
+import sys
+from PIL import Image
+R='/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/refs/flower-sheets/'; P='/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/'
+y0,y1,x1=(int(v) for v in (sys.argv[2:5] if len(sys.argv)>4 else (0,250,630)))
+ims=[Image.open(R+'06_gen_trimsheet-height_v2.png').convert('RGB'),Image.open(P+'lily_trim_height.png').convert('RGB').resize((1254,1254),Image.LANCZOS),Image.open(R+'07_gen_trimsheet-basecolor_v2.png').convert('RGB'),Image.open(P+'lily_trim_basecolor.png').convert('RGB').resize((1254,1254),Image.LANCZOS)]
+h=y1-y0; im=Image.new('RGB',(x1*2,h*2))
+for i,x in enumerate(ims): im.paste(x.crop((0,y0,x1,y1)),(x1*(i%2),h*(i//2)))
+im.save(sys.argv[1])

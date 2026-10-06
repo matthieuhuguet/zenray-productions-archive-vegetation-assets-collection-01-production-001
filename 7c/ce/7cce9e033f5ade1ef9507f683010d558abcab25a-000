@@ -1,8 +1,8 @@
-# 5 October 2026 : measures the AI generated trim sheet height (trimsheet-height-flower.png): band boundaries from the row profile, horizontal seam error of every band (left column against right column, and the half width wrap test), and the content of every band. Output ref-maps/trim_measure.json. FR : mesure de la height de la trim sheet.
+# 5 October 2026 : measures the AI generated trim sheet height (03_gen_trimsheet-height_v1.png): band boundaries from the row profile, horizontal seam error of every band (left column against right column, and the half width wrap test), and the content of every band. Output ref-maps/trim_measure.json. FR : mesure de la height de la trim sheet.
 import numpy as np, json
 from PIL import Image
 B = '/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/'
-im = np.asarray(Image.open('/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/refs/flower-sheets/trimsheet-height-flower.png').convert('L'), np.float32) / 255.0
+im = np.asarray(Image.open('/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/refs/flower-sheets/03_gen_trimsheet-height_v1.png').convert('L'), np.float32) / 255.0
 H, W = im.shape
 row = im.mean(1); g = np.abs(np.diff(row)); rowstd = im.std(1)
 # separators are thin dark horizontal lines: rows much darker than both neighbours at +-6 px

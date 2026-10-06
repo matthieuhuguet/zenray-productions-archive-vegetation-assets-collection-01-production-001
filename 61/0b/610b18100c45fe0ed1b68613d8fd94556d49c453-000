@@ -16,7 +16,7 @@ for d in hou.hda.definitionsInFile(HDA) if os.path.exists(HDA) else []:
         except hou.OperationFailed: pass   # the file is not installed in this session yet
 g = obj.createNode('geo', 'Lily_Flower')
 for c in g.children(): c.destroy()
-LAYOUT = """# kind  s(0..1 on the stem)  azimuth(deg)  tilt(deg above horizontal)  size    (measured on perfect-4-views.png, 5 October 2026)
+LAYOUT = """# kind  s(0..1 on the stem)  azimuth(deg)  tilt(deg above horizontal)  size    (measured on 01_gen_flower-4views-perfect.png, 5 October 2026)
 F 0.98 260 45 1.00
 F 0.87 200 8 1.00
 F 0.86 359 39 0.92

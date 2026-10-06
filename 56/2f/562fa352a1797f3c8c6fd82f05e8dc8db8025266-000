@@ -2,7 +2,7 @@
 import sys, numpy as np
 from PIL import Image
 g = np.asarray(Image.open(sys.argv[1]).convert('L'), np.float32) / 255; N = g.shape[0]
-r = np.asarray(Image.open('/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/refs/flower-sheets/trimsheet-height-flower.png').convert('L').resize((N, N)), np.float32) / 255
+r = np.asarray(Image.open('/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/refs/flower-sheets/03_gen_trimsheet-height_v1.png').convert('L').resize((N, N)), np.float32) / 255
 a, b = int(float(sys.argv[2]) * N) + 2, int(float(sys.argv[3]) * N) - 2; G, R = g[a:b], r[a:b]
 def st(x): return dict(mean=x.mean(), std=x.std(), p10=np.percentile(x, 10), p90=np.percentile(x, 90), grad=np.abs(np.diff(x, axis=1)).mean() + np.abs(np.diff(x, axis=0)).mean())
 for n, x in (('ref', R), ('gen', G)): print(n, {k: round(float(v), 3) for k, v in st(x).items()})

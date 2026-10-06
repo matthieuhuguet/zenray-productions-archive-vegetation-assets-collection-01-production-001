@@ -8,7 +8,7 @@ import TrimNodes as T, BuildBand0V2 as V
 RES = 1024; H = int(0.193 * RES)
 hou.hipFile.clear(suppress_save_prompt=True)
 net = hou.node('/obj').createNode('copnet', 'abl'); out = V.build(net)
-ref = np.asarray(Image.open('/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/refs/flower-sheets/trimsheet-height-flower.png').convert('L').resize((RES, RES), Image.LANCZOS), np.float32)[:H] / 255
+ref = np.asarray(Image.open('/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/refs/flower-sheets/03_gen_trimsheet-height_v1.png').convert('L').resize((RES, RES), Image.LANCZOS), np.float32)[:H] / 255
 ref = (ref + ref[:, ::-1]) / 2; a, b = RES // 3, 2 * RES // 3 + 1; refc = ref[:, a:b]
 def render():
     p = '/tmp/ablv2.png'; os.path.exists(p) and os.remove(p)

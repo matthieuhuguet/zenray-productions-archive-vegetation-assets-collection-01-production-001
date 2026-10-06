@@ -3,7 +3,7 @@ import numpy as np
 from PIL import Image
 from scipy import ndimage as ndi
 N = 2048; V0, V1 = 0.193, 0.388; H = int((V1 - V0) * N)
-R = np.asarray(Image.open('/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/refs/flower-sheets/trimsheet-height-flower.png').convert('L').resize((N, N), Image.LANCZOS), np.float64)[int(V0 * N):int(V0 * N) + H] / 255
+R = np.asarray(Image.open('/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/refs/flower-sheets/03_gen_trimsheet-height_v1.png').convert('L').resize((N, N), Image.LANCZOS), np.float64)[int(V0 * N):int(V0 * N) + H] / 255
 M = (R + R[:, ::-1]) / 2
 S = ndi.gaussian_filter(M, 3)
 # arch centre near 0.175: the column of the symmetry maximum of the bottom rows

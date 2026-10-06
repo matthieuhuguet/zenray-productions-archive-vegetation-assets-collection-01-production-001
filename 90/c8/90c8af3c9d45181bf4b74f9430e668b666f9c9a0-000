@@ -3,7 +3,7 @@ import sys
 from PIL import Image
 B='/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/'
 g=Image.open(sys.argv[1]).convert('L'); v1=float(sys.argv[2]); v0=float(sys.argv[4]) if len(sys.argv)>4 else 0.0
-ref=Image.open('/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/refs/flower-sheets/trimsheet-height-flower.png').convert('L').resize(g.size)
+ref=Image.open('/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/refs/flower-sheets/03_gen_trimsheet-height_v1.png').convert('L').resize(g.size)
 y0,y1=int(v0*g.size[1]),int(v1*g.size[1]); h=y1-y0; s=Image.new('L',(g.size[0],2*h+6),255); s.paste(ref.crop((0,y0,g.size[0],y1)),(0,0)); s.paste(g.crop((0,y0,g.size[0],y1)),(0,h+6)); s.save(sys.argv[3])
 # 6 October 2026 AUTOSAVE : every comparison sheet is also kept, timestamped, in versions/auto/ so that NO iteration image is ever lost again (Matthieu: save each Copernicus iteration image locally).
 import os, shutil, time

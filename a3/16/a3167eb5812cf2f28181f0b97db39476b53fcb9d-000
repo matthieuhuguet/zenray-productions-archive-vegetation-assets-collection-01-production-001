@@ -83,7 +83,7 @@ def pistil(geo):
         tip = pts[-1]; td = (pts[-1] - pts[-2]).normalized()
         tube(geo, [tip, tip + td * 0.0045, tip + td * 0.009], [0.0007, 0.0048, 0.0007], 8, 'stigma', 'stigma%d' % k, BROWN, uvf=lambda u, v, ex, c=k: TU('stamens', ((c % 3) + 0.5) / 3.0 + 0.029 * math.cos(2 * math.pi * u) * math.sin(math.pi * ex[0]), 0.28 - 0.26 * ex[0]))
 def calyx(geo):
-    """epicalyx and calyx of the parts sheet (upscaled-flower-parts.png): a ring of six small lime bracts at the top of the pedicel, hugging the base of the tube. FR : calice."""
+    """epicalyx and calyx of the parts sheet (02_gen_flower-parts-upscaled.png): a ring of six small lime bracts at the top of the pedicel, hugging the base of the tube. FR : calice."""
     Lc = PRM('calyx_size'); rnd = random.Random(int(PRM('seed')) + 5)
     for k, slot in enumerate(flower_slots()):
         B, d = flower_frame(slot); e1, e2 = frame_perp(d); roll = rnd.uniform(0, 2 * math.pi); sz = Lc * (1.0 if not slot[3] else 0.7) * slot[4]

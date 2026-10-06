@@ -10,7 +10,7 @@ bi = int(sys.argv[1]); RES = 1024
 subprocess.run(['cp', B + 'hip/VegetationCollection01.hiplc', '/tmp/veg_fit.hiplc'])
 subprocess.run([HY, B + 'Scripts/BuildLilyTrim.py', '/tmp/veg_fit.hiplc', '/tmp/veg_fit.hiplc', str(RES)], capture_output=True)
 subprocess.run([HY, '/tmp/fit_export.py'], capture_output=True)
-ref = np.asarray(Image.open('/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/refs/flower-sheets/trimsheet-height-flower.png').convert('L').resize((RES, RES), Image.LANCZOS), np.float32) / 255
+ref = np.asarray(Image.open('/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/refs/flower-sheets/03_gen_trimsheet-height_v1.png').convert('L').resize((RES, RES), Image.LANCZOS), np.float32) / 255
 gen = np.asarray(Image.open(B + 'maps/trim/lily_trim_height.png').convert('L').resize((RES, RES), Image.LANCZOS), np.float32) / 255
 a, b = BANDS[bi]; y0, y1 = int(a * RES) + 3, int(b * RES) - 3; R, G = ref[y0:y1], gen[y0:y1]
 print('band', bi, 'mask IoU %.3f' % M.iou(M.seg(G), M.seg(R)), 'mean ref/gen %.2f/%.2f std %.2f/%.2f' % (R.mean(), G.mean(), R.std(), G.std()))

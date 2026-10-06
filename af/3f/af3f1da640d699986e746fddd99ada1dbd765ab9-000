@@ -10,7 +10,7 @@ def load(path, mirror):
     a = np.asarray(Image.open(path).convert('L').resize((N, N), Image.LANCZOS), np.float32)[:H] / 255
     if mirror: a = (a + a[:, ::-1]) / 2
     c = a[:, N // 3: 2 * N // 3 + 1]; return ndi.gaussian_filter(c, 4), (c.shape[1] - 1) / 2
-R, c0 = load('/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/refs/flower-sheets/trimsheet-height-flower.png', True); G, _ = load(sys.argv[1], False)
+R, c0 = load('/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/refs/flower-sheets/03_gen_trimsheet-height_v1.png', True); G, _ = load(sys.argv[1], False)
 qs = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
 for title, ys, fn in (('WINGS q = 0 tongue edge .. 1 silhouette', (0.5, 0.6, 0.7, 0.8, 0.9, 0.95), lambda lv, q: wt(lv) + q * (min(wb(lv), 0.1665) - wt(lv))), ('TONGUE t = 0 axis .. 1 edge', (0.5, 0.6, 0.7, 0.8, 0.9, 0.95), lambda lv, t: t * wt(lv))):
     print(title); print('lv     ' + ' '.join('%4.1f' % q for q in qs))
