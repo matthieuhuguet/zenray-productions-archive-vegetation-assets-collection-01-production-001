@@ -136,6 +136,9 @@ def build(net, with_maps=True):
         src = maps[nm]; sw_in.append(src if nm in ('basecolor', 'normal') else T.node(net, 'monotorgb', 'V0_%s_as_rgb' % nm, [src]))      # one signature (RGB) so the switch can flip between all maps
     view = T.node(net, 'switch', 'VIEW_switch_between_maps', sw_in)
     maps['view'] = view
+    # 6 October 2026 14:10: Preserve measured Band0 pigment and adjustable local AO on every rebuild.
+    import PatchPetalColour, PatchPetalAO
+    PatchPetalColour.build(net); PatchPetalAO.build(net)
     tidy(net, bands, maps)
     return maps
 if __name__ == '__main__':

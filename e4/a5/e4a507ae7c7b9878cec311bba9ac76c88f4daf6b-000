@@ -6,8 +6,8 @@ import TrimNodes as T
 P=Path('/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01')
 D=P/'versions/petal_colour_match'
 MEASURE=json.load(open(D/'Profiles.json'))
-def build():
- net=hou.node('/obj/Lily_Trim');before=set(net.children());lv=net.node('A03_band__lv_0_top_1_bottom');ax=net.node('A06_cell__abs_cx');wb=net.node('B01s_scalloped')
+def build(net=None):
+ net=net or hou.node('/obj/Lily_Trim');before=set(net.children());lv=net.node('A03_band__lv_0_top_1_bottom');ax=net.node('A06_cell__abs_cx');wb=net.node('B01s_scalloped')
  q=T.node(net,'clamp','PC_q',[T.mix(net,'PC_ratio',ax,T.mix(net,'PC_width_floor',wb,T.const(net,'PC_floor',lv,.001),12),6)])
  combined=None
  for i,rows in enumerate(MEASURE['profiles']):
@@ -24,11 +24,15 @@ def build():
   colour=T.node(net,'blend','PC_p%d_with_dots'%i,[colour,dot,net.node('SC06_mask')],mode=0)
   colour=T.mix(net,'PC_p%d_windowed'%i,colour,net.node('U9%d_petal_window'%i),5)
   combined=colour if combined is None else T.mix(net,'PC_p%d_plus'%i,combined,colour,3)
- source=T.node(net,'fetch','PC_FibreSource',coppath='/obj/Lily_Trim/Band0/G43_contact__added')
- soft=T.node(net,'blur','PC_FibreSoft',[source],units=1,size_pixel=14)
- hp=T.mix(net,'PC_FibreDetail',source,soft,4);shade=T.lin(net,'PC_fibre_gain',hp,-.12,.12,.80,1.20)
- nodots=T.lin(net,'PC_not_dots',T.node(net,'blur','PC_dot_halo_region',[net.node('SC06_mask')],units=1,size_pixel=4),0,.01,1,0)
- shade=T.node(net,'blend','PC_shade_no_halo',[T.const(net,'PC_neutral',lv,1),shade,nodots],mode=0)
+ # 6 October 2026: colour uses irregular flowing fibres, excluding the regular fan and bead lighting.
+ fields=[]
+ for j,name in enumerate(['G53_fine_streak','G54_medium_streak','G55_groove_streak']):
+  f=T.node(net,'fetch','PC_Fibre%d'%j,coppath=net.path()+'/Band0/'+name,setports='1',outputtype1=1)
+  fields.append(T.lin(net,'PC_Fibre%d_gain'%j,f,0,1,[-.086,-.036,.087][j],[.914,.964,-.913][j]))
+ signal=T.mix(net,'PC_Fibres_sum',T.mix(net,'PC_Fibres_pair',fields[0],fields[1],3),fields[2],3)
+ shade=T.lin(net,'PC_fibre_gain',signal,-.08,.08,.86,1.14)
+ edgefade=T.smooth(net,'PC_edge_fibre_fade',q,.65,1.0,1,0)
+ shade=T.node(net,'blend','PC_shade_no_halo',[T.const(net,'PC_neutral',lv,1),shade,edgefade],mode=0)
  out=T.mix(net,'PC_FINAL',combined,shade,5)
  net.node('U30_colour0_windowed').setInput(0,out)
  created=set(net.children())-before

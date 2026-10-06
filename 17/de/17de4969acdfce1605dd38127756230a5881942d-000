@@ -15,7 +15,7 @@ profiles=[]
 for i in range(3):
  cell=a[:242,i*418:(i+1)*418];m=mask[:242,i*418:(i+1)*418]; yy,xx=np.indices(m.shape);axis=209
  widths=np.array([max(abs(np.where(row)[0]-axis),default=1) for row in m]);widths=np.maximum(widths,1)
- q=abs(xx-axis)/widths[:,None];v=yy/241
+ q=np.asarray(Image.open(D/'QCoordinates.png').convert('L'),float)[:242,i*418:(i+1)*418]/255;v=yy/242
  # 6 October 2026: exclude dark speckles, estimate pigment with regional medians.
  pigment=m&(cell[:,:,0]>.72)&(cell[:,:,1]>.15)
  rows=[]

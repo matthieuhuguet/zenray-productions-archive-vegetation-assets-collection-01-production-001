@@ -1,0 +1,25 @@
+# 6 October 2026 14:00: Add adjustable micro occlusion to the approved Band0 pigment, preserving every other band.
+from pathlib import Path
+import hou
+import TrimNodes as T
+P=Path('/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01')
+D=P/'versions/petal_colour_match'
+def build(net=None):
+ net=net or hou.node('/obj/Lily_Trim');before=set(net.children());group=net.parmTemplateGroup()
+ if not net.parm('petal_ao_intensity'):
+  folder=hou.FolderParmTemplate('petal_colour_controls','Petal Colour',[hou.FloatParmTemplate('petal_ao_intensity','Pattern AO Intensity',1,default_value=(.05,),min=0,max=.6,min_is_strict=True,max_is_strict=True)])
+  group.append(folder);net.setParmTemplateGroup(group)
+ ao=T.node(net,'heighttoambientocclusion','PC_AO_Creases',[net.node('Band0_mono')],heightscale=.05,viewradius_pixel=6)
+ soft=T.node(net,'blur','PC_AO_Macro',[ao],units=1,size_pixel=10)
+ cavity=T.node(net,'clamp','PC_AO_Cavity',[T.mix(net,'PC_AO_LocalCreases',soft,ao,4)])
+ lifted=T.lin(net,'PC_AO_Lifted',cavity,0,.20,1,.75)
+ lifted.parm('outputmin').deleteAllKeyframes();lifted.parm('outputmin').set(1)
+ lifted.parm('outputmax').setExpression('1-ch("../petal_ao_intensity")')
+ masked=T.node(net,'blend','PC_AO_Inside',[T.const(net,'PC_AO_Neutral',net.node('A03_band__lv_0_top_1_bottom'),1),lifted,net.node('B03_petal_mask')],mode=0)
+ out=T.mix(net,'PC_FINAL_WithAO',net.node('PC_FINAL'),masked,5)
+ net.node('U30_colour0_windowed').setInput(0,out)
+ box=net.findNetworkBox('PetalPatternAO') or net.createNetworkBox('PetalPatternAO');box.setComment('6 October 2026: Band0 adjustable micro occlusion')
+ nodes=tuple(set(net.children())-before)
+ for n in nodes:box.addItem(n)
+ net.layoutChildren(items=nodes);box.fitAroundContents()
+ return out

@@ -11,7 +11,9 @@ SIL = [(0.0, 0.0440)] + [tuple(k) for k in MEAS['silhouette']]
 LEVEL = [(0, .85), (.08, .94), (.15, .93), (.22, .88), (.30, .85), (.38, .81), (.46, .79), (.55, .78), (.65, .77), (.75, .73), (.82, .71), (.90, .71), (.95, .70), (1.0, .69)]      # 6 October 2026: +0.05, the v2 petal is brighter (median 0.75)
 GROUND = 0.40; PIVOT = 1.08            # the fan of fibres starts PIVOT band heights below the top
 import os
-VAULT = float(os.environ.get('VAULT', '1.0'))      # the vault depth x, 1.0 = the ref
+VAULT = float(os.environ.get('VAULT', '1.0'))
+RIM = float(os.environ.get('RIM', '0.5'))      # 6 October 2026 (Matthieu): the luminous contour (bright rim, groove, halo) is VERY SUBTLE like the ref: 0 = none, 1 = the first strength, 0.4 chosen      # the vault depth x, 1.0 = the ref
+DOTS = float(os.environ.get('DOTS', '0.85'))      # 6 October 2026: dot density factor, 1.0 = the density measured on ref 06, a little less asked by Matthieu
 UPTO = 99
 def scallop(net, tag, lv, wb):
     """6 October 2026: the edge of the v2 petals is SCALLOPED (soft lobes about 0.02 canvas long): a slow noise along the edge added to the half width. 3 nodes."""
@@ -21,7 +23,7 @@ def coords(net, ry, rx):
     ax = T.mix(net, 'A06_cell__abs_cx', cx, T.const(net, 'A05_const__zero', lv, 0.0), 9)
     wb = T.curve(net, 'B01_silhouette_halfwidth', lv, [(x, y / 0.2) for x, y in SIL], 1.0, 0.0, 0.2, T.SMOOTH)
     wb = scallop(net, 'B01s', lv, wb)
-    mb = T.mix(net, 'B03_petal_mask', T.smooth(net, 'B02_edge', T.mix(net, 'B02a_edge_distance', wb, ax, 4), -EDGE, EDGE), T.smooth(net, 'B02b_top_plateau', lv, 0.014, 0.024), 5)
+    mb = T.mix(net, 'B03_petal_mask', T.smooth(net, 'B02_edge', T.mix(net, 'B02a_edge_distance', wb, ax, 4), -EDGE, EDGE), T.smooth(net, 'B02b_top_plateau', lv, 0.0, 0.002), 5)
     return lv, ax, wb, mb
 def build(net):
     rx = T.node(net, 'ramp', 'A00_ramp__three_cycles_x', signature='f1', cycles=3.0, method=1); ry = T.node(net, 'ramp', 'A01_ramp__down_y', signature='f1', rotation=90.0)
@@ -37,7 +39,7 @@ def build(net):
         hk = [(0.0, 1.0 if k == 0 else 0.0)] + ([(cs[k - 1], 0.0)] if k > 0 else []) + [(cs[k], 1.0)] + ([(cs[k + 1], 0.0)] if k < 5 else []) + [(1.0, 1.0 if k == 5 else 0.0)]
         hw_ = T.curve(net, 'C02_hat_row%d' % k, lv, hk, 1.0, 0.0, 1.0, None)
         term = T.mix(net, 'C02_row%d_weighted' % k, ck, hw_, 5); tone = term if tone is None else T.mix(net, 'C02_sum%d' % k, tone, term, 3)
-    tone = T.mix(net, 'C03_tone_plus_bias', tone, T.const(net, 'C03a_bias', lv, -0.005), 3)      # 6 October 2026: the dark layers (grooves, pits) lower the mean by 0.055 against the measured median, so the base is raised by the same amount
+    tone = T.mix(net, 'C03_tone_plus_bias', tone, T.const(net, 'C03a_bias', lv, 0.025), 3)      # 6 October 2026: the dark layers (grooves, pits) lower the mean by 0.055 against the measured median, so the base is raised by the same amount
     ground = T.const(net, 'C05_ground', lv, GROUND)
     h = T.mix(net, 'C06_over_ground', ground, T.mix(net, 'C06a_delta_masked', T.mix(net, 'C06b_delta', tone, ground, 4), mb, 5), 3)
     c = dict(lv=lv, ax=ax, wb=wb, mb=mb, t=t, rx=rx)
@@ -51,13 +53,16 @@ def iteration1(net, h, c):
     soft = T.node(net, 'fractalnoise', 'G00_soft_phase_noise', [lv], amp=0.5, center=0.0, elementsize=0.14)
     d_sil = T.mix(net, 'G01_distance_inside', wb, ax, 4)
     rim = V.profile(net, 'G02_rim', d_sil, [(-0.02, 0.0), (-0.008, -0.02), (-0.002, -0.05), (0.0, -0.02), (0.0015, 0.22), (0.006, 0.14), (0.011, 0.04), (0.016, -0.05), (0.024, 0.0), (0.05, 0.0)], -0.02, 0.05, -0.15, 0.35)      # 6 October 2026: wider bright rim with a groove inside, like the v2 petals
+    rim = T.mix(net, 'G02a_rim_scaled', rim, T.const(net, 'G02b_rim_strength', lv, RIM), 5)
     h = T.mix(net, 'G04_rim__added', h, T.mix(net, 'G03_rim__not_top', rim, T.lin(net, 'G03a', T.smooth(net, 'G03b', lv, 0.70, 0.76), 0.0, 1.0, 1.0, 0.0), 5), 3)
-    # 6 October 2026: the rib MEASURED per row group on ref 06: the centre line is an ABSOLUTE tone (0.80) whatever the vault, a weight w(dx) = 1, 0.75, 0.3, 0.07, 0 px; beside it a small RELATIVE ridge and groove (rel tone minus the base at 22..25 px).
-    rw = V.profile(net, 'G05_rib_weight', ax, [(0.0, 1.0), (1 / 1254.0, 0.8), (2 / 1254.0, 0.3), (3 / 1254.0, 0.07), (4 / 1254.0, 0.0), (0.03, 0.0)], 0.0, 0.03, 0.0, 1.0)
-    rw = T.mix(net, 'G05a_rib_weight_masked', rw, T.smooth(net, 'G05b_below_top', lv, 0.0, 0.03), 5)
-    h = T.mix(net, 'G05c_rib_centre__added', h, T.mix(net, 'G05d_rib_pull', T.mix(net, 'G05e_gap', T.const(net, 'G05f_centre', lv, 0.80), h, 4), rw, 5), 3)
-    rr = V.profile(net, 'G06_rib_rel', ax, [(k / 1254.0, v) for k, v in enumerate(MEAS['rib_rel'])], 0.0, 25.0 / 1254, -0.1, 0.1)
-    h = T.mix(net, 'G07_rib_rel__added', h, T.mix(net, 'G06a_rel_masked', rr, T.smooth(net, 'G06b_below_neck', lv, 0.0, 0.05), 5), 3)
+    # 6 October 2026 (Matthieu: "tu as fait disparaitre la double épine, remets-la"): the DOUBLE SPINE measured on the centred petal of ref 06 (signed profile around the axis, three row groups): two bright lines at +-5 px (absolute tone 0.84, about 3 px wide), a darker gap between them (-0.06) and a dark groove outside each line at about 10 px (-0.12 at the top, -0.19 at the bottom), back to the base by 17 px. (The other two petals of the AI sheet carry the pair off centre, not copied.)
+    pxu = 1.0 / 1254.0
+    wl = V.profile(net, 'G05_spine_lines', ax, [(0.0, 0.0), (2.0 * pxu, 0.0), (3.8 * pxu, 0.35), (5.8 * pxu, 1.0), (7.8 * pxu, 0.35), (9.2 * pxu, 0.0), (0.03, 0.0)], 0.0, 0.03, 0.0, 1.0)
+    wl = T.mix(net, 'G05a_spine_lines_masked', wl, T.curve(net, 'G05b_fade_up', lv, [(0.0, 0.15), (0.06, 0.35), (0.12, 0.65), (0.25, 1.0), (1.0, 1.0)], 1.0, 0.0, 1.0), 5)      # 6 October 2026: the spine SOFTENS toward the top (ref 06: line minus base +0.02 at the top rows, +0.13 at row 60; groove depth 0.09 against 0.17)
+    gd = V.profile(net, 'G06_spine_dark', ax, [(0.0, -0.035), (2.5 * pxu, -0.035), (4.0 * pxu, -0.02), (5.2 * pxu, 0.0), (8.5 * pxu, -0.03), (10.5 * pxu, -0.13), (12.0 * pxu, -0.17), (13.5 * pxu, -0.10), (15.5 * pxu, -0.03), (19.0 * pxu, 0.0), (0.03, 0.0)], 0.0, 0.03, -0.2, 0.0)
+    gd = T.mix(net, 'G06a_spine_dark_scaled', gd, T.curve(net, 'G06b_groove_by_row', lv, [(0.0, 0.20), (0.08, 0.38), (0.17, 0.70), (0.30, 1.0), (0.55, 1.05), (0.80, 0.85), (0.92, 0.62), (1.0, 0.6)], 1.0, 0.0, 1.5), 5)
+    h = T.mix(net, 'G07_spine_dark__added', h, T.mix(net, 'G06c_masked', gd, T.smooth(net, 'G06d_below_top', lv, 0.0, 0.03), 5), 3)
+    h = T.mix(net, 'G05c_spine_lines__added', h, T.mix(net, 'G05d_pull', T.mix(net, 'G05e_gap', T.const(net, 'G05f_line_tone', lv, 0.845), h, 4), wl, 5), 3)
     dy = T.lin(net, 'G10_fan__dy', lv, 0.0, 1.0, PIVOT * BAND_V1, (PIVOT - 1.0) * BAND_V1)
     phi = T.node(net, 'function', 'G11_fan__angle', [T.mix(net, 'G11a_slope', ax, T.mix(net, 'G11b_dy_floor', dy, T.const(net, 'G11c', lv, 0.01), 12), 6)], func=2, func_trig=5, angleunit=2)
     fade = T.lin(net, 'G12_fan__fade', T.smooth(net, 'G12a', lv, 0.97, 1.0), 0.0, 1.0, 1.0, 0.0)
@@ -83,31 +88,29 @@ def iteration1(net, h, c):
     h = h_cur[0]
     h = V.grain(net, 'G32_grain', h, lv, mb, 0.0022, 5.3, 0.025)
     sh = V.profile(net, 'G41_contact', d_sil, [(-0.05, 0.0), (-0.025, -0.02), (-0.010, -0.05), (-0.003, -0.04), (0.0, 0.0), (0.05, 0.0)], -0.05, 0.05, -0.15, 0.05)
+    sh = T.mix(net, 'G41a_contact_scaled', sh, T.const(net, 'G41b_contact_strength', lv, RIM), 5)
     h = T.mix(net, 'G43_contact__added', h, T.mix(net, 'G42_contact__outside', sh, T.lin(net, 'G42a', mb, 0.0, 1.0, 1.0, 0.0), 5), 3)
     h = V.pads(net, 'G', h, n0); V.close(net, b, 'G', n0); return h
-def speckles(net, lv, ax, wb, mb, tag='SP', shift=0.0):
+def speckles(net, lv, ax, wb, mb, tag='SP', shift=0.0, hot=False):
     """THE SPECKLES of the petal (Matthieu, 6 October 2026: add small random dots, like the photo): scattered round dots, dense around the centre and the lower middle of the petal, rarer toward the white edge. Returns a 0..1 mask. The same function builds the same pattern in the height AND in the base colour (deterministic noise), so the dot is dark pink in the colour exactly where it is a bump in the height. 11 nodes. FR : points aleatoires du petale."""
     t = T.node(net, 'clamp', tag + '01_across', [T.mix(net, tag + '01a', ax, T.mix(net, tag + '01b', wb, T.const(net, tag + '01c', lv, 0.01), 12), 6)])
     # 6 October 2026: dot DENSITY measured on ref 06 (dark pixel counts by t: 2351 2069 2136 1205 619 278 0, by row band of 40: 275 714 1228 1904 2208 2261): a probability P(t) * P(lv); a dot is kept where the probability beats a fine random noise, so the density follows the measurement.
     pt = T.curve(net, tag + '02_p_across', t, [(0.0, 0.0), (0.06, 0.0), (0.08, 1.0), (0.275, 0.88), (0.425, 0.91), (0.575, 0.51), (0.725, 0.26), (0.875, 0.12), (1.0, 0.0)], 1.0, 0.0, 1.0)
     pl = T.curve(net, tag + '02a_p_along', lv, [(0.0, 0.0), (0.08, 0.12), (0.25, 0.32), (0.41, 0.54), (0.58, 0.84), (0.74, 0.98), (0.97, 1.0), (1.0, 1.0)], 1.0, 0.0, 1.0)
-    rnd = T.lin(net, tag + '02b_random', T.node(net, 'fractalnoise', tag + '02c_rnd', [lv], amp=0.5, center=0.5, elementsize=0.02, noisetype=1, offx=3.9), 0.15, 0.85, 0.0, 1.0)
-    keep = T.smooth(net, tag + '02d_keep', T.mix(net, tag + '02e_p_minus_rnd', T.mix(net, tag + '02f_p', pt, pl, 5), rnd, 4), 0.0, 0.08)
+    rnd = T.lin(net, tag + '02b_random', T.node(net, 'fractalnoise', tag + '02c_rnd', [lv], amp=0.5, center=0.5, elementsize=0.05, noisetype=1, offx=3.9), 0.15, 0.85, 0.0, 1.0)
+    keep = T.smooth(net, tag + '02d_keep', T.mix(net, tag + '02e_p_minus_rnd', T.mix(net, tag + '02f_p', T.mix(net, tag + '02f1_p0', pt, pl, 5), T.const(net, tag + '02f2_dots', lv, DOTS), 5), rnd, 4), 0.0, 0.015)
     nz = T.node(net, 'worleynoise', tag + '03_dots', [lv], elementsize=0.027, jitter=1.0, offx=7.0 + shift, offy=0.0 + shift * 0.8)      # 6 October 2026: Worley F1 distance, thresholded below, gives perfectly ROUND dots (fractal noise blobs were angular), one per cell, like the pits of the v2 reference
-    dots = T.smooth(net, tag + '04_round', nz, 0.075, 0.105, 1.0, 0.0)
+    dots = T.smooth(net, tag + '04_round', nz, 0.010, 0.020, 1.0, 0.0) if hot else T.smooth(net, tag + '04_round', nz, 0.105, 0.135, 1.0, 0.0)
     return T.mix(net, tag + '06_mask', T.mix(net, tag + '06a_kept', dots, keep, 5), mb, 5)
 def iteration2(net, h, c):
     """ITERATION 2 (64 nodes): the speckles in the height: small raised dots with a tiny dimple ring, plus fine pores scattered over the whole petal."""
     lv, ax, wb, mb = c['lv'], c['ax'], c['wb'], c['mb']
     n0 = len(net.children()); b = V.box(net, 'H', 'BAND 0 V3 ITERATION 2 : 64 nodes, speckles', (1.0, 0.8, 0.85))
     spk = speckles(net, lv, ax, wb, mb)
-    # 6 October 2026 (Matthieu): the dots have a little 3D VOLUME. Bead lighting: Height to Normal on the soft dot dome, then a fixed light direction (up left): lit crescent on one side of each dot, shadow crescent on the other.
-    dome = T.node(net, 'blur', 'H10_bead_dome', [spk], units=1, size_pixel=2.2)
-    nrm = T.node(net, 'heighttonormal', 'H10a_bead_normal', [dome], scale=6.0)
-    nx = T.node(net, 'channelextract', 'H10b_nx', [nrm], channel=0); ny = T.node(net, 'channelextract', 'H10c_ny', [nrm], channel=1)
-    shade = T.mix(net, 'H10d_light', T.lin(net, 'H10e_nx', nx, 0.0, 1.0, -0.5, 0.5), T.lin(net, 'H10f_ny', ny, 0.0, 1.0, -0.5, 0.5), 3)
-    h = T.mix(net, 'H10g_bead_shading__added', h, T.lin(net, 'H10h_gain', shade, -1.0, 1.0, -0.40, 0.40), 3) if False else T.mix(net, 'H10g_bead_shading__added', h, T.mix(net, 'H10h_shade', shade, T.const(net, 'H10i_k', lv, 0.22), 5), 3)
-    h = T.mix(net, 'H11_speckles__added', h, T.lin(net, 'H11a_gain', spk, 0.0, 1.0, 0.0, -0.60), 3)   # 6 October 2026: the dots of the v2 reference are dark PITS (p1 of the petal 0.34 against 0.55 before), not raised bumps
+    h = T.mix(net, 'H11_speckles__added', h, T.lin(net, 'H11a_gain', spk, 0.0, 1.0, 0.0, -0.42), 3)
+    # 6 October 2026 (Matthieu): the 3D effect of the dots = a small WHITE POINT inside a BLACK SPHERE (the first bead shading was coarse): a second, tiny round mask from the same dot field (Worley distance under 0.022) pulled to a bright tone.
+    hl = speckles(net, lv, ax, wb, mb, 'SH', hot=True)
+    h = T.mix(net, 'H11b_white_point__added', h, T.mix(net, 'H11c_pull', T.mix(net, 'H11d_gap', T.const(net, 'H11e_white', lv, 0.90), h, 4), hl, 5), 3)   # 6 October 2026: the dots of the v2 reference are dark PITS (p1 of the petal 0.34 against 0.55 before), not raised bumps
     h = V.dots_layer(net, 'H21_pores', h, lv, mb, 0.0022, 9.9, 0.66, 0.045)
     h = V.dots_layer(net, 'H22_pores_dark', h, lv, mb, 0.0017, 14.1, 0.70, -0.04)
     h = V.pads(net, 'H', h, n0); V.close(net, b, 'H', n0); return h
@@ -116,7 +119,7 @@ def opacity(net, ry, rx):
     lv = T.lin(net, 'OP0_lv', ry, 0.0, BAND_V1); cx = T.lin(net, 'OP0_cx', rx, 0.0, 1.0, -1.0 / 6, 1.0 / 6); ax = T.mix(net, 'OP0_ax', cx, T.const(net, 'OP0_zero', lv, 0.0), 9)
     wb = T.curve(net, 'OP0_wb', lv, [(x, y / 0.2) for x, y in SIL], 1.0, 0.0, 0.2, T.SMOOTH)
     wb = scallop(net, 'OP0s', lv, wb)
-    return T.mix(net, 'OP0_mask', T.smooth(net, 'OP0_edge', T.mix(net, 'OP0_dist', wb, ax, 4), -EDGE * 0.6, EDGE * 0.6), T.smooth(net, 'OP0_top', lv, 0.014, 0.024), 5)
+    return T.mix(net, 'OP0_mask', T.smooth(net, 'OP0_edge', T.mix(net, 'OP0_dist', wb, ax, 4), -EDGE * 0.6, EDGE * 0.6), T.smooth(net, 'OP0_top', lv, 0.0, 0.002), 5)
 if __name__ == '__main__':
     hou.hipFile.clear(suppress_save_prompt=True); net = hou.node('/obj').createNode('copnet', 'Band0V3_test'); res = int(sys.argv[3]) if len(sys.argv) > 3 else 2048
     if len(sys.argv) > 4: UPTO = int(sys.argv[4])

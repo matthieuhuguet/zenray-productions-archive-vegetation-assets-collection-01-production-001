@@ -8,31 +8,39 @@ H = 242; W = 418
 def load(p): return np.asarray(Image.open(p).convert('L').resize((1254, 1254), Image.LANCZOS), float)[:H] / 255
 a = load(R); b = load(OURS)
 def edges(img, y):
-    """half width per row and petal: first steep crossing of 0.55 going inward from the background."""
+    """distance from the nominal cell centre to the left and right edge (steep crossing of 0.55 going inward), per petal: [(dL, dR), ...]."""
     row = img[y]; out = []
     for c in range(3):
-        cx = c * W + W // 2
+        cx = c * W + W // 2; pair = []
         for sgn in (-1, 1):
             e = None
             for d in range(int(W / 2) - 1, 3, -1):
                 x = cx + sgn * d
                 if 0 <= x < 1254 and row[x] > 0.55 and row[max(0, x - sgn * 3)] > 0.5: e = d; break
-            out.append(e)
+            pair.append(e)
+        out.append(tuple(pair))
     return out
 def maps(img):
-    hw = np.zeros((H, 3)); 
+    """half width per row and petal, and the horizontal offset of the true axis of each petal (the AI sheet is not exactly periodic: the axes sit a few px away from the nominal centres). Offset = median over rows 60..140 of (dR - dL) / 2."""
+    hw = np.zeros((H, 3)); offs = [[] for _ in range(3)]
     for y in range(H):
         e = edges(img, y)
         for c in range(3):
-            ee = [v for v in e[2 * c:2 * c + 2] if v is not None]; hw[y, c] = np.mean(ee) if ee else 0
-    return hw
-hwa, hwb = maps(a), maps(b)
+            dl, dr = e[c]
+            if dl is not None and dr is not None:
+                hw[y, c] = (dl + dr) / 2.0
+                if 60 <= y <= 140: offs[c].append((dr - dl) / 2.0)
+            elif dl is not None or dr is not None: hw[y, c] = dl if dl is not None else dr
+    off = np.array([np.median(o) if o else 0.0 for o in offs])
+    return hw, off
+(hwa, offa), (hwb, offb) = maps(a), maps(b)
+print('petal axis offsets (px, + = axis right of the nominal centre): ref', offa.round(1), 'ours', offb.round(1))
 print('half width (px of 1254) every 24 rows ref|ours:', [(y, round(float(hwa[y].mean()), 1), round(float(hwb[y].mean()), 1)) for y in range(4, H, 24)])
-def coords(hw):
-    Y, X = np.mgrid[0:H, 0:1254]; C = (X // W).clip(0, 2); cx = C * W + W // 2
+def coords(hw, off):
+    Y, X = np.mgrid[0:H, 0:1254]; C = (X // W).clip(0, 2); cx = C * W + W // 2 + off[C]
     h = hw[Y, C]; dx = np.abs(X - cx); t = dx / np.maximum(h, 1); d = h - dx
     return Y, t, d, h
-Ya, ta, da, ha = coords(hwa); Yb, tb, db, hb = coords(hwb)
+Ya, ta, da, ha = coords(hwa, offa); Yb, tb, db, hb = coords(hwb, offb)
 ina = (da > 0) & (ha > 5); inb = (db > 0) & (hb > 5)
 def prof(img, d, inside, lo, hi, step):
     out = []
@@ -51,7 +59,7 @@ for (r0, r1) in [(20, 80), (80, 140), (140, 235)]:
     print(' rows %d-%d ref ' % (r0, r1), ra); print('           ours', rb)
 print('\nRIB PROFILE (tone vs |dx| px, rows 40..230):')
 sel = np.zeros((H, 1254), bool); sel[40:230] = True
-dxa = np.abs(np.arange(1254) % W - W // 2)[None, :].repeat(H, 0)
+Xg = np.arange(1254)[None, :].repeat(H, 0); Cg = (Xg // W).clip(0, 2); dxa = np.rint(np.abs(Xg - (Cg * W + W // 2 + offa[Cg]))).astype(int)
 for nm, img, ins in (('ref ', a, ina), ('ours', b, inb)):
     print(' ', nm, [round(float(img[sel & ins & (dxa == k)].mean()), 2) for k in range(0, 22)])
 print('\nVERTICAL LEVEL (mean tone vs row, t in 0.15..0.6, d>14):')
