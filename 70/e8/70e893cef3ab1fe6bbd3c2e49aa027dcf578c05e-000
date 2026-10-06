@@ -1,0 +1,46 @@
+{
+  "date": "6 October 2026",
+  "width": 3840,
+  "height": 2160,
+  "fps": 30,
+  "appear": 1.5,
+  "hold": 3.5,
+  "disappear": 0,
+  "lines": [
+    "ZenRay Vegetation Collection 01",
+    "Fleur de Lys"
+  ],
+  "font": "Vogun-Medium.ttf",
+  "foreground": "#ffffff",
+  "background": "#f6f4ee",
+  "widthRatio": 0.94,
+  "lineGap": 110,
+  "variants": [
+    {
+      "id": "vogun-spaced-caps-pop-1s",
+      "name": "Capitales espacées",
+      "lines": [
+        "ZENRAY VEGETATION COLLECTION 01",
+        "FLEUR DE LYS"
+      ],
+      "trackingEm": 0.065,
+      "popAt": 1
+    }
+  ],
+  "rowDelay": 0.5,
+  "firstStart": 0.015,
+  "spread": 0.3,
+  "settle": 0.17,
+  "slices": 8,
+  "sourceHTML": "Animation.html",
+  "shadow": {
+    "color": "rgba(0,0,0,0.55)",
+    "blur": 16,
+    "offsetX": 0,
+    "offsetY": 0
+  },
+  "cutAtEnd": true,
+  "firstFade": 1.5,
+  "firstCut": 1.5,
+  "weight": 500
+}

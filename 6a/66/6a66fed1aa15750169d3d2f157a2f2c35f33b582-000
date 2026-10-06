@@ -1,0 +1,54 @@
+{
+  "date": "6 October 2026",
+  "originalMedium": true,
+  "results": [
+    {
+      "id": "vogun-cyber-pingpong-yellow",
+      "MB": 1.22,
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "width": 3840,
+            "height": 2160,
+            "nb_frames": "150"
+          }
+        ],
+        "format": {
+          "duration": "5.000000"
+        }
+      },
+      "blankEndpoints": true,
+      "stableHold": true,
+      "text": [
+        "ZenRay Vegetation Collection 01",
+        "FLEUR DE LYS"
+      ]
+    },
+    {
+      "id": "vogun-cyber-pingpong-white",
+      "MB": 0.88,
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "width": 3840,
+            "height": 2160,
+            "nb_frames": "150"
+          }
+        ],
+        "format": {
+          "duration": "5.000000"
+        }
+      },
+      "blankEndpoints": true,
+      "stableHold": true,
+      "text": [
+        "ZenRay Vegetation Collection 01",
+        "FLEUR DE LYS"
+      ]
+    }
+  ]
+}

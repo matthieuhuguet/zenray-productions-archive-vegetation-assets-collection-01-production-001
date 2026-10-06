@@ -1,0 +1,63 @@
+{
+  "date": "6 October 2026",
+  "result": [
+    {
+      "id": "vogun-cyber-pingpong-yellow",
+      "layout": [
+        {
+          "text": "ZenRay Vegetation Collection 01",
+          "size": 243,
+          "width": 3526.415771484375,
+          "height": 236.68202209472656,
+          "ascent": 176.1750030517578
+        },
+        {
+          "text": "FLEUR DE LYS",
+          "size": 540,
+          "width": 3526.73974609375,
+          "height": 394.2000427246094,
+          "ascent": 388.8000183105469
+        }
+      ],
+      "samples": [
+        "vogun-cyber-pingpong-yellow-000.png",
+        "vogun-cyber-pingpong-yellow-009.png",
+        "vogun-cyber-pingpong-yellow-018.png",
+        "vogun-cyber-pingpong-yellow-030.png",
+        "vogun-cyber-pingpong-yellow-045.png",
+        "vogun-cyber-pingpong-yellow-105.png",
+        "vogun-cyber-pingpong-yellow-149.png"
+      ],
+      "bytes": 1220613
+    },
+    {
+      "id": "vogun-cyber-pingpong-white",
+      "layout": [
+        {
+          "text": "ZenRay Vegetation Collection 01",
+          "size": 243,
+          "width": 3526.415771484375,
+          "height": 236.68202209472656,
+          "ascent": 176.1750030517578
+        },
+        {
+          "text": "FLEUR DE LYS",
+          "size": 540,
+          "width": 3526.73974609375,
+          "height": 394.2000427246094,
+          "ascent": 388.8000183105469
+        }
+      ],
+      "samples": [
+        "vogun-cyber-pingpong-white-000.png",
+        "vogun-cyber-pingpong-white-009.png",
+        "vogun-cyber-pingpong-white-018.png",
+        "vogun-cyber-pingpong-white-030.png",
+        "vogun-cyber-pingpong-white-045.png",
+        "vogun-cyber-pingpong-white-105.png",
+        "vogun-cyber-pingpong-white-149.png"
+      ],
+      "bytes": 877384
+    }
+  ]
+}
