@@ -75,7 +75,7 @@ def build(net, with_maps=True):
             # measured on the reference photo (petal-colour-reference-tmp1.webp): the OUTER EDGE of the petal is almost white, the colour is carried by the inside, saturated and deeper toward the centre. Palettes: edge white, body, deep, speckle.
             PET = [dict(edge=(0.97, 0.94, 0.93), body=(0.99, 0.78, 0.86), deep=(0.95, 0.56, 0.62), dot=(0.85, 0.25, 0.38)),      # pale pink (white pink lily)
                    dict(edge=(0.98, 0.94, 0.92), body=(0.86, 0.46, 0.55), deep=(0.70, 0.20, 0.32), dot=(0.60, 0.10, 0.24)),      # pink (top petal of the photo)
-                   dict(edge=(0.95, 0.85, 0.84), body=(0.85, 0.10, 0.26), deep=(0.68, 0.00, 0.12), dot=(0.45, 0.00, 0.08))]      # crimson fuchsia (bottom right lily)
+                   dict(edge=(0.98, 0.94, 0.93), body=(0.90, 0.54, 0.64), deep=(0.78, 0.30, 0.44), dot=(0.64, 0.14, 0.30), wash=(0.985, 0.88, 0.91))]      # WASHED pink: a variation of the middle pink, bleached in patches like the centre lily of the photo (Matthieu, 6 October 2026)
             d_sil = T.mix(net, 'U82_distance_to_edge', wb0, ax0, 4)
             d_top = T.lin(net, 'U82a_distance_to_top', lv0, 0.017, 1.017, 0.0, 0.193)
             d_in = T.mix(net, 'U82b_distance_inside', d_sil, d_top, 13)
@@ -88,6 +88,10 @@ def build(net, with_maps=True):
                 mi = T.node(net, 'blend', 'U9%dd_deeper' % i, [mi, flat_colour(net, 'U9%de_deep' % i, ry, pc['deep']), T.lin(net, 'U9%df_amount' % i, deepmask, 0.0, 1.0, 0.0, 0.85)], mode=0)
                 mi = T.node(net, 'blend', 'U9%dg_dots' % i, [mi, flat_colour(net, 'U9%dh_dot' % i, ry, pc['dot']), T.lin(net, 'U9%di_dotamount' % i, spk, 0.0, 1.0, 0.0, 0.9)], mode=0)
                 mi = T.node(net, 'blend', 'U9%dl_white_edge' % i, [mi, flat_colour(net, 'U9%dm_edge' % i, ry, pc['edge']), edge_amt], mode=0)
+                if 'wash' in pc:
+                    wn = T.node(net, 'fractalnoise', 'U9%dn_wash_noise' % i, [lv0], amp=0.5, center=0.5, elementsize=0.16, noisetype=1, offx=3.7, tilesizex=2.0 / 3.0, oct=3)
+                    wp = T.curve(net, 'U9%do_wash_patches' % i, wn, [(0.0, 0.0), (0.30, 0.0), (0.75, 1.0), (1.0, 1.0)], 1.0, 0.0, 1.0, T.SMOOTH)
+                    mi = T.node(net, 'blend', 'U9%dp_washed' % i, [mi, flat_colour(net, 'U9%dq_wash' % i, ry, pc['wash']), T.lin(net, 'U9%dr_wash_amount' % i, wp, 0.0, 1.0, 0.0, 0.70)], mode=0)
                 ci = T.mix(net, 'U9%dj_petal_colour' % i, mi, wi, 5); cols = ci if cols is None else T.mix(net, 'U9%dk_plus' % i, cols, ci, 3)
             hp = T.mix(net, 'U84_height_detail', bands[0], T.node(net, 'blur', 'U84a_height_soft', [bands[0]], units=1, size_pixel=14.0), 4)      # high pass of the height: fibres, rib, rim
             shade = T.lin(net, 'U85_shade', hp, -0.12, 0.12, 0.82, 1.12)

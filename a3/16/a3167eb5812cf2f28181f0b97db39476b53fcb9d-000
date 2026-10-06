@@ -57,7 +57,7 @@ def tepals(geo):
                     pos = c + l * x - nout * drop + nout * (0.0012 * (1 - abs(tt)) * g) + nout * (wave * math.sin(f * 11.0 + j * 1.7 + tt * 2.3) * tt * tt * g)
                     row.append((pos, (tt * 0.5 + 0.5, f)))
                 rows.append(row)
-            ks = max(2, int(0.55 * (NS - 1))); cell = (j // 2) % 3
+            ks = max(2, int(0.55 * (NS - 1))); cell = k % 3   # one petal pattern per FLOWER (Matthieu, 6 October 2026), not per tepal
             def uv_tube(u, f, ex, c=cell): lv = 1.0 - f / 0.55; return TU('tepal_outer', (c % 3) / 3.0 + (u * 2.0 - 1.0) * outer_half(lv), lv)   # band 1 is shifted by half a cell: the arch is centred on the cell boundary
             def uv_flare(u, f, ex, c=cell): lv = 1.0 - (f - 0.55) / 0.45; return TU('tepal_inner', (c + 0.5) / 3.0 + (u * 2.0 - 1.0) * sil(lv) * 0.97, lv)
             grid(geo, rows[:ks + 1], 'tepal', 'tepal%d_%d_tube' % (k, j), tepal_color, uvf=uv_tube)
