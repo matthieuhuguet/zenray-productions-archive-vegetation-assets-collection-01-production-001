@@ -1,0 +1,45 @@
+{
+ "movie": "LilyHeight_trim_v005",
+ "fps": 24,
+ "size": [
+  2048,
+  2048
+ ],
+ "seconds": 61.333,
+ "title": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/vogun-cyber/vogun-cyber-pingpong-yellow.mov",
+ "title_resolution": [
+  3840,
+  2160
+ ],
+ "title_start_s": 1.0,
+ "music": "/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/audio/fox capture plan - Butterfly Effect.mp3",
+ "timeline": [
+  {
+   "start": 0.0,
+   "end": 6.0,
+   "shot": "hook_bed_orbit_flat_2k",
+   "source": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/render/bed_orbit_flat_2k/flat_%04d.png"
+  },
+  {
+   "start": 6.0,
+   "end": 56.333,
+   "shot": "height_evolution_complete",
+   "source": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/height_evolution/height_evolution_complete.mp4"
+  },
+  {
+   "start": 56.333,
+   "end": 61.333,
+   "shot": "flower_close_orbit_2k_5s",
+   "source": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/render/flower_close_orbit_2k/close_%04d.png"
+  }
+ ],
+ "music_start_s": 144,
+ "sfx_at_title": {
+  "file": "/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/audio/DS 13. Prompt.mp3",
+  "normalised_copy": "/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/audio/DS13_Prompt_norm.wav",
+  "start_s": 1.0,
+  "level": "-17 LUFS, true peak -1.5 dB before the mix",
+  "final_track": "-14 LUFS two-pass after the mix"
+ },
+ "folder": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/FinalVideos/"
+}
