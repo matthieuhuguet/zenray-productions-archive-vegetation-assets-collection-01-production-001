@@ -1,0 +1,419 @@
+# 6 October 2026 : builds EVERY image of the Fleur de Lys article (numbered WebP, never above 2560 px, a weight budget per file) and the images index.
+# FR : fabrique TOUTES les images de l'article Fleur de Lys (WebP numerotes, jamais au-dessus de 2560 px, budget de poids par fichier) et l'index des images.
+#
+# One definition per figure (the @fig decorator = the interface), the generic helpers below it are the HDA. Nothing is read from the reference images:
+# every source is a Houdini or Unreal output of this project, a screenshot of Matthieu, or a frame of the finished videos.
+# Run:  python3 Scripts/ArticleLily/Figures.py            (build everything)
+#       python3 Scripts/ArticleLily/Figures.py --only 5,6  (rebuild some figures by number)
+#       python3 Scripts/ArticleLily/Figures.py --list      (print the plan)
+import os, sys, json, hashlib, subprocess, glob, shutil
+from PIL import Image, ImageDraw, ImageFont, ImageFilter
+
+R = '/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/'
+SITE = '/Users/zenray/.claude/tmp/tmp-zenray-website-lily/site/'
+WORK = '/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/article/'
+SLUG = 'fleur-de-lys-procedural-lily-houdini-unreal'
+OUT = SITE + 'public/projects/' + SLUG + '/'
+FRAMES = WORK + 'frames/'
+FONTS = os.path.expanduser('~/Library/Fonts/')
+P = dict(
+    max_w=2560,            # never wider than this (6 October 2026, "never too big")
+    q_start=90, q_min=68,  # WebP quality ladder: quality drops BEFORE width does
+    budget_big=680_000,    # bytes, images wider than small_w
+    budget_small=430_000,  # bytes, images up to small_w
+    small_w=1700,
+    total_budget=17_000_000,
+    gap=14, bg=(17, 17, 19), ink=(236, 236, 238), muted=(150, 150, 156),
+    coral=(243, 138, 92), pink=(226, 118, 135), blue=(67, 113, 238), sky=(111, 182, 237), green=(106, 154, 82), yellow=(255, 255, 0),
+    vogun=FONTS + 'Vogun-Medium.ttf',
+)
+STEPS = R + 'video/steps/inputs/'
+REG = []   # registry of figures, in reading order
+
+
+def fig(slug, caption, alt, kind='figure', section=''):
+    def deco(fn):
+        REG.append(dict(slug=slug, caption=caption, alt=alt, kind=kind, section=section, fn=fn, sources=[]))
+        return fn
+    return deco
+
+
+# ---------------------------------------------------------------- helpers
+SRC = []   # every source file opened while one figure is built (provenance, written to the private index)
+def rgb(path): SRC.append(path); return Image.open(path).convert('RGB')
+def src(path): return R + path if not path.startswith('/') else path
+def ft(size, kind='sans', weight=400):
+    if kind == 'sans':
+        f = ImageFont.truetype(FONTS + 'InterVariable.ttf', size); f.set_variation_by_axes([14, weight]); return f
+    if kind == 'serif': return ImageFont.truetype(FONTS + 'AnthropicSerif-Light.ttf', size)
+    if kind == 'mono': return ImageFont.truetype(FONTS + 'AnthropicMono-Regular.ttf', size)
+    if kind == 'vogun': return ImageFont.truetype(P['vogun'], size)
+def fit_w(im, w):
+    if im.width <= w: return im
+    return im.resize((w, round(im.height * w / im.width)), Image.LANCZOS)
+def fit_box(im, w, h):
+    s = min(w / im.width, h / im.height); return im.resize((max(1, round(im.width * s)), max(1, round(im.height * s))), Image.LANCZOS)
+def cover_box(im, w, h):
+    s = max(w / im.width, h / im.height); im = im.resize((max(1, round(im.width * s)), max(1, round(im.height * s))), Image.LANCZOS)
+    x = (im.width - w) // 2; y = (im.height - h) // 2; return im.crop((x, y, x + w, y + h))
+def frame(video, t, name, size=None):
+    os.makedirs(FRAMES, exist_ok=True); out = FRAMES + name + '.png'
+    cmd = ['ffmpeg', '-y', '-loglevel', 'error', '-ss', str(t), '-i', video, '-frames:v', '1'] + (['-vf', 'scale=%d:%d' % size] if size else []) + [out]
+    subprocess.run(cmd, check=True); SRC.append(video); return Image.open(out).convert('RGB')
+def window_crop(path):          # the application window only (no macOS menu bar, no Dock): 3456 x 2234 screenshots of Matthieu
+    im = rgb(path); return im.crop((0, 66, im.width, 2086))
+def grid(cells, cols, cw, ch=None, gap=None, bg=None, labels=None, label_size=34, pad=0):
+    gap = P['gap'] if gap is None else gap; bg = bg or P['bg']; ch = ch or cw
+    rows = (len(cells) + cols - 1) // cols
+    W = pad * 2 + cols * cw + (cols - 1) * gap; H = pad * 2 + rows * ch + (rows - 1) * gap
+    sh = Image.new('RGB', (W, H), bg); d = ImageDraw.Draw(sh); f = ft(label_size)
+    for i, c in enumerate(cells):
+        x = pad + (i % cols) * (cw + gap); y = pad + (i // cols) * (ch + gap)
+        c = fit_box(c, cw, ch); sh.paste(c, (x + (cw - c.width) // 2, y + (ch - c.height) // 2))
+        if labels and labels[i]: tag(d, f, labels[i], x + 14, y + 12)
+    return sh
+def tag(d, f, text, x, y, fg=(255, 255, 255), bgc=(0, 0, 0, 150)):
+    w = d.textlength(text, font=f); h = f.size
+    d.rounded_rectangle((x - 8, y - 4, x + w + 8, y + h + 10), radius=10, fill=(14, 14, 16))
+    d.text((x, y), text, font=f, fill=fg)
+def save(im, name, max_w=None, budget=None):
+    im = im.convert('RGB'); mw = max_w or P['max_w']
+    if im.width > mw: im = im.resize((mw, round(im.height * mw / im.width)), Image.LANCZOS)
+    budget = budget or (P['budget_small'] if im.width <= P['small_w'] else P['budget_big']); path = OUT + name
+    q = P['q_start']
+    while True:
+        im.save(path, 'WEBP', quality=q, method=6)
+        if os.path.getsize(path) <= budget or q <= P['q_min']: break
+        q -= 3
+    return dict(file=name, width=im.width, height=im.height, bytes=os.path.getsize(path), quality=q, over_budget=os.path.getsize(path) > budget)
+def title_overlay(img, lines, top, size=190, max_w=0.80, gap=1.10, shadow=0.55, blur=9):
+    W = img.width; d0 = ImageDraw.Draw(img)
+    while max(d0.textlength(t, font=ft(size, 'vogun')) for t in lines) > max_w * W: size -= 4
+    f = ft(size, 'vogun'); sh = Image.new('L', img.size, 0); sd = ImageDraw.Draw(sh); y = top
+    for t in lines: sd.text(((W - d0.textlength(t, font=f)) / 2, y), t, font=f, fill=int(255 * shadow)); y += int(size * gap)
+    sh = sh.filter(ImageFilter.GaussianBlur(blur)); img.paste(Image.new('RGB', img.size, (0, 0, 0)), mask=sh)
+    d = ImageDraw.Draw(img); y = top
+    for t in lines: d.text(((W - d.textlength(t, font=f)) / 2, y), t, font=f, fill=P['yellow']); y += int(size * gap)
+    return img
+def rbox(d, box, fill, outline=None, r=26, w=3): d.rounded_rectangle(box, radius=r, fill=fill, outline=outline, width=w)
+def centered(d, text, cx, cy, f, fill):
+    w = d.textlength(text, font=f); d.text((cx - w / 2, cy - f.size * 0.62), text, font=f, fill=fill)
+def arrow(d, x0, y0, x1, y1, color, w=8, head=26):
+    d.line((x0, y0, x1 - head * 0.6, y1), fill=color, width=w); d.polygon([(x1, y1), (x1 - head, y1 - head * 0.62), (x1 - head, y1 + head * 0.62)], fill=color)
+
+
+# ================================================================ FIGURES, in reading order
+# ---- posters (not numbered figures, they dress the three video blocks) ----------------------------------
+@fig('poster-how', 'Poster: How did I create these shots?', 'A frame of the first video: a flower bed and a single lily side by side, with the yellow title.', kind='poster')
+def poster_how():
+    return frame(R + 'video/FinalVideos/howIcreatethoseshots.mp4', 3.0, 'how_3p0', (2048, 2048))
+@fig('poster-petals', 'Poster: Petals Height', 'Cover of the Petals Height video: a pink lily and the yellow title.', kind='poster')
+def poster_petals():
+    im = rgb(src('render/flower_close_orbit_2k/close_0230.png')); return title_overlay(im, ['Petals Height', 'FLEUR DE LYS'], 70)
+@fig('poster-trim', 'Poster: Trim Sheet Height', 'Cover of the Trim Sheet Height video: the flower bed and the yellow title.', kind='poster')
+def poster_trim():
+    im = rgb(src('render/bed_orbit_flat_2k/flat_0040.png')); return title_overlay(im, ['Trim Sheet Height', 'FLEUR DE LYS'], 70)
+@fig('card-thumb', 'Card thumbnail for the works grid', 'Thumbnail: a pink lily on a blurred copy of itself.', kind='card')
+def card_thumb():
+    im = rgb(src('render/flower_close_orbit_2k/close_0230.png')); W, H = 2560, 1440
+    bg = cover_box(im, W, H).filter(ImageFilter.GaussianBlur(46)); bg = Image.blend(bg, Image.new('RGB', bg.size, (10, 10, 12)), 0.32)
+    bg.paste(fit_box(im, H, H), ((W - H) // 2, 0)); return bg
+
+# ---- Before the first node ------------------------------------------------------------------------------
+@fig('pipeline', 'The whole pipeline in one picture. Houdini builds the asset and its maps, Unreal renders the shots, ffmpeg and Python cut the videos.',
+     'Diagram: references measured in Houdini, an HDA and a Copernicus trim sheet, FBX and 4096 maps into Unreal Engine with Lumen and Movie Render Queue, then ffmpeg for three videos.', section='brief')
+def pipeline():
+    S = 2; W, H = 2560 * S, 1150 * S; im = Image.new('RGB', (W, H), (246, 246, 248)); d = ImageDraw.Draw(im)
+    f1, f2, f3, fa = ft(44 * S, 'sans', 600), ft(33 * S), ft(28 * S), ft(27 * S)
+    dark = (24, 24, 28); grey = (110, 110, 118); line = (210, 210, 216)
+    bw, gap = 470, 200; xs = [40 + k * (bw + gap) for k in range(4)]
+    cols = [(xs[0], 'References', None), (xs[1], 'Houdini 22.0.368', P['coral']), (xs[2], 'Unreal Engine 5.8.1', P['blue']), (xs[3], 'ffmpeg and Python', P['green'])]
+    top, bot = 110, 790
+    for (x0, name, col) in cols:
+        rbox(d, (x0 * S, top * S, (x0 + bw) * S, bot * S), (255, 255, 255), outline=col or line, w=4 * S, r=34 * S)
+        d.text(((x0 + 34) * S, (top + 28) * S), name, font=f1, fill=dark)
+    def item(col, y, h, *lines):
+        x0 = xs[col]; rbox(d, ((x0 + 26) * S, y * S, (x0 + bw - 26) * S, (y + h) * S), (244, 244, 247), outline=line, r=20 * S, w=2 * S)
+        d.text(((x0 + 48) * S, (y + 18) * S), lines[0], font=f2, fill=dark)
+        for k, l in enumerate(lines[1:]): d.text(((x0 + 48) * S, (y + 18 + 50 + 38 * k) * S), l, font=f3, fill=grey)
+    item(0, 200, 170, 'Erwan Gaudichon', 'ArtStation, 23 images')
+    item(0, 392, 170, 'Measured, never copied', 'masks, profiles, tables')
+    item(0, 584, 170, 'Proportion studies', 'four-view measurements')
+    item(1, 200, 256, 'HDA  zenray_lily', '7 components', '3 folders of 8 parameters', 'flower table, UV mode')
+    item(1, 478, 276, 'Copernicus trim sheet', '7 bands, 6 maps, 4096 px', 'stock nodes only, no VEX', 'seamless by construction')
+    item(2, 200, 170, 'Material instances', 'masked, two-sided')
+    item(2, 392, 170, 'Lumen and 3 lights', 'cyclorama, 140 flowers')
+    item(2, 584, 170, 'Movie Render Queue', '2048 px frames, 6 samples')
+    item(3, 200, 170, 'Montage and title key', 'Vogun Medium, yellow')
+    item(3, 392, 170, 'Audio and SFX', '-14 LUFS, peak -1.5 dB')
+    item(3, 584, 170, 'Three videos', 'mov and mp4')
+    for k, t_ in enumerate(['', 'FBX + maps', 'PNG frames']):
+        xa = xs[k] + bw; xb = xs[k + 1]
+        arrow(d, (xa + 14) * S, 450 * S, (xb - 14) * S, 450 * S, dark, w=7 * S, head=28 * S)
+        if t_: centered(d, t_, (xa + xb) / 2 * S, 404 * S, fa, grey)
+    rbox(d, (40 * S, 850 * S, 2520 * S, 1070 * S), (255, 255, 255), outline=line, r=34 * S, w=3 * S)
+    d.text((84 * S, 886 * S), 'Geometry and textures in Houdini. Lighting and rendering in Unreal Engine.', font=f2, fill=dark)
+    d.text((84 * S, 950 * S), 'One lily HDA and one trim sheet, from individual petals to a complete flower bed.', font=f3, fill=grey)
+    return im.resize((2560, 1150), Image.LANCZOS)
+
+# ---- Step 1 : creating the HDA --------------------------------------------------------------------------
+@fig('step1-hda-in-houdini', 'Step 1, creating the HDA. The lily as a Houdini Digital Asset: three folders of parameters on the right, five variations of it on the left.',
+     'Houdini screenshot: five pink lilies in the viewport and the HDA parameters (stem height, stem bend, leaf count, tepal length, seed) on the right.', section='hda')
+def step1():
+    return fit_w(window_crop(STEPS + '1 creating hda.png'), P['max_w'])
+@fig('hda-versions', 'The HDA at versions 1, 4 and 7, seen from the front, the side, the top and in three quarters.',
+     'Three rows of four viewport views of the lily model, becoming more detailed from top to bottom.', section='hda')
+def hda_versions():
+    rows = [rgb(src('previews/lily_v001.png')), rgb(src('previews/lily_v004_flowers.png')), rgb(src('previews/lily_v007.png'))]
+    sh = Image.new('RGB', (2400, sum(r.height for r in rows) + 2 * 10), (18, 18, 20)); y = 0; d = ImageDraw.Draw(sh); f = ft(34)
+    for n, r in zip(('v001', 'v004', 'v007'), rows): sh.paste(r, (0, y)); tag(d, f, n, 2400 - 130, y + 14); y += r.height + 10
+    return sh
+@fig('uv-check', 'The lily coloured with the base colour read at its own UVs.',
+     'Four views of the lily coloured by the trim sheet through its UVs.', section='hda')
+def uv_check():
+    return rgb(src('previews/lily_uv_check.png'))
+
+# ---- Step 2 : the height ---------------------------------------------------------------------------------
+BANDS = [(0, 'Inner tepal', '3 big petals', 0.0, 0.193), (1, 'Outer tepal', '3 arches', 0.193, 0.388), (2, 'Stamens', '3 stigmas, anthers', 0.388, 0.507),
+         (3, 'Calyx', '7 arches', 0.507, 0.609), (4, 'Stem', 'hairy strip', 0.609, 0.725), (5, 'Leaf', '2 leaves', 0.725, 0.837), (6, 'Bud', '3 buds', 0.837, 1.0)]
+@fig('seven-bands', 'The finished height map, 2048 px, with its seven bands. One material, seven families of parts.',
+     'The grey height map of the lily trim sheet with seven labelled horizontal bands: inner tepal, outer tepal, stamens, calyx, stem, leaf and bud.', section='height')
+def seven_bands():
+    sheet = rgb(src('maps/trim/lily_trim_height.png')).resize((1800, 1800), Image.LANCZOS); G = 720
+    im = Image.new('RGB', (G + 1800, 1800), P['bg']); im.paste(sheet, (G, 0)); d = ImageDraw.Draw(im); fb, fs = ft(46, 'sans', 500), ft(34)
+    for (i, name, cells, v0, v1) in BANDS:
+        y0, y1 = round(v0 * 1800), round(v1 * 1800); yc = (y0 + y1) // 2
+        if i: d.line((60, y0, G + 1800, y0), fill=(70, 70, 76), width=2)
+        d.ellipse((60, yc - 34, 128, yc + 34), fill=P['coral']); d.text((94 - d.textlength(str(i), font=fb) / 2, yc - 26), str(i), font=fb, fill=(20, 20, 22))
+        d.text((158, yc - 40), name, font=fb, fill=P['ink']); d.text((158, yc + 14), cells, font=fs, fill=P['muted'])
+    return im
+@fig('step2-copernicus', 'Step 2, the almost final height in Copernicus. The network Lily_Trim holds one subnet per band; the viewer shows the height.',
+     'Houdini screenshot: the grey height map of the lily trim sheet in the viewer and the Copernicus network on the right.', section='height')
+def step2():
+    return fit_w(window_crop(STEPS + '2 almost final height.png'), P['max_w'])
+@fig('petal-moments', 'One petal, nine moments between 5 October (top left) and 6 October (bottom right). Height only, exactly as the graph produced it.',
+     'A three by three grid of the height of one petal, from flat grey blocks to a fan of fibres with dark speckles.', section='height')
+def petal_moments():
+    ids = [1, 11, 22, 32, 43, 53, 63, 74, 84]; base = R + 'versions/petal_evolution/frames/'
+    cells = [rgb(base + 'f%03d.png' % i) for i in ids]; w, h = cells[0].size
+    sh = grid([c.resize((round(w * 1.5), round(h * 1.5)), Image.LANCZOS) for c in cells], 3, round(w * 1.5), round(h * 1.5), gap=10)
+    return sh
+@fig('vault-tests', 'The vault test: the cross-section curve at 1.0 (measured), 1.6 and 2.2, from top to bottom. My first reading, a darker centre all along the petal, was wrong.',
+     'Three rows of the petal height with an increasingly dark centre.', section='height')
+def vault_tests():
+    rows = [rgb(src('previews/band0_vault_%s.png' % v)).crop((0, 0, 2048, int(2048 * 0.20))) for v in ('1.0', '1.6', '2.2')]
+    sh = Image.new('RGB', (2048, sum(r.height for r in rows) + 16), P['bg']); y = 0; d = ImageDraw.Draw(sh); f = ft(40)
+    for n, r in zip(('x 1.0, measured', 'x 1.6', 'x 2.2'), rows): sh.paste(r, (0, y)); tag(d, f, n, 18, y + 18); y += r.height + 8
+    return sh
+@fig('sheet-growth', 'The sheet fills up band by band. Eight of the 160 recorded states, from the first petals to the last bud; bands that do not exist yet stay flat grey.',
+     'Eight small squares showing the height sheet being filled from the top band downward.', section='height')
+def sheet_growth():
+    base = R + 'versions/height_evolution/complete/frames/'; ids = [1, 21, 41, 46, 61, 91, 121, 160]
+    cells = [rgb(base + '%04d.png' % i) for i in ids]
+    return grid(cells, 4, 624, 624, gap=12, labels=['state %d' % i for i in ids], label_size=30)
+@fig('petal-band-4096', 'The petal band today, cropped from the 4096 export. Three petals, each with its own speckles.',
+     'A wide strip of the grey height of three petals at 4096 pixels.', section='height')
+def petal_band_4096():
+    im = rgb(src('maps/trim4096/lily_trim_height.png')); return im.crop((0, 0, 4096, round(4096 * 0.193)))
+
+# ---- Step 3 : back and forth with texturing ----------------------------------------------------------------
+@fig('six-maps', 'The six final maps, aligned: height, base colour, normal, ambient occlusion, roughness and opacity (2048 px).',
+     'Six square maps of the lily trim sheet in a grid of three by two.', section='maps')
+def six_maps():
+    names = [('Height', 'maps/trim/lily_trim_height.png'), ('Base colour', 'maps/trim4096/lily_trim_basecolor_live_6oct.png'), ('Normal', 'maps/trim/lily_trim_normal.png'),
+             ('Ambient occlusion', 'maps/trim/lily_trim_ao.png'), ('Roughness', 'maps/trim/lily_trim_roughness.png'), ('Opacity', 'maps/trim/lily_trim_opacity.png')]
+    return grid([rgb(src(p)) for _, p in names], 3, 800, 800, gap=14, labels=[n for n, _ in names], label_size=34)
+@fig('three-petals', 'The three petals of band 0 in base colour: pale pink, pink and washed pink. Each flower picks one of them.',
+     'Three petals in base colour, pale pink, pink and washed pink, with dark speckles.', section='maps')
+def three_petals():
+    cells = [rgb(src('maps/trim/petals/lily_petal_0%d_basecolor.png' % i)) for i in (1, 2, 3)]
+    return grid(cells, 3, 683, 395, gap=8)
+@fig('ao-before-after', 'Local ambient occlusion in the base colour of band 0, before (top) and after (bottom), at intensity 0.05.',
+     'Two strips of three pink petals, the second one with subtle occlusion in the creases.', section='maps')
+def ao_before_after():
+    return rgb(src('versions/petal_colour_match/AO_Before_After.png'))
+@fig('step3-karma', 'Step 3, back and forth with texturing. The lily rendered by Karma CPU in the Houdini viewport, the render settings on the right.',
+     'Houdini screenshot: a large pale pink lily in the viewport and the Karma render settings.', section='maps')
+def step3():
+    return fit_w(window_crop(STEPS + '3 back and forth with texturing.png'), P['max_w'])
+@fig('lookdev-iterations', 'Four of the look development renders in Karma, from the first grey read (v3) to the pink petals (v12).',
+     'Four renders of the same lily plant, from grey and flat to pink.', section='maps')
+def lookdev():
+    names = ['v3', 'v6', 'v9', 'v12']; ims = [rgb(src('render/lily_trim_lookdev_%s.png' % n)) for n in names]
+    boxes = [im.point(lambda v: 255 if v > 14 else 0).convert('L').getbbox() for im in ims]
+    x0 = min(b[0] for b in boxes) - 40; y0 = min(b[1] for b in boxes) - 40; x1 = max(b[2] for b in boxes) + 40; y1 = max(b[3] for b in boxes) + 40
+    cells = [im.crop((max(0, x0), max(0, y0), min(im.width, x1), min(im.height, y1))) for im in ims]
+    cw = 600; ch = round(cw * cells[0].height / cells[0].width)
+    return grid(cells, 4, cw, ch, gap=10, labels=names, label_size=32)
+
+# ---- Step 4 : importing into Unreal ------------------------------------------------------------------------
+@fig('step4-unreal-import', 'Step 4, importing into Unreal with opacity. The material instance MI_LilyTrim and the five maps it reads, in the content browser.',
+     'Unreal Editor screenshot: a pink lily in the viewport, a material instance window showing the trim sheet and the texture assets below.', section='unreal')
+def step4():
+    return fit_w(window_crop(STEPS + '4 importing into unreal with opacity.png'), P['max_w'])
+@fig('first-lumen', 'The first good Lumen render, 2048 px.',
+     'A pale pink lily with cut-out petals and leaves on a grey studio floor.', section='unreal')
+def first_lumen():
+    return rgb(src('versions/lily_ue_v002.png'))
+
+# ---- Step 5 : setup before three-point lighting -------------------------------------------------------------
+@fig('step5-studio', 'Step 5, setup before three-point lighting. The studio level with a cyclorama, the flower and a camera, and the sequence under it.',
+     'Unreal Editor screenshot: a lily in a dark studio box, a camera actor in front, and an empty Sequencer.', section='unreal')
+def step5():
+    return fit_w(window_crop(STEPS + '5 setup before 3 point lighting.png'), P['max_w'])
+@fig('orbit-storyboard', 'Storyboard sheet: three elevations (10, 30 and 55 degrees) by five azimuths, rendered small with Lumen.',
+     'A grid of fifteen small renders of the lily from different angles.', section='unreal')
+def orbit_storyboard():
+    return rgb(src('versions/storyboard_ue_orbit_3angles.png'))
+@fig('first-lighting', 'The first three lighting proposals for the single flower: soft studio, warm key with cool fill, dramatic low key.',
+     'Three renders of the same lily on a pale background, labelled A, B and C.', section='unreal')
+def first_lighting():
+    return rgb(src('versions/lighting_ue_3proposals_v001.png'))
+@fig('orbit-five-frames', 'Five frames of the first camera move: 5 seconds, a full turn, the elevation rising from 10 to 55 degrees.',
+     'Five renders of the lily seen from changing angles.', section='unreal')
+def orbit_five():
+    return rgb(src('versions/orbit_anim_ue_v001_5frames.png'))
+
+# ---- Step 6 : preview of the first shot ----------------------------------------------------------------------
+@fig('step6-render-queue', 'Step 6, preview of the first shot. Movie Render Queue at frame 57 of 240, Lumen on.',
+     'Unreal Editor screenshot: the Movie Render Queue preview window showing a pink lily and the frame counter.', section='unreal')
+def step6():
+    return fit_w(window_crop(STEPS + '6 preview the first shot.png'), P['max_w'])
+@fig('close-orbit-frames', 'Four frames of the close orbit, 2048 px each (frames 0, 40, 150 and 190 of 240).',
+     'Four renders of pink lilies from a low camera moving around the plant.', section='unreal')
+def close_frames():
+    ids = [0, 40, 150, 190]; cells = [rgb(src('render/flower_close_orbit_2k/close_%04d.png' % i)) for i in ids]
+    return grid(cells, 4, 636, 636, gap=10)
+
+# ---- Step 7 : final scattering ---------------------------------------------------------------------------------
+@fig('five-variations', 'Five variations of the same HDA, side by side in Houdini.',
+     'Five pink lilies of different heights and shapes in the Houdini viewport.', section='bed')
+def variations():
+    return rgb(src('versions/variants_houdini_sheet_v001.png'))
+@fig('colourways', 'The base-colour trim sheet in pink, blue and white.',
+     'Three versions of the trim sheet base colour: pink petals, blue petals and white petals.', section='bed')
+def colourways():
+    return rgb(src('versions/basecolor_live_pink_blue_white.png'))
+@fig('first-bed', 'The first bed render: 140 flowers, three colourways, five shapes. The floor and the light are still wrong.',
+     'A round bed of pink, blue and white lilies on a pale floor.', section='bed')
+def first_bed():
+    return rgb(src('versions/bed_ue_v001.png'))
+@fig('step7-scattering', 'Step 7, final scattering. The level L_LilyBed with its 150 actors, and the camera sequence.',
+     'Unreal Editor screenshot: a dense bed of pink, blue and white lilies in the viewport and the Sequencer below.', section='bed')
+def step7():
+    return fit_w(window_crop(STEPS + '7 final scattering.png'), P['max_w'])
+@fig('bed-lighting', 'Three lighting moods for the bed: A Shoji, B Misty Morning and C Komorebi.',
+     'Three renders of the flower bed under warm, cold and sunlit lighting.', section='bed')
+def bed_lighting():
+    return rgb(src('versions/bed_lighting_3proposals_v001.png'))
+@fig('bed-frames', 'Four frames of the bed orbit with the Shoji lighting (frames 0, 30, 190 and 220 of 240).',
+     'Four renders of a dense bed of lilies seen from a low camera.', section='bed')
+def bed_frames():
+    ids = [0, 30, 190, 220]; cells = [rgb(src('render/bed_orbit_flat_2k/flat_%04d.png' % i)) for i in ids]
+    return grid(cells, 4, 636, 636, gap=10)
+
+# ---- The three videos ----------------------------------------------------------------------------------------------
+@fig('timeline', 'How the three videos are cut. The two 2048 px cuts share the same hook; the third one is 4096 px and walks through the seven steps.',
+     'Timeline diagram of the three videos with their segments, title, sound effect and music.', section='videos')
+def timeline():
+    S = 2; W, Hh = 2560 * S, 1290 * S; im = Image.new('RGB', (W, Hh), (246, 246, 248)); d = ImageDraw.Draw(im)
+    fl, fs, ft_ = ft(38 * S, 'sans', 500), ft(28 * S), ft(26 * S)
+    dark = (24, 24, 28); grey = (110, 110, 118); line = (214, 214, 220)
+    L, Rm, T = 80, 2500, 62.0; X = lambda t: (L + (Rm - L) * t / T) * S
+    for t in range(0, 61, 10):
+        d.line((X(t), 84 * S, X(t), 1262 * S), fill=line, width=2 * S); d.text((X(t) + 8 * S, 40 * S), '%d s' % t, font=ft_, fill=grey)
+    rows = [
+        ('How did I create these shots?', '38 s, 4096 px, 30 fps', 100, [(0, 10, 'Side by side', P['coral']), (10, 38, 'Seven numbered steps, 4 s each', P['blue'])], 'Music: Feverkin (Alternate Realities Part I), 2:16 to 2:54'),
+        ('Petals Height', '42.67 s, 2048 px, 24 fps', 500, [(0, 6, 'Hook', P['coral']), (6, 34.67, '84 height images, 0.33 s each', P['blue']), (34.67, 37.67, 'Petals', P['pink']), (37.67, 42.67, 'Close orbit', P['green'])], 'Music: Sonic Riots (Grandbrothers)'),
+        ('Trim Sheet Height', '61.33 s, 2048 px, 24 fps', 900, [(0, 6, 'Hook', P['coral']), (6, 56.33, 'Height evolution, 160 states of the full sheet', P['blue']), (56.33, 61.33, 'Close orbit', P['green'])], 'Music: Butterfly Effect (fox capture plan) from 2:24'),
+    ]
+    for (name, spec, y, segs, music) in rows:
+        d.text((L * S, y * S), name, font=fl, fill=dark); d.text(((L + 700) * S, (y + 6) * S), spec, font=ft_, fill=grey)
+        yb = (y + 128) * S; hb = 120 * S
+        d.polygon([(X(1.0), yb - 4 * S), (X(1.0) - 13 * S, yb - 26 * S), (X(1.0) + 13 * S, yb - 26 * S)], fill=dark); d.text((X(1.0) + 22 * S, yb - 48 * S), 'sound effect at 1.0 s', font=ft_, fill=dark)
+        for (a, b, label, col) in segs:
+            rbox(d, (X(a) + 2 * S, yb, X(b) - 2 * S, yb + hb), col, r=16 * S, w=0)
+            f_ = fs if (X(b) - X(a)) > 140 * S else ft_
+            if d.textlength(label, font=f_) < (X(b) - X(a)) - 26 * S: d.text((X(a) + 16 * S, yb + 40 * S), label, font=f_, fill=(255, 255, 255))
+        rbox(d, (X(1.0), yb + hb + 16 * S, X(6.0), yb + hb + 46 * S), P['yellow'], r=8 * S, w=0); d.text((X(6.0) + 14 * S, yb + hb + 14 * S), 'title, 1.0 to 6.0 s', font=ft_, fill=dark)
+        d.text((L * S, (y + 128 + 120 + 66) * S), music + ', normalised to -14 LUFS', font=ft_, fill=grey)
+    return im.resize((2560, 1290), Image.LANCZOS)
+@fig('title-reveal', 'The title reveal over the hook, four frames: bands of electrical cross-connections run left to right, then top to bottom.',
+     'Four frames of a yellow two-line title appearing over the flower bed.', section='videos')
+def title_reveal():
+    v = R + 'video/FinalVideos/LilyHeight_petals_v005.mp4'; ts = [1.15, 1.5, 1.9, 3.2]
+    cells = [frame(v, t, 'title_%d' % i, (1024, 1024)) for i, t in enumerate(ts)]
+    return grid(cells, 4, 630, 630, gap=10, labels=['%.2f s' % t for t in ts], label_size=28)
+@fig('covers', 'The three 9:16 covers: How do I create those shots, Petals Height and Trim Sheet Height.',
+     'Three vertical covers with yellow titles over a flower and a flower bed.', section='videos')
+def covers():
+    names = ['HowDoICreateThoseShots', 'PetalsHeight', 'TrimSheetHeight']
+    cells = [rgb(R + 'video/FinalVideos/Thumbnail_%s_9x16.png' % n) for n in names]
+    return grid(cells, 3, 640, 1138, gap=16)
+@fig('last-frame', 'The last shot of the three videos: frame 230 of the close orbit.',
+     'A close-up of pink lilies with a big open flower in the foreground.', section='videos')
+def last_frame():
+    return rgb(src('render/flower_close_orbit_2k/close_0230.png'))
+
+
+# ================================================================ driver
+# Reading order of the numbered figures (6 October 2026). It is the ONLY place that sets the numbers: Article.py checks that the text uses them in this order.
+ORDER = ['pipeline', 'step1-hda-in-houdini', 'hda-versions', 'uv-check', 'step2-copernicus', 'seven-bands', 'sheet-growth', 'petal-moments', 'vault-tests', 'petal-band-4096',
+         'step3-karma', 'three-petals', 'ao-before-after', 'six-maps', 'lookdev-iterations', 'step4-unreal-import', 'first-lumen',
+         'step5-studio', 'orbit-storyboard', 'orbit-five-frames', 'first-lighting', 'step6-render-queue', 'close-orbit-frames',
+         'step7-scattering', 'five-variations', 'colourways', 'first-bed', 'bed-lighting', 'bed-frames', 'timeline', 'title-reveal', 'covers', 'last-frame']
+
+def plan():
+    fig_no = 0; out = []
+    assert sorted(r['slug'] for r in REG if r['kind'] == 'figure') == sorted(ORDER), 'ORDER and the registered figures differ'
+    reg = [r for r in REG if r['kind'] != 'figure'] + sorted([r for r in REG if r['kind'] == 'figure'], key=lambda r: ORDER.index(r['slug']))
+    for r in reg:
+        r = dict(r)
+        if r['kind'] == 'figure': fig_no += 1; r['number'] = fig_no; r['file'] = '%02d-%s.webp' % (fig_no, r['slug'])
+        else: r['number'] = None; r['file'] = '%s.webp' % r['slug'] if r['kind'] != 'card' else 'thumb.webp'
+        out.append(r)
+    return out
+
+def main():
+    args = sys.argv[1:]; items = plan()
+    if '--list' in args:
+        for r in items: print('%-8s %-34s %s' % (r['number'] or '-', r['file'], r['caption'][:80]))
+        return
+    only = None
+    if '--only' in args: only = set(int(x) for x in args[args.index('--only') + 1].split(','))
+    os.makedirs(OUT, exist_ok=True); os.makedirs(FRAMES, exist_ok=True); rec = {}
+    old = {}
+    if os.path.exists(WORK + 'images-index.json'):
+        for it in json.load(open(WORK + 'images-index.json'))['images']: old[it['slug']] = it
+    for r in items:
+        if only is not None and (r['number'] is None or r['number'] not in only): 
+            if r['slug'] in old: rec[r['slug']] = old[r['slug']]
+            continue
+        SRC.clear(); im = r['fn']()
+        mw = 1600 if r['kind'] == 'poster' else None
+        info = save(im, r['file'], max_w=mw)
+        info.update(dict(slug=r['slug'], number=r['number'], kind=r['kind'], section=r['section'], caption=r['caption'], alt=r['alt'],
+                         sources=sorted({s[len(R):] if s.startswith(R) else s for s in SRC})))
+        data = open(OUT + r['file'], 'rb').read(); info['sha256'] = hashlib.sha256(data).hexdigest()
+        rec[r['slug']] = info; print('%-6s %-36s %5dx%-5d %7.0f KB q%d%s' % (r['number'] or '-', r['file'], info['width'], info['height'], info['bytes'] / 1024, info['quality'], '  OVER BUDGET' if info['over_budget'] else ''))
+    images = [rec[r['slug']] for r in items if r['slug'] in rec]
+    # remove stale files: anything in OUT that is not a current image
+    keep = {i['file'] for i in images}
+    for f in glob.glob(OUT + '*.webp'):
+        if os.path.basename(f) not in keep: os.remove(f); print('removed stale', os.path.basename(f))
+    total = sum(i['bytes'] for i in images)
+    index = dict(schema='article.images.index.v1', article=SLUG, built='6 October 2026', budget=dict(max_width=P['max_w'], big=P['budget_big'], small=P['budget_small'], total=P['total_budget']),
+                 totals=dict(files=len(images), bytes=total), images=images)
+    json.dump(index, open(WORK + 'images-index.json', 'w'), indent=1, ensure_ascii=False)
+    pub = dict(index); pub['images'] = [{k: v for k, v in i.items() if k not in ('sha256', 'sources')} for i in images]
+    json.dump(pub, open(OUT + 'images-index.json', 'w'), indent=1, ensure_ascii=False)
+    md = ['# Images of the Fleur de Lys article (6 October 2026)', '',
+          'Built by `Scripts/ArticleLily/Figures.py`. %d files, %.1f MB, every width at most %d px. Public copy without sources: `public/projects/%s/images-index.json`. (6 October 2026)' % (len(images), total / 1e6, P['max_w'], SLUG), '',
+          '| No | File | Size px | KB | Caption | Sources (6 October 2026) |', '|---|---|---|---|---|---|']
+    for i in images:
+        md.append('| %s | `%s` | %d x %d | %.0f | %s | %s |' % (i['number'] or i['kind'], i['file'], i['width'], i['height'], i['bytes'] / 1024, i['caption'].replace('|', '/'), '<br>'.join('`%s`' % s for s in i.get('sources', []))))
+    open(WORK + 'ImagesIndex.md', 'w').write('\n'.join(md) + '\n')
+    print('TOTAL %d files, %.1f MB (budget %.0f MB)' % (len(images), total / 1e6, P['total_budget'] / 1e6))
+
+if __name__ == '__main__':
+    main()

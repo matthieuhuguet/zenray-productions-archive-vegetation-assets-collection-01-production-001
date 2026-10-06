@@ -1,0 +1,27 @@
+# 6 October 2026 : the three 9:16 thumbnails of the final videos (2160 x 3840), titled in Vogun Medium (original, no synthetic change), PURE YELLOW #FFFF00, first line mixed case, second line CAPITALS, elegant centered black shadow (55 percent, blur 9 px, zero offset). Illustrations: the 3 s frame of LilyComparison_4K_v001.mov (bed and flower side by side), the Unreal close orbit frame 60 (single flower), the Unreal bed orbit frame 90 (bed). Every number is in P below. Usage: python3 MakeThumbnails.py. FR : trois miniatures 9:16, titre jaune Vogun avec ombre noire centree.
+import os, subprocess
+from PIL import Image, ImageDraw, ImageFont, ImageFilter
+R = '/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/'; OUT = R + 'video/FinalVideos/'
+P = dict(W=2160, H=3840, font=os.path.expanduser('~/Library/Fonts/Vogun-Medium.ttf'), yellow=(255, 255, 0), shadow_alpha=0.55, shadow_blur=9, max_w=0.84, size=200, gap=1.12,
+         comparison=R + 'video/LilyComparison_4K_v001.mov', comparison_at=3.0, flower=R + 'render/flower_close_orbit_2k/close_0060.png', bed=R + 'render/bed_orbit_flat_2k/flat_0090.png')
+def title(img, lines, top):
+    W = P['W']; maxw = P['max_w'] * W; d0 = ImageDraw.Draw(img); size = P['size']
+    while max(d0.textlength(t, font=ImageFont.truetype(P['font'], size)) for t in lines) > maxw: size -= 4
+    f = ImageFont.truetype(P['font'], size); sh = Image.new('L', img.size, 0); sd = ImageDraw.Draw(sh); y = top
+    for t in lines:
+        x = (W - d0.textlength(t, font=f)) / 2; sd.text((x, y), t, font=f, fill=int(255 * P['shadow_alpha'])); y += int(size * P['gap'])
+    sh = sh.filter(ImageFilter.GaussianBlur(P['shadow_blur'])); img.paste(Image.new('RGB', img.size, (0, 0, 0)), mask=sh)
+    d = ImageDraw.Draw(img); y = top
+    for t in lines: d.text(((W - d.textlength(t, font=f)) / 2, y), t, font=f, fill=P['yellow']); y += int(size * P['gap'])
+    return size
+def cover(src, W, H):       # 9:16 centre crop of a square picture
+    im = Image.open(src).convert('RGB'); w, h = im.size; cw = int(h * W / H); im = im.crop(((w - cw) // 2, 0, (w + cw) // 2, h)); return im.resize((W, H), Image.LANCZOS)
+W, H = P['W'], P['H']; os.makedirs(OUT, exist_ok=True)
+subprocess.run(['ffmpeg', '-y', '-loglevel', 'error', '-ss', str(P['comparison_at']), '-i', P['comparison'], '-frames:v', '1', '/tmp/comparison_frame.png'], check=True)
+img = Image.new('RGB', (W, H), (0, 0, 0)); comp = Image.open('/tmp/comparison_frame.png').convert('RGB').resize((W, W), Image.LANCZOS); img.paste(comp, (0, 1500))
+title(img, ['How do I create', 'those shots'], 820); img.save(OUT + 'Thumbnail_HowDoICreateThoseShots_9x16.png')
+img = cover(P['flower'], W, H); title(img, ['Petals Height', 'FLEUR DE LYS'], 190); img.save(OUT + 'Thumbnail_PetalsHeight_9x16.png')
+img = cover(P['bed'], W, H); title(img, ['Trim Sheet Height', 'FLEUR DE LYS'], 190); img.save(OUT + 'Thumbnail_TrimSheetHeight_9x16.png')
+s = Image.new('RGB', (3 * 540, 960))
+for i, n in enumerate(('HowDoICreateThoseShots', 'PetalsHeight', 'TrimSheetHeight')): s.paste(Image.open(OUT + 'Thumbnail_%s_9x16.png' % n).resize((540, 960), Image.LANCZOS), (i * 540, 0))
+s.save(R + 'versions/thumbnails_9x16_strip_v001.png'); print('ok')

@@ -1,0 +1,7 @@
+# 6 October 2026 : keys the cream title frames (raw_NNNN.png, 3840 x 2160) into RGBA (t_NNNN.png): yellow text, soft black shadow. One process per batch of files, called through xargs -P16 by AssembleLilyMovieV5.py (a multiprocessing Pool re-ran the whole assembly script in every worker on macOS and launched dozens of ffmpeg). FR : detoure le titre, un lot de fichiers par processus.
+import sys, os, numpy as np
+from PIL import Image
+for f in sys.argv[1:]:
+    a = np.asarray(Image.open(f).convert('RGB'), np.float32); R, B = a[..., 0], a[..., 2]
+    text = np.clip(((R - B) - 12.0) / (255.0 - 12.0), 0, 1); shadow = np.clip((243.0 - 2.0 - R) / (243.0 - 2.0), 0, 1) * (1 - np.clip(text * 3, 0, 1)); alpha = np.maximum(text, shadow * 0.9)
+    col = np.where(text > 0.02, 255.0, 0.0); Image.fromarray(np.dstack([col, col, np.zeros_like(R), alpha * 255.0]).astype('uint8')).save(f.replace('raw_', 't_')); os.remove(f)

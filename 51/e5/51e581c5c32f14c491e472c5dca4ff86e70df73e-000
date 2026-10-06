@@ -1,0 +1,12 @@
+#!/bin/zsh
+# 6 October 2026 : capture the Houdini window (no screen takeover) and print the mean and std of the 3D viewport area, save the crop. Usage: CaptureHoudiniViewport.sh <out.png>. FR : capture de la fenetre Houdini, moyenne de la vue 3D.
+S=/Users/zenray/.claude/skills/zenray-houdini/scripts
+WID=$(swift $S/window_id.swift "Houdini" | head -1 | cut -f1)
+screencapture -x -o -l"$WID" /tmp/hou_full.png
+python3 - "$1" <<'PY'
+import sys
+from PIL import Image
+import numpy as np
+im=Image.open('/tmp/hou_full.png').convert('RGB'); vp=im.crop((60,400,1900,1800)); a=np.asarray(vp,float)
+print('viewport mean %.1f std %.1f' % (a.mean(), a.std())); vp.resize((920,700)).save(sys.argv[1])
+PY

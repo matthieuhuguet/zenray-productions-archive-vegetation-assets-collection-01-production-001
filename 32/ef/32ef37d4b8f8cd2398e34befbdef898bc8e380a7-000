@@ -1,0 +1,66 @@
+# 6 October 2026 14:50: Normalize synthetic faces, verify coverage and weight, preserve Medium byte for byte.
+from pathlib import Path
+import hashlib, json, shutil, sys
+from fontTools.ttLib import TTFont
+from PIL import Image, ImageDraw, ImageFont
+root = Path(__file__).resolve().parent.parent / 'assets/fonts/Vogun'
+sys.path.insert(0, str(root / 'vendor'))
+from fontTools.ttLib.removeOverlaps import removeOverlaps
+config = json.loads((root / 'Weights.json').read_text())
+source = Path(config['source'])
+original_hash = hashlib.sha256(source.read_bytes()).hexdigest()
+reference = TTFont(source)
+coverage = set(reference.getBestCmap())
+installed = Path('/Users/zenray/Library/Fonts')
+report = []
+for item in config['weights']:
+    style, weight = item['style'], item['weight']
+    file = root / f'Vogun-{style}.ttf'
+    font = TTFont(file)
+    removeOverlaps(font, removeHinting=True, ignoreErrors=False)
+    names = {1: ('Vogun' if style in ('Regular', 'Bold') else 'Vogun ' + style), 2: ('Bold' if style == 'Bold' else 'Regular'), 3: f'Vogun-{style}-Synthetic-6October2026', 4: 'Vogun ' + style, 6: 'Vogun-' + style, 16: 'Vogun', 17: style}
+    for record in list(font['name'].names):
+        if record.nameID in names:
+            font['name'].names.remove(record)
+    for key, value in names.items():
+        font['name'].setName(value, key, 3, 1, 0x409)
+        font['name'].setName(value, key, 1, 0, 0)
+    font['OS/2'].usWeightClass = weight
+    font['OS/2'].fsSelection &= ~(1 | 32 | 64)
+    if weight == 700:
+        font['OS/2'].fsSelection |= 32
+    if weight == 400:
+        font['OS/2'].fsSelection |= 64
+    font['head'].macStyle = 1 if weight == 700 else 0
+    font.save(file)
+    verified = TTFont(file, checkChecksums=2)
+    assert set(verified.getBestCmap()) == coverage
+    assert verified['OS/2'].usWeightClass == weight
+    for glyph in verified['glyf'].glyphs.values():
+        glyph.expand(verified['glyf'])
+    verified['maxp'].recalc(verified)
+    verified.save(file)
+    destination = installed / file.name
+    assert not destination.exists(), f'Existing file must not be overwritten: {destination}'
+    report.append(dict(style=style, weight=weight, path=str(file), installPath=str(destination), codepoints=len(coverage)))
+fonts = [(entry['style'], Path(entry['path'])) for entry in report]
+fonts.insert(2, ('Medium', source))
+canvas = Image.new('RGB', (1900, 1000), 'white')
+draw = ImageDraw.Draw(canvas)
+areas = []
+for i, (style, file) in enumerate(fonts):
+    face = ImageFont.truetype(str(file), 92)
+    mask = Image.new('L', (1750, 150))
+    ImageDraw.Draw(mask).text((0, 0), 'Vogun Fleur de Lys 012345', font=face, fill=255)
+    area = sum(mask.getdata()) / 255
+    areas.append(area)
+    draw.text((32, i * 190 + 20), style, font=ImageFont.truetype(str(source), 30), fill='black')
+    draw.text((230, i * 190 + 20), 'Vogun Fleur de Lys 012345', font=face, fill='black')
+assert areas == sorted(areas) and len(set(areas)) == len(areas), areas
+canvas.save(root / 'WeightComparison.png')
+for entry in report:
+    shutil.copy2(entry['path'], entry['installPath'])
+assert hashlib.sha256(source.read_bytes()).hexdigest() == original_hash
+assert hashlib.sha256((installed / 'Vogun-Medium.ttf').read_bytes()).hexdigest() == original_hash
+(root / 'Verification.json').write_text(json.dumps(dict(date='6 October 2026', mediumHash=original_hash, mediumUnchanged=True, sampleInkAreas=areas, fonts=report), indent=2))
+print(json.dumps(dict(installed=report, areas=areas)))

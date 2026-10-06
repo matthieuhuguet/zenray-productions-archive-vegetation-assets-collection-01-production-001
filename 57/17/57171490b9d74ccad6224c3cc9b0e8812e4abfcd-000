@@ -1,0 +1,29 @@
+# 6 October 2026 16:14: Reject empty render outputs and preserve numerical evidence.
+from pathlib import Path
+import json
+import hashlib
+import numpy as np
+import OpenImageIO as oiio
+CONFIG = {"root": "/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/renderers", "names": ["Cycles", "CyclesLegacy", "CyclesInstalled", "Octane", "OctaneNative", "KarmaBaseline", "KarmaWithPlugins"]}
+root = Path(CONFIG["root"])
+results = {}
+for name in CONFIG["names"]:
+    path = root / "tests" / (name + ".exr")
+    if not path.exists():
+        results[name] = {"exists": False}
+        continue
+    reader = oiio.ImageInput.open(str(path))
+    spec = reader.spec()
+    pixels = np.asarray(reader.read_image(format=oiio.FLOAT))
+    reader.close()
+    rgb = pixels[..., :3].astype(np.float64)
+    results[name] = {"exists": True, "resolution": [spec.width, spec.height], "minimum": float(np.min(rgb)), "maximum": float(np.max(rgb)), "mean": float(np.mean(rgb)), "stddev": float(np.std(rgb)), "spatialStddev": np.std(rgb, axis=(0, 1)).tolist(), "samples": spec.get_int_attribute("numCompletedSamples"), "greenMaterialVisible": bool(np.any(rgb[..., 1] - rgb[..., 0] > 0.05)), "nonblank": bool(np.isfinite(rgb).all() and np.std(rgb, axis=(0, 1)).max() > 0.001), "sha256": hashlib.sha256(path.read_bytes()).hexdigest()}
+    preview = np.clip(np.maximum(rgb, 0) ** (1 / 2.2) * 255, 0, 255).astype(np.uint8)
+    writer = oiio.ImageOutput.create(str(path.with_suffix(".png")))
+    writer.open(str(path.with_suffix(".png")), oiio.ImageSpec(spec.width, spec.height, 3, oiio.UINT8))
+    writer.write_image(preview)
+    writer.close()
+original = json.loads((root / "OriginalFiles.json").read_text())
+results["originalFiles"] = {path: hashlib.sha256(Path(path).read_bytes()).hexdigest() == record["sha256"] for path, record in original.items()}
+(root / "ImageVerification.json").write_text(json.dumps(results, indent=2) + "\n")
+print(json.dumps(results, indent=2))

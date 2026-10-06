@@ -1,0 +1,83 @@
+# 6 October 2026 20:12: Assemble centered comparison, existing steps, and normalized music with an electric title cue.
+import concurrent.futures
+import hashlib
+import json
+import pathlib
+import subprocess
+import wave
+import numpy as np
+
+ROOT = pathlib.Path(__file__).resolve().parents[1]
+VIDEO = ROOT / 'video'
+WORK = VIDEO / 'shorts-lily'
+CONFIG = json.loads((WORK / 'Montage.json').read_text())
+
+def run(args):
+    subprocess.run(['ffmpeg', '-hide_banner', '-loglevel', 'error', '-y', '-filter_complex_threads', '4', *args], check=True)
+
+def codec():
+    return ['-c:v', 'hevc_videotoolbox', '-b:v', CONFIG['bitrate'], '-tag:v', 'hvc1', '-pix_fmt', 'yuv420p', '-color_primaries', 'bt709', '-color_trc', 'bt709', '-colorspace', 'bt709', '-movflags', '+faststart']
+
+def comparison():
+    size = CONFIG['size']
+    half = size // 2
+    filters = ';'.join([f'[{i}:v]fps={CONFIG["fps"]},scale={size}:{size}:flags=lanczos,crop={half}:{size}:{half//2}:0,setsar=1[v{i}]' for i in range(2)]) + ';[v0][v1]hstack=inputs=2[out]'
+    run(['-i', str(VIDEO / CONFIG['sources'][0]), '-i', str(VIDEO / CONFIG['sources'][1]), '-filter_complex', filters, '-map', '[out]', '-an', '-t', str(CONFIG['comparisonDuration']), *codec(), str(VIDEO / CONFIG['comparisonOutput'])])
+
+def steps():
+    run(['-i', str(VIDEO / CONFIG['sources'][2]), '-vf', f'scale={CONFIG["size"]}:{CONFIG["size"]}:flags=lanczos,setsar=1', '-an', '-r', str(CONFIG['fps']), *codec(), str(WORK / 'Steps4K.mov')])
+
+def soundtrack():
+    sample_rate = 48000
+    time = np.arange(int(sample_rate * .75)) / sample_rate
+    rng = np.random.default_rng(6)
+    envelope = np.exp(-time * 8) * np.minimum(time / .015, 1)
+    phase = 2 * np.pi * (2400 * time - 1000 * time ** 2)
+    signal = envelope * (.11 * np.sin(phase) * (np.sin(2 * np.pi * 43 * time) ** 8) + .025 * rng.normal(size=time.size))
+    pcm = (np.clip(signal, -1, 1) * 32767).astype('<i2')
+    with wave.open(str(WORK / 'audio/TitleElectric.wav'), 'wb') as output:
+        output.setparams((1, 2, sample_rate, 0, 'NONE', 'not compressed'))
+        output.writeframes(pcm.tobytes())
+    duration = CONFIG['comparisonDuration'] + CONFIG['stepsDuration']
+    delay = round(CONFIG['titleStart'] * 1000)
+    filters = f'[0:a]atrim=duration={duration},asetpts=PTS-STARTPTS,afade=t=in:d=0.15,afade=t=out:st={duration-1}:d=1[m];[1:a]adelay={delay}|{delay}[s];[m][s]amix=inputs=2:duration=first:normalize=0[out]'
+    run(['-ss', str(CONFIG['musicStart']), '-i', str(WORK / 'audio/Feverkin-AlternateRealities-PartI.mp3'), '-i', str(WORK / 'audio/TitleElectric.wav'), '-filter_complex', filters, '-map', '[out]', '-ar', '48000', '-ac', '2', str(WORK / 'audio/Mix.wav')])
+    normalizer = f'loudnorm=I={CONFIG["loudness"]}:TP={CONFIG["truePeak"]}:LRA=11'
+    first = subprocess.run(['ffmpeg', '-hide_banner', '-i', str(WORK / 'audio/Mix.wav'), '-af', normalizer + ':print_format=json', '-f', 'null', '-'], capture_output=True, text=True, check=True).stderr
+    measured = json.loads(first[first.rindex('{'):first.rindex('}') + 1])
+    (WORK / 'audio/NormalizationPass1.json').write_text(json.dumps(measured, indent=2))
+    settings = normalizer + ':linear=true:' + ':'.join(f'{key}={measured[value]}' for key, value in [('measured_I','input_i'),('measured_TP','input_tp'),('measured_LRA','input_lra'),('measured_thresh','input_thresh'),('offset','target_offset')])
+    run(['-i', str(WORK / 'audio/Mix.wav'), '-af', settings, '-ar', '48000', '-ac', '2', str(WORK / 'audio/Normalized.wav')])
+
+def assemble():
+    inputs = ['-i', str(VIDEO / CONFIG['comparisonOutput']), '-i', str(WORK / 'Steps4K.mov'), '-framerate', str(CONFIG['fps']), '-i', str(WORK / 'title/frames/%04d.png'), '-i', str(WORK / 'audio/Normalized.wav')]
+    start = CONFIG['titleStart']
+    filters = f'[2:v]setpts=PTS-STARTPTS+{start}/TB[title];[0:v][title]overlay=eof_action=pass:enable=between(t\,{start}\,{start+CONFIG["titleDuration"]})[opening];[opening][1:v]concat=n=2:v=1:a=0[out]'
+    run([*inputs, '-filter_complex', filters, '-map', '[out]', '-map', '3:a', '-t', str(CONFIG['comparisonDuration'] + CONFIG['stepsDuration']), *codec(), '-c:a', 'aac', '-b:a', CONFIG['audioBitrate'], str(VIDEO / CONFIG['finalOutput'])])
+
+def verify():
+    report = {'config': CONFIG, 'outputs': {}, 'sourceHashes': {name: hashlib.sha256((VIDEO / name).read_bytes()).hexdigest() for name in CONFIG['sources']}}
+    for name, duration in [(CONFIG['comparisonOutput'], CONFIG['comparisonDuration']), (CONFIG['finalOutput'], CONFIG['comparisonDuration'] + CONFIG['stepsDuration'])]:
+        media = VIDEO / name
+        metadata = json.loads(subprocess.check_output(['ffprobe','-v','error','-show_streams','-show_format','-of','json',str(media)]))
+        stream = next(s for s in metadata['streams'] if s['codec_type'] == 'video')
+        assert stream['width'] == stream['height'] == CONFIG['size']
+        assert abs(float(metadata['format']['duration']) - duration) < .05
+        assert int(stream['nb_frames']) == duration * CONFIG['fps']
+        subprocess.run(['ffmpeg','-v','error','-i',str(media),'-f','null','-'], check=True)
+        report['outputs'][name] = {'metadata': metadata, 'sha256': hashlib.sha256(media.read_bytes()).hexdigest(), 'fullDecode': True}
+    result = subprocess.run(['ffmpeg','-hide_banner','-i',str(VIDEO / CONFIG['finalOutput']),'-vn','-af','loudnorm=I=-14:TP=-1.5:LRA=11:print_format=json','-f','null','-'], capture_output=True, text=True, check=True).stderr
+    loudness = json.loads(result[result.rindex('{'):result.rindex('}') + 1])
+    assert abs(float(loudness['input_i']) - CONFIG['loudness']) < .6
+    assert float(loudness['input_tp']) < -1
+    report['audioMeasurement'] = loudness
+    (WORK / 'Verification.json').write_text(json.dumps(report, indent=2))
+    print(json.dumps({'outputs': list(report['outputs']), 'audio': loudness}, indent=2), flush=True)
+
+if __name__ == '__main__':
+    with concurrent.futures.ThreadPoolExecutor(max_workers=3) as pool:
+        for result in pool.map(lambda function: function(), [comparison, steps, soundtrack]):
+            pass
+    print('Comparison, steps and soundtrack prepared.', flush=True)
+    assemble()
+    verify()

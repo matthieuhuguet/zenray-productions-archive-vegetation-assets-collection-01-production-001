@@ -1,0 +1,49 @@
+# Archive verified petal frames and encode a compact preview, 6 October 2026.
+from pathlib import Path
+import hashlib
+import json
+import shutil
+import subprocess
+
+CONFIG = {
+    'root': Path('/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01'),
+    'source': Path('/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie'),
+    'fps': 24, 'frames_per_step': 8, 'bitrate': '1500k', 'date': '6 October 2026',
+}
+root = CONFIG['root']
+source = CONFIG['source']
+output = root / 'versions/petal_evolution'
+frames = output / 'frames'
+frames.mkdir(parents=True, exist_ok=True)
+entries = json.loads((source / 'manifest.json').read_text())
+assert len(entries) == 84
+aliases = {'recovered': 'recovered_from_conversation', 'auto': 'auto', 'band0_refv2': 'band0_refv2'}
+for entry in entries:
+    original = source / 'frames' / entry['frame']
+    target = frames / entry['frame']
+    shutil.copy2(original, target)
+    digest = hashlib.sha256(original.read_bytes()).hexdigest()
+    assert hashlib.sha256(target.read_bytes()).hexdigest() == digest
+    parts = Path(entry['source']).parts
+    comparison = root / 'versions' / aliases[parts[0]] / Path(*parts[1:])
+    assert comparison.exists(), str(comparison)
+    entry.update({'archivedFrame': str(target), 'sha256': digest, 'comparisonSource': str(comparison)})
+shutil.copy2(source / 'storyboard_sheet.png', output / 'storyboard_sheet.png')
+(output / 'Manifest.json').write_text(json.dumps({'date': CONFIG['date'], 'classification': 'Houdini generated petal crops; reference panels excluded', 'frames': entries}, indent=2) + '\n')
+movie = output / 'petal_evolution.mp4'
+subprocess.run(['ffmpeg', '-y', '-v', 'error', '-framerate', str(CONFIG['fps'] / CONFIG['frames_per_step']), '-start_number', '1', '-i', str(frames / 'f%03d.png'), '-vf', 'format=yuv420p', '-r', str(CONFIG['fps']), '-c:v', 'hevc_videotoolbox', '-b:v', CONFIG['bitrate'], '-tag:v', 'hvc1', '-movflags', '+faststart', '-an', str(movie)], check=True)
+probe = json.loads(subprocess.check_output(['ffprobe', '-v', 'error', '-show_entries', 'format=duration,size:stream=width,height,nb_frames', '-of', 'json', str(movie)]))
+assert abs(float(probe['format']['duration']) - 28) < .1
+subprocess.run(['ffmpeg', '-v', 'error', '-i', str(movie), '-map', '0:v:0', '-f', 'null', '-'], check=True)
+(output / 'Verification.json').write_text(json.dumps({'copiedFrames': len(entries), 'allCopiesHashVerified': True, 'fullVideoDecode': True, 'probe': probe}, indent=2) + '\n')
+(output / 'INDEX.md').write_text(f'''# Petal evolution, {CONFIG['date']}
+
+84 saved Houdini height crops, archived without changing their pixels. ({CONFIG['date']})
+
+[Petal-only preview](petal_evolution.mp4): 28 seconds, native 418 x 242, no audio. Earlier crops were already resized by the original montage. ({CONFIG['date']})
+
+[Original complete montage](../../video/LilyHeightToRender_v004.mov) and [compact MP4](../../video/LilyHeightToRender_v004.mp4): 1920 x 1920, 46.667 seconds, including render, title and music. ({CONFIG['date']})
+
+[Manifest](Manifest.json) records each comparison source, UTC date and archived frame checksum. Reference images remain separate. ({CONFIG['date']})
+''')
+print(json.dumps({'frames': len(entries), 'movie': str(movie), 'probe': probe}))

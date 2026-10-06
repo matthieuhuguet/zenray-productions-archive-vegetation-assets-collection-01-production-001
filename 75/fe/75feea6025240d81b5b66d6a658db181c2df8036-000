@@ -1,0 +1,7 @@
+# 6 October 2026 : mixes a short SFX (already normalised) into the audio of a movie at a given second (the title moment), video stream copied, then re-normalises the whole track to -14 LUFS with NormalizeAudio.py. The movie is replaced only after the new one exists. Usage: python3 MixSfxAtTitle.py <movie> <sfx.wav> [start seconds = 1.0]. FR : ajoute un SFX au moment du titre, video copiee, audio renormalise.
+import sys, os, subprocess
+src, sfx = sys.argv[1], sys.argv[2]; at = float(sys.argv[3]) if len(sys.argv) > 3 else 1.0; ms = int(round(at * 1000))
+tmp = src[:-4] + '_sfx' + src[-4:]
+fc = '[1:a]adelay=%d|%d,aresample=48000[s];[0:a]aresample=48000[m];[m][s]amix=inputs=2:duration=first:normalize=0[a]' % (ms, ms)
+subprocess.run(['ffmpeg', '-y', '-loglevel', 'error', '-i', src, '-i', sfx, '-filter_complex', fc, '-map', '0:v', '-map', '[a]', '-c:v', 'copy', '-c:a', 'aac', '-b:a', '320k', '-movflags', '+faststart', tmp], check=True)
+os.replace(tmp, src); subprocess.run([sys.executable, os.path.join(os.path.dirname(os.path.abspath(__file__)), 'NormalizeAudio.py'), src], check=True)

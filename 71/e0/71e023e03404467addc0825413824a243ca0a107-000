@@ -1,0 +1,19 @@
+// 6 October 2026 14:55: Register user fonts and verify each exact face through CoreText.
+import Foundation
+import CoreText
+var result: [[String: Any]] = []
+for style in ["Light", "Regular", "Medium", "Semibold", "Bold"] {
+    let name = "Vogun-" + style
+    let url = URL(fileURLWithPath: "/Users/zenray/Library/Fonts/" + name + ".ttf")
+    var error: Unmanaged<CFError>?
+    let registered = CTFontManagerRegisterFontsForURL(url as CFURL, .user, &error)
+    let font = CTFontCreateWithName(name as CFString, 72, nil)
+    let actual = CTFontCopyPostScriptName(font) as String
+    guard actual == name else { fatalError("Font substitution: " + actual + " for " + name) }
+    let traits = CTFontCopyTraits(font) as NSDictionary
+    result.append(["style": style, "postScriptName": actual, "family": CTFontCopyFamilyName(font) as String, "registered": registered, "registrationNote": error.map { String(describing: $0.takeRetainedValue()) } ?? "OK", "weightTrait": traits[kCTFontWeightTrait] ?? 0])
+}
+let data = try JSONSerialization.data(withJSONObject: result, options: [.prettyPrinted, .sortedKeys])
+let path = "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/assets/fonts/Vogun/CoreTextVerification.json"
+try data.write(to: URL(fileURLWithPath: path))
+print(String(data: data, encoding: .utf8)!)

@@ -1,0 +1,17 @@
+# 6 October 2026 16:20: Remove build-directory runtime dependencies from the installed Cycles binaries.
+from pathlib import Path
+import subprocess
+import re
+CONFIG = {"root": "/Users/zenray/Create/Build/HoudiniRenderers/22.0.368/Cycles", "build_marker": "tmp-vegetation-assets-collection-01/renderers/cycles/source"}
+root = Path(CONFIG["root"])
+for binary in [root / "cycles", root / "houdini/dso/usd/hdCycles.dylib"]:
+    output = subprocess.check_output(["otool", "-l", str(binary)], text=True)
+    paths = re.findall(r"cmd LC_RPATH\s+cmdsize \d+\s+path (.*?) \(offset", output)
+    for path in paths:
+        if CONFIG["build_marker"] in path:
+            subprocess.run(["install_name_tool", "-delete_rpath", path, str(binary)], check=True)
+    library_path = str(root / "houdini/lib")
+    if library_path not in paths:
+        subprocess.run(["install_name_tool", "-add_rpath", library_path, str(binary)], check=True)
+    subprocess.run(["codesign", "--force", "--sign", "-", str(binary)], check=True)
+    print(binary)

@@ -1,0 +1,9 @@
+# 6 October 2026 : two-pass EBU R128 loudness normalisation of the audio of a movie, video stream copied untouched. Usage: python3 NormalizeAudio.py <movie.mp4|mov> [target LUFS = -14] [true peak dB = -1.5]. The file is replaced only after the new one exists. FR : normalisation audio en deux passes, video copiee.
+import sys, json, subprocess, os, re
+src = sys.argv[1]; I = sys.argv[2] if len(sys.argv) > 2 else '-14'; TP = sys.argv[3] if len(sys.argv) > 3 else '-1.5'; T = 'I=%s:TP=%s:LRA=11' % (I, TP)
+r = subprocess.run(['ffmpeg', '-hide_banner', '-i', src, '-af', 'loudnorm=%s:print_format=json' % T, '-vn', '-f', 'null', '-'], capture_output=True, text=True).stderr
+m = json.loads(r[r.rindex('{'):r.rindex('}') + 1]); print(os.path.basename(src), 'before: %s LUFS, true peak %s dB, LRA %s' % (m['input_i'], m['input_tp'], m['input_lra']))
+af = 'loudnorm=%s:measured_I=%s:measured_TP=%s:measured_LRA=%s:measured_thresh=%s:offset=%s:linear=true' % (T, m['input_i'], m['input_tp'], m['input_lra'], m['input_thresh'], m['target_offset'])
+tmp = src[:-4] + '_norm' + src[-4:]; subprocess.run(['ffmpeg', '-y', '-loglevel', 'error', '-i', src, '-c:v', 'copy', '-af', af, '-c:a', 'aac', '-b:a', '320k', '-movflags', '+faststart', tmp], check=True); os.replace(tmp, src)
+r = subprocess.run(['ffmpeg', '-hide_banner', '-i', src, '-af', 'loudnorm=%s:print_format=json' % T, '-vn', '-f', 'null', '-'], capture_output=True, text=True).stderr
+a = json.loads(r[r.rindex('{'):r.rindex('}') + 1]); print('   after: %s LUFS, true peak %s dB' % (a['input_i'], a['input_tp']))

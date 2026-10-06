@@ -1,0 +1,28 @@
+# 6 October 2026 16:12: Test Octane with its native Solaris settings and beauty AOV.
+import hou
+from pathlib import Path
+from pxr import Usd, UsdRender, Sdf, Gf
+CONFIG = {"root": "/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/renderers/tests", "samples": 8, "resolution": 128}
+root = Path(CONFIG["root"])
+node = hou.node("/stage").createNode("otoy::Octane::1.3")
+for parm in node.parms():
+    if "octanelog" in parm.name() and not parm.name().endswith("_control"):
+        parm.set(True)
+    if "maxsamples" in parm.name() and not parm.name().endswith("_control"):
+        parm.set(CONFIG["samples"])
+node.stage().Flatten().Export(str(root / "OctaneNativeSettings.usda"))
+stage = Usd.Stage.CreateNew(str(root / "OctaneSmoke.usda"))
+stage.GetRootLayer().subLayerPaths = [str(root / "OctaneNativeSettings.usda"), str(root / "Smoke.usda")]
+settings = UsdRender.Settings(stage.GetPrimAtPath("/Render/rendersettings"))
+settings.CreateCameraRel().SetTargets(["/World/Camera"])
+settings.CreateResolutionAttr(Gf.Vec2i(CONFIG["resolution"]))
+product = UsdRender.Product(stage.GetPrimAtPath("/Render/Products/OctaneAOVProduct"))
+product.CreateProductNameAttr(str(root / "OctaneNative.exr"))
+product.CreateProductTypeAttr("raster")
+product.CreateCameraRel().SetTargets(["/World/Camera"])
+product.CreateResolutionAttr(Gf.Vec2i(CONFIG["resolution"]))
+aov = stage.GetPrimAtPath("/Render/Products/Vars/AAABeauty")
+aov.CreateAttribute("driver:parameters:aov:husk:name", Sdf.ValueTypeNames.String).Set("Beauty")
+stage.SetMetadata("renderSettingsPrimPath", "/Render/rendersettings")
+stage.GetRootLayer().Save()
+print(stage.GetRootLayer().realPath)

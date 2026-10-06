@@ -1,0 +1,26 @@
+# 6 October 2026 : writes video/INDEX.md (the mapped index of the lily movie files) from the manifests next to it. FR : index mappe de la video.
+import json, glob, os
+P = '/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/'
+V = P + 'video/'
+L = ['# Lily movie, height map evolution to Karma renders (6 October 2026)', '',
+     '6 October 2026 : project `vegetation-assets-collection-01` (ZenRay Assets V2), folder `ZenRayHoudini/VegetationCollection01/video/`. Built by `Scripts/AssembleLilyMovie.py`, this index by `Scripts/WriteMovieIndex.py`.', '',
+     '6 October 2026 : SQUARE format 1920 x 1920 (black bars top and bottom around a 1920 x 1112 picture, petal ratio 1.727), 24 fps, HEVC `hvc1` in `.mov` (iPhone Photos) and H.264 in `.mp4`, AAC 320 k. Order asked by Matthieu: height map storyboard (0.33 s per image, last one held 1 s), 3 petal base colours (1 s each), 4 Karma renders (1.5 s each: front, side, three quarter, top), 72 frame top turn over (3 s), title movie keyed on the first 5 s, music from 3:59 to the end of Grandbrothers Sonic Riots.', '',
+     '## Movies', '', '| File | Seconds | Turn over included | Date |', '|---|---|---|---|']
+for m in sorted(glob.glob(V + '*.manifest.json')):
+    d = json.load(open(m)); n = d['movie']
+    L.append('| `%s.mov` and `%s.mp4` | %.2f | %s | 6 October 2026 |' % (n, n, d['seconds'], 'yes' if d['turn_over_included'] else 'no, rendering still running'))
+L += ['', '## Sources (6 October 2026)', '',
+      '| Role | Path |', '|---|---|',
+      '| Height storyboard frames (84 images, first petal, Houdini half, 418 x 242) | `~/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f001.png` to `f084.png`, order and sources in `petal_movie/manifest.json` |',
+      '| Storyboard sheet | `petal_movie/storyboard_sheet.png` |',
+      '| 3 petal base colours | `maps/trim/petals/lily_petal_01_basecolor.png`, `02`, `03` |',
+      '| 4 Karma renders (RGBA, put on grey 118 for the movie) | `render/lily_4views_front_4k.png`, `side`, `three_quarter`, `top` (and `_grey` copies) |',
+      '| Turn over frames | `render/turntable_top/turn_0001.png` to `turn_0072.png` (Karma CPU, 1866 x 1080, 16 samples) |',
+      '| Title | `maps/trim/petals/title-animation/vogun-pop/vogun-mixed-pop-1s.mov` (opaque cream background rebuilt into an alpha: white text above the cream, shadow below it) |',
+      '| Music | `~/.claude/tmp/tmp-vegetation-assets-collection-01/audio/Grandbrothers - Sonic Riots (3m59 to end).mp3` |', '',
+      '## Timeline of the latest movie', '']
+ms = sorted(glob.glob(V + '*.manifest.json'), key=os.path.getmtime)
+if ms:
+    d = json.load(open(ms[-1])); L += ['6 October 2026 : `%s`, %.2f s.' % (d['movie'], d['seconds']), '', '| Start | End | Shot | Source |', '|---|---|---|---|']
+    for r in d['timeline']: L.append('| %.2f | %.2f | %s | `%s` |' % (r['start'], r['end'], r['shot'], r['source'].replace(P, '')))
+open(V + 'INDEX.md', 'w').write('\n'.join(L) + '\n'); print('INDEX.md', len(L), 'lines')

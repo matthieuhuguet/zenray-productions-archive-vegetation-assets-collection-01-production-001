@@ -1,0 +1,24 @@
+# 6 October 2026 : applies ~/.claude/skills/zenray-houdini/CyclesLookdev1.md (JSON block) to the live Houdini scene. Run through the bridge: houdini_hom live with  exec(open('<this file>').read()). FR : applique le lookdev Cycles ecrit dans le fichier md.
+import re, json, os
+md = open(os.path.expanduser('~/.claude/skills/zenray-houdini/CyclesLookdev1.md')).read()
+P = json.loads(re.search(r'```json\s*(\{.*?\})\s*```', md, re.S).group(1))
+st = hou.node('/stage'); d = st.node('lt_dome'); k = st.node('lt_key'); f = st.node('lt_fill'); fx = st.node('lt_cycles_preview_fix')
+d.parm('xn__inputsintensity_i0a').set(P['dome']['intensity']); d.parm('xn__inputsexposure_vya').set(P['dome']['exposure'])
+k.parm('xn__inputsexposure_vya').set(P['key']['exposure']); k.parm('xn__inputsangle_zta').set(P['key']['angle']); k.parm('rx').set(P['key']['rx']); k.parm('ry').set(P['key']['ry'])
+f.parm('xn__inputsexposure_vya').set(P['fill']['exposure']); f.parm('xn__inputsangle_zta').set(P['fill']['angle']); f.parm('rx').set(P['fill']['rx']); f.parm('ry').set(P['key']['ry'] + P['fill']['ry_offset_from_key'])
+code = '''# 6 October 2026 : written by ApplyCyclesLookdev.py from CyclesLookdev1.md. FR : ne pas editer ici, editer le fichier md.
+stage = hou.pwd().editableStage()
+USE_NORMAL = %s
+if not USE_NORMAL:
+    for prim in stage.Traverse():
+        if prim.GetTypeName() == 'Shader':
+            idattr = prim.GetAttribute('info:id')
+            if idattr and idattr.Get() == 'UsdPreviewSurface':
+                n = prim.GetAttribute('inputs:normal')
+                if n: n.ClearConnections()
+''' % ('True' if P['preview_material']['use_normal_map'] else 'False')
+fx.parm('python').set(code); fx.cook(force=True)
+st.node(P['viewport']['display_node']).setDisplayFlag(True)
+sv = hou.ui.paneTabOfType(hou.paneTabType.SceneViewer); sv.setHydraRenderer(P['viewport']['delegate'])
+hou.hipFile.save()
+result = {'applied': P, 'delegate': sv.currentHydraRenderer()}

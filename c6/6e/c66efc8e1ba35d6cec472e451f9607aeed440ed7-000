@@ -1,0 +1,74 @@
+# 6 October 2026 (v003 order): HOOK 3 s (the 72 frame top turn over, or the top render as a placeholder while it renders), full trim sheet base colour, full trim sheet height (placeholders from maps/trim), then the height storyboard, the 3 petals, the 4 renders, and the yellow cyber title keyed over the first 5 s. Earlier: assembles the lily movie: height map storyboard (0.33 s per image, last one held 1 s), the 3 petal base colours (1 s each), the 4 Karma renders (1.5 s each), the 72 frame top turn over (3 s), the title movie keyed over the first seconds, the music. Usage: python3 AssembleLilyMovie.py [version]. If the 72 turn over frames are not all there yet, it builds the version WITHOUT the turn over (suffix _noturnover). FR : assemblage de la video du lys.
+import os, sys, glob, json, subprocess, shutil
+import numpy as np
+from PIL import Image
+P = '/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/'
+TMP = '/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/'
+VER = sys.argv[1] if len(sys.argv) > 1 else 'v001'
+OUT = P + 'video/'; WORK = OUT + '_work/'
+W, H, FPS = 1920, 1112, 24
+SQ = 1920                                       # 6 October 2026 (Matthieu): the frame is SQUARE, black bars on the top and the bottom around the 1920 x 1112 picture                      # petal ratio 418 x 242 = 1.727, kept in the 1920 wide frame
+STEP, LAST_HOLD, PETAL_S, RENDER_S = 8, 24, 24, 36      # frames: 0.333 s, 1 s, 1 s, 1.5 s at 24 fps
+TITLE = P + 'maps/trim/petals/title-animation/vogun-cyber/vogun-cyber-pingpong-yellow.mov'
+MUSIC = TMP + 'audio/Grandbrothers - Sonic Riots (3m59 to end).mp3'
+os.makedirs(WORK + 'imgs', exist_ok=True); os.makedirs(WORK + 'title', exist_ok=True)
+def run(cmd): subprocess.run(cmd, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE)
+def prep(src, name):
+    """a shot on the SQUARE canvas: a square picture (trim sheet) fills it, any other picture is fitted to 1920 x 1112 with black bars above and below."""
+    im = Image.open(src)
+    if im.mode == 'RGBA': bg = Image.new('RGBA', im.size, (118, 118, 118, 255)); bg.alpha_composite(im); im = bg
+    im = im.convert('RGB'); canvas = Image.new('RGB', (SQ, SQ), (0, 0, 0))
+    if abs(im.size[0] - im.size[1]) < 4: canvas = im.resize((SQ, SQ), Image.LANCZOS)
+    else: canvas.paste(im.resize((W, H), Image.LANCZOS), (0, (SQ - H) // 2))
+    p = WORK + 'imgs/' + name + '.png'; canvas.save(p); return p
+HOOK = 144                                         # 6 s: the 72 turn over frames at HALF speed (Matthieu, 6 October 2026), in-between frames by motion interpolation
+tf = sorted(glob.glob(P + 'render/turntable_top/turn_*.png')); turn = len(tf) >= 72 and not subprocess.run(['pgrep', '-x', 'husk'], capture_output=True).stdout.strip()
+hook = []; rest = []
+if not turn: hook.append(('hook_top_render_placeholder', P + 'render/lily_4views_top_4k.png', HOOK))
+rest.append(('trimsheet_basecolor', P + 'maps/trim/lily_trim_basecolor.png', 36)); rest.append(('trimsheet_height', P + 'maps/trim/lily_trim_height.png', 36))
+hf = sorted(glob.glob(TMP + 'petal_movie/frames/f*.png'))
+for i, f in enumerate(hf): rest.append(('h%03d' % (i + 1), f, LAST_HOLD if i == len(hf) - 1 else STEP))
+for k in (1, 2, 3): rest.append(('petal%d' % k, P + 'maps/trim/petals/lily_petal_0%d_basecolor.png' % k, PETAL_S))
+for v in ('front', 'side', 'three_quarter', 'top'): rest.append(('render_' + v, P + 'render/lily_4views_%s_4k.png' % v, RENDER_S))
+def seg_from_shots(shots, out):
+    lst = ['ffconcat version 1.0']
+    for name, src, n in shots: lst += ["file '%s'" % prep(src, name), 'duration %.6f' % (n / float(FPS))]
+    lst.append("file '%s'" % (WORK + 'imgs/' + shots[-1][0] + '.png'))
+    open(out + '.txt', 'w').write('\n'.join(lst))
+    run(['ffmpeg', '-y', '-f', 'concat', '-safe', '0', '-i', out + '.txt', '-vf', 'fps=%d,format=yuv420p' % FPS, '-frames:v', str(sum(n for _, _, n in shots)), '-c:v', 'libx264', '-crf', '8', out])      # 6 October 2026: bounded to the exact frame count, a concat of one image otherwise lasts twice as long
+segs = []
+if hook: seg_from_shots(hook, WORK + 'seg_hook.mp4')
+else:
+    os.makedirs(WORK + 'turn', exist_ok=True)
+    for k in range(1, 73):      # the Karma frames are transparent: put them on the grey 118 of the other renders
+        im = Image.open(P + 'render/turntable_top/turn_%04d.png' % k).convert('RGBA'); bg = Image.new('RGBA', im.size, (118, 118, 118, 255)); bg.alpha_composite(im)
+        bg.convert('RGB').resize((W, H), Image.LANCZOS).save(WORK + 'turn/g_%04d.png' % k)
+    run(['ffmpeg', '-y', '-framerate', str(FPS), '-i', WORK + 'turn/g_%04d.png', '-vf', 'setpts=2*PTS,minterpolate=fps=%d:mi_mode=mci:mc_mode=aobmc:me_mode=bidir:vsbmc=1,pad=%d:%d:0:%d:color=black,format=yuv420p' % (FPS, SQ, SQ, (SQ - H) // 2), '-frames:v', str(HOOK), '-c:v', 'libx264', '-crf', '8', WORK + 'seg_hook.mp4'])
+segs.append(WORK + 'seg_hook.mp4')
+seg_from_shots(rest, WORK + 'seg_rest.mp4'); segs.append(WORK + 'seg_rest.mp4')
+shots = (hook if hook else [('hook_turn_over_72_frames_half_speed', P + 'render/turntable_top/turn_0001..0072.png', HOOK)]) + rest
+frames_abc = sum(n for _, _, n in shots)
+open(WORK + 'segs.txt', 'w').write('\n'.join("file '%s'" % s for s in segs))
+run(['ffmpeg', '-y', '-f', 'concat', '-safe', '0', '-i', WORK + 'segs.txt', '-c', 'copy', WORK + 'body.mp4'])
+total_frames = frames_abc; total_s = total_frames / float(FPS)
+# the title: opaque cream movie, YELLOW text with a soft black shadow. Alpha rebuilt per frame: text = red minus blue is large (yellow), shadow = red darker than the cream.
+for f in glob.glob(WORK + 'title/*.png'): os.remove(f)
+run(['ffmpeg', '-y', '-i', TITLE, '-t', '5', '-vf', 'fps=%d,scale=1920:1080:flags=lanczos' % FPS, WORK + 'title/raw_%04d.png'])
+for f in sorted(glob.glob(WORK + 'title/raw_*.png')):
+    a = np.asarray(Image.open(f).convert('RGB'), float); R, G, B = a[..., 0], a[..., 1], a[..., 2]
+    text = np.clip(((R - B) - 12.0) / (255.0 - 12.0), 0, 1)
+    shadow = np.clip((243.0 - 2.0 - R) / (243.0 - 2.0), 0, 1) * (1 - np.clip(text * 3, 0, 1))
+    alpha = np.maximum(text, shadow * 0.9)
+    col = np.dstack([np.where(text > 0.02, 255.0, 0.0), np.where(text > 0.02, 255.0, 0.0), np.zeros_like(R)])
+    rgba = np.dstack([col, alpha * 255.0]).astype('uint8'); Image.fromarray(rgba).save(f.replace('raw_', 't_')); os.remove(f)
+vf = "[0:v][1:v]overlay=0:%d:eof_action=pass,format=yuv420p[v]" % ((SQ - 1080) // 2)
+af = 'afade=t=in:st=0:d=0.4,afade=t=out:st=%.3f:d=1.5' % (total_s - 1.5)
+base = ['ffmpeg', '-y', '-i', WORK + 'body.mp4', '-framerate', str(FPS), '-i', WORK + 'title/t_%04d.png', '-i', MUSIC, '-filter_complex', vf, '-map', '[v]', '-map', '2:a', '-af', af, '-t', '%.3f' % total_s, '-r', str(FPS)]
+tag = 'LilyHeightToRender_' + VER + ('' if turn else '_placeholderhook')
+run(base + ['-c:v', 'hevc_videotoolbox', '-b:v', '18M', '-tag:v', 'hvc1', '-color_primaries', 'bt709', '-color_trc', 'bt709', '-colorspace', 'bt709', '-c:a', 'aac', '-b:a', '320k', '-movflags', '+faststart', OUT + tag + '.mov'])
+run(base + ['-c:v', 'libx264', '-crf', '17', '-pix_fmt', 'yuv420p', '-c:a', 'aac', '-b:a', '320k', '-movflags', '+faststart', OUT + tag + '.mp4'])
+# index: every file of the movie, where it comes from, and its time on the timeline
+t = 0.0; rows = []
+for name, src, n in shots: rows.append((t, t + n / float(FPS), name, src)); t += n / float(FPS)
+json.dump(dict(movie=tag, fps=FPS, size=[SQ, SQ], picture=[W, H], seconds=round(total_s, 3), turn_over_included=turn, title=TITLE, music=MUSIC, timeline=[dict(start=round(a, 3), end=round(b, 3), shot=n, source=s) for a, b, n, s in rows]), open(OUT + tag + '.manifest.json', 'w'), indent=1)
+shutil.rmtree(WORK); print(tag, round(total_s, 2), 's', 'turn over' if turn else 'WITHOUT turn over')

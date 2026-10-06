@@ -1,0 +1,28 @@
+# 6 October 2026 14:45: Derive editable synthetic weights without rewriting the original Medium.
+import fontforge
+import json
+import sys
+from pathlib import Path
+config_path = Path(sys.argv[1])
+config = json.loads(config_path.read_text())
+report = []
+for item in config['weights']:
+    font = fontforge.open(config['source'])
+    font.layers[1].is_quadratic = False
+    font.selection.all()
+    font.unlinkReferences()
+    font.changeWeight(item['stroke'], 'auto', 0, 0, 'retain')
+    font.removeOverlap()
+    font.correctDirection()
+    font.addExtrema()
+    font.round()
+    font.familyname = config['family']
+    font.fontname = config['family'] + '-' + item['style']
+    font.fullname = config['family'] + ' ' + item['style']
+    font.weight = item['style']
+    font.os2_weight = item['weight']
+    path = config_path.parent / (font.fontname + '.ttf')
+    font.generate(str(path))
+    report.append(dict(file=str(path), validation=font.validate(1)))
+    font.close()
+(config_path.parent / 'FontForgeReport.json').write_text(json.dumps(report, indent=2))

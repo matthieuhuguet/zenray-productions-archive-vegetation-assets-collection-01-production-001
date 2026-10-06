@@ -1,0 +1,33 @@
+# Assemble the numbered subtitle shots and verify the square MOV, 6 October 2026.
+from pathlib import Path
+import hashlib
+import json
+import subprocess
+
+CONFIG = {'root': Path('/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01'), 'date': '6 October 2026', 'output': 'LilySteps_v004.mov'}
+video = CONFIG['root'] / 'video'
+work = video / 'steps'
+settings = json.loads((work / 'Animation.json').read_text())
+report = json.loads((work / 'RenderReport.json').read_text())
+assert len(report['result']) == len(settings['variants']) == 7
+for item in settings['variants']:
+    copied = work / item['image']
+    assert hashlib.sha256(copied.read_bytes()).hexdigest() == item['sha256']
+for item in report['result']:
+    assert len(item['layout']) == 1
+    assert item['layout'][0]['width'] < settings['width'] * settings['widthRatio'] + 1
+concat = work / 'Concat.txt'
+concat.write_text(''.join("file '" + item['id'] + ".mov'\n" for item in settings['variants']))
+output = video / CONFIG['output']
+subprocess.run(['ffmpeg', '-y', '-v', 'error', '-f', 'concat', '-safe', '0', '-i', str(concat), '-c', 'copy', '-movflags', '+faststart', str(output)], check=True)
+probe = json.loads(subprocess.check_output(['ffprobe', '-v', 'error', '-show_entries', 'format=duration,size:stream=codec_name,width,height,nb_frames,r_frame_rate', '-of', 'json', str(output)]))
+stream = probe['streams'][0]
+assert stream['width'] == stream['height'] == settings['width']
+assert int(stream['nb_frames']) == 840
+assert abs(float(probe['format']['duration']) - 28) < .01
+subprocess.run(['ffmpeg', '-v', 'error', '-i', str(output), '-f', 'null', '-'], check=True)
+verification = {'date': CONFIG['date'], 'output': str(output), 'sourceCopiesHashVerified': True, 'captionOrder': [v['name'] for v in settings['variants']], 'fullDecode': True, 'probe': probe}
+(work / 'Verification.json').write_text(json.dumps(verification, indent=2) + '\n')
+with (video / 'INDEX.md').open('a') as handle:
+    handle.write('\n## Numbered production steps, 6 October 2026\n\n[LilySteps_v004.mov](LilySteps_v004.mov): seven screenshots in numerical order, 1920 x 1920, 30 fps, 28 seconds, white Vogun Medium animated captions, one second in / two seconds hold / one second out. Source screenshots fit without cropping. (6 October 2026)\n\n[Reusable subtitle style](SubtitleStyle.md), [parameters](steps/Animation.json), [verification](steps/Verification.json). Original v004 montage remains unchanged. (6 October 2026)\n')
+print(json.dumps(verification))

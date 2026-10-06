@@ -1,0 +1,32 @@
+# 6 October 2026 16:22: Verify installed Cycles without access to its build dependencies.
+from pathlib import Path
+import os
+import subprocess
+import numpy as np
+import OpenImageIO as oiio
+import json
+CONFIG = {"root": "/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/renderers", "install": "/Users/zenray/Create/Build/HoudiniRenderers/22.0.368", "hfs": "/Applications/Houdini/Current/Frameworks/Houdini.framework/Resources"}
+root = Path(CONFIG["root"])
+source_lib = root / "cycles/source/lib/macos_arm64"
+hidden_lib = source_lib.with_name("macos_arm64.disabled-for-test")
+assert source_lib.exists() and not hidden_lib.exists()
+environment = os.environ.copy()
+environment.update(HOUDINI_PACKAGE_DIR=CONFIG["install"] + "/SolarisGPU/packages", USDIMAGINGGL_ENGINE_ENABLE_SCENE_INDEX="0", CYCLES_LOGGING="1", CYCLES_LOGGING_LEVEL="info")
+source_lib.rename(hidden_lib)
+try:
+    with (root / "CyclesInstalledRender.log").open("w") as log:
+        result = subprocess.run([CONFIG["hfs"] + "/bin/husk", "--gpu", "-R", "Cycles", "--indie", "--settings", "/Render/Settings", "-c", "/World/Camera", "-r", "128", "128", "-o", "CyclesInstalled.exr", "Smoke.usda"], cwd=root / "tests", env=environment, stdout=log, stderr=subprocess.STDOUT, timeout=120)
+        assert result.returncode == 0, result.returncode
+finally:
+    hidden_lib.rename(source_lib)
+def read_image(name):
+    image = oiio.ImageBuf(str(root / "tests" / (name + ".exr")))
+    return np.asarray(image.get_pixels(oiio.FLOAT)).astype(np.float64)
+installed = read_image("CyclesInstalled")
+baseline = read_image("KarmaBaseline")
+with_plugins = read_image("KarmaWithPlugins")
+proof = {"installedCyclesSpatialStddev": np.std(installed[..., :3], axis=(0, 1)).tolist(), "karmaMaximumPixelDifference": float(np.max(np.abs(baseline - with_plugins))), "cyclesIndependentOfBuildLibraries": True, "defaultPackages": [p.name for p in Path("/Users/zenray/Library/Preferences/houdini/22.0/packages").glob("*.json")]}
+assert max(proof["installedCyclesSpatialStddev"]) > 0.001
+assert proof["karmaMaximumPixelDifference"] == 0
+(root / "InstalledVerification.json").write_text(json.dumps(proof, indent=2) + "\n")
+print(json.dumps(proof, indent=2))

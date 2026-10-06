@@ -1,0 +1,71 @@
+# 6 October 2026 : the verifier of the Fleur de Lys article. Exit code 0 = green. Tested in both directions (see the --selftest flag).
+# FR : le verificateur de l'article. Code de sortie 0 = vert. Il refuse : une image absente de l'index, trop large ou trop lourde, un tiret long, une source interdite.
+import os, re, json, sys
+R = '/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/'
+SITE = '/Users/zenray/.claude/tmp/tmp-zenray-website-lily/site/'
+WORK = '/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/article/'
+SLUG = 'fleur-de-lys-procedural-lily-houdini-unreal'
+ART = SITE + 'public/articles/%s.json' % SLUG
+PUB = SITE + 'public/projects/%s/' % SLUG
+FORBIDDEN_SOURCES = re.compile(r'(^|/)(refs?|ref-maps|references)(/|$)|newref|REFERENCE|trimsheet-height-flower|full_trim|_cmp|ref_over_generated|TreeRef|perfect 4 views|upscaled-flower-parts|(^|/)basecolor\.png$', re.I)
+ALLOWED_TYPES = {'paragraph', 'heading', 'bulletListItem', 'numberedListItem', 'quote', 'codeBlock', 'image', 'youtube', 'table'}
+
+def run(art_path=ART):
+    errs = []; warn = []
+    art = json.load(open(art_path)); idx = json.load(open(WORK + 'images-index.json')); by_file = {i['file']: i for i in idx['images']}
+    raw = open(art_path, encoding='utf8').read()
+    for ch, name in (('—', 'em dash'), ('–', 'en dash'), (' -- ', 'double hyphen')):
+        if ch in raw: errs.append('%s found in the article' % name)
+    # 6 October 2026 22:28: Keep internal production agents and generative tools out of public editorial text.
+    forbidden_editorial = re.compile(r'\b(?:Claude(?: Code)?|Codex|Gemini|LLMs?|AI|agents?|automation|automated|automatisation|intelligence artificielle|image generat(?:ion|or)|ZenRay Assets V2)\b', re.I)
+    if forbidden_editorial.search(raw): errs.append('internal production or generative tool mention in public article')
+    if art.get('schema') != 'article.public.v1': errs.append('schema')
+    if art.get('slug') != SLUG: errs.append('slug')
+    seen = []
+    for b in art['blocks']:
+        if b['type'] not in ALLOWED_TYPES: errs.append('block type %s' % b['type'])
+        if b['type'] == 'image':
+            f = b['props']['url'].split('/')[-1]; seen.append(f)
+            it = by_file.get(f)
+            if not it: errs.append('image not in the index: ' + f); continue
+            if not os.path.exists(PUB + f): errs.append('image missing on disk: ' + f)
+            if it['width'] > idx['budget']['max_width']: errs.append('too wide: %s %d' % (f, it['width']))
+            lim = idx['budget']['small'] if it['width'] <= 1700 else idx['budget']['big']
+            if it['bytes'] > lim: errs.append('too heavy: %s %d bytes' % (f, it['bytes']))
+            if b['props'].get('width') != it['width'] or b['props'].get('height') != it['height']: errs.append('block size differs from the index: ' + f)
+            if not b['props'].get('alt'): errs.append('no alt text: ' + f)
+            if not b['props']['caption'].startswith('Figure %d.' % it['number']): errs.append('caption number differs: ' + f)
+        if b['type'] == 'youtube':
+            if not b['props'].get('poster'): errs.append('video without poster: ' + b.get('id', '?'))
+            elif not os.path.exists(PUB + b['props']['poster'].split('/')[-1]): errs.append('poster missing on disk: ' + b['props']['poster'])
+    nums = [by_file[f]['number'] for f in seen if f in by_file]
+    if nums != sorted(nums) or nums != list(range(1, len(nums) + 1)): errs.append('figure numbers are not 1..N in reading order: %s' % nums)
+    for i in idx['images']:
+        for s in i.get('sources', []):
+            if FORBIDDEN_SOURCES.search(s): errs.append('forbidden source %s in %s' % (s, i['file']))
+        if i['kind'] == 'figure' and i['file'] not in seen: errs.append('figure not used in the article: ' + i['file'])
+    on_disk = {f for f in os.listdir(PUB) if f.endswith('.webp')}
+    stray = on_disk - {i['file'] for i in idx['images']}
+    if stray: errs.append('files on disk but not in the index: %s' % sorted(stray))
+    total = sum(os.path.getsize(PUB + f) for f in on_disk)
+    if total > idx['budget']['total']: errs.append('total weight %d over the budget' % total)
+    ids = [b.get('id') for b in art['blocks'] if b.get('id')]
+    if len(ids) != len(set(ids)): errs.append('duplicate block ids')
+    for b in art['blocks']:   # every internal link points to a heading id
+        for n in (b.get('content') or []) if isinstance(b.get('content'), list) else []:
+            if n.get('type') == 'link' and n['href'].startswith('#') and n['href'][1:] not in ids: errs.append('dead anchor ' + n['href'])
+    return errs, dict(blocks=len(art['blocks']), images=len(seen), total_bytes=total)
+
+if __name__ == '__main__':
+    if '--selftest' in sys.argv:   # red on a broken copy, green on the real one
+        art = json.load(open(ART)); bad = json.loads(json.dumps(art))
+        for b in bad['blocks']:
+            if b['type'] == 'image': b['props']['url'] = b['props']['url'].replace('.webp', '-x.webp'); break
+        bad['blocks'][0]['content'][0]['text'] += ' Claude Code automation'
+        open(WORK + '_broken.json', 'w').write(json.dumps(bad))
+        e_bad, _ = run(WORK + '_broken.json'); e_ok, info = run(); os.remove(WORK + '_broken.json')
+        print('broken copy ->', len(e_bad), 'errors (must be > 0):', e_bad[:3]); print('real article ->', len(e_ok), 'errors (must be 0)', info)
+        sys.exit(0 if e_bad and not e_ok else 1)
+    errs, info = run(); print(info)
+    for e in errs: print('ERROR', e)
+    print('GREEN' if not errs else 'RED'); sys.exit(1 if errs else 0)

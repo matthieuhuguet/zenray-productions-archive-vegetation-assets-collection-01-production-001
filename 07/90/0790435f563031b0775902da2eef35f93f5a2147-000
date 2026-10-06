@@ -1,0 +1,212 @@
+# 6 October 2026 18:32: Reconstruct a source-audited height timeline without reference-image pixels.
+from pathlib import Path
+from datetime import datetime, timezone
+from concurrent.futures import ThreadPoolExecutor
+import re
+import json
+import hashlib
+import subprocess
+from PIL import Image, ImageDraw
+
+CONFIG = {
+    "project": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01",
+    "workshop": "/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01",
+    "size": 2048,
+    "edges": [0, 0.193, 0.388, 0.507, 0.609, 0.725, 0.837, 1],
+    "date": "6 October 2026",
+    "fps": 24,
+    "frames_per_step": 8,
+    "workers": 8,
+    "band_names": ["Inner petals", "Outer tepals", "Stamens", "Calyx", "Stem", "Leaf", "Bud"],
+    "original_transcript": "/Users/zenray/.claude/projects/-Users-zenray--claude-Memory1/2562b086-836d-49c5-80c7-0c935a98513c.jsonl",
+}
+PROJECT = Path(CONFIG["project"])
+OUT = PROJECT / "versions/height_evolution/complete"
+FRAMES = OUT / "frames"
+FRAMES.mkdir(parents=True, exist_ok=True)
+EDGES = [round(v * CONFIG["size"]) for v in CONFIG["edges"]]
+EVENTS = []
+EXCLUDED = []
+
+
+def digest(path):
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def time_from_file(path):
+    return datetime.fromtimestamp(path.stat().st_mtime, timezone.utc).isoformat().replace("+00:00", "Z")
+
+
+def overlaps(a, b):
+    return a[0] < b[2] and a[2] > b[0] and a[1] < b[3] and a[3] > b[1]
+
+
+def add_event(path, timestamp, band, box, references, layout, basis):
+    with Image.open(path) as source:
+        assert 0 <= box[0] < box[2] <= source.width
+        assert 0 <= box[1] < box[3] <= source.height
+        assert not any(overlaps(box, reference) for reference in references), path
+        cropped = source.convert("L").crop(box)
+    EVENTS.append({"source": str(path), "sourceSha256": digest(path), "timeUTC": timestamp,
+                   "timeBasis": basis, "band": band, "generatedBox": box,
+                   "referenceBoxes": references, "layout": layout,
+                   "classification": "houdini_generated_height", "nativeCropSize": list(cropped.size),
+                   "image": cropped})
+
+
+def vertical_comparison(path, timestamp, band, basis, early=False):
+    with Image.open(path) as image:
+        width, height = image.size
+    if early:
+        strip_height = (height - 6) // 2
+    else:
+        a, b = CONFIG["edges"][band:band + 2]
+        strip_height = round((b - a) * width)
+    assert strip_height < height / 2
+    add_event(path, timestamp, band, [0, height - strip_height, width, height],
+              [[0, 0, width, strip_height]], "reference_above_houdini_below", basis)
+
+
+# 6 October 2026: Reference areas are forbidden even when the file lives inside versions.
+assert overlaps([0, 0, 10, 10], [0, 0, 10, 10])
+assert not overlaps([0, 11, 10, 20], [0, 0, 10, 10])
+recovered = PROJECT / "versions/recovered_from_conversation"
+for line in (recovered / "INDEX.md").read_text().splitlines():
+    if not line.startswith("| 0"):
+        continue
+    filename, timestamp, tool, origin = [c.strip() for c in line.strip("|").split("|")[:4]]
+    path = recovered / filename
+    base = Path(origin).name
+    match = re.fullmatch(r"band(\d)(v\d)?_cmp\.png", base)
+    if match:
+        vertical_comparison(path, timestamp, int(match[1]), "transcript_read_time")
+    elif base == "band_0.png":
+        vertical_comparison(path, timestamp, 0, "transcript_read_time", early=True)
+    elif base == "bands2to6_cmp.png":
+        with Image.open(path) as image:
+            width, height = image.size
+        scale = width / CONFIG["size"]
+        offset = 0.0
+        for band in range(2, 7):
+            a, b = CONFIG["edges"][band:band + 2]
+            strip_height = (b - a) * width
+            box = [0, round(offset + strip_height + 4 * scale), width,
+                   min(height, round(offset + 2 * strip_height + 4 * scale))]
+            add_event(path, timestamp, band, box,
+                      [[0, round(offset), width, round(offset + strip_height)]],
+                      "alternating_reference_houdini_multiband", "transcript_read_time")
+            offset += 2 * strip_height + 8 * scale
+    else:
+        EXCLUDED.append({"source": str(path), "reason": "reference_user_attachment_preview_or_unverified_layout"})
+
+cutoff = max(event["timeUTC"] for event in EVENTS)
+for path in sorted((PROJECT / "versions/auto").glob("*.png")):
+    match = re.search(r"band(\d).*_cmp\.png$", path.name)
+    if match and time_from_file(path) > cutoff:
+        vertical_comparison(path, time_from_file(path), int(match[1]), "original_file_mtime_utc")
+for folder, band in [("band4_v3", 4), ("band6_v2", 6)]:
+    for path in sorted((PROJECT / "versions" / folder).glob("*.png")):
+        if time_from_file(path) > cutoff:
+            vertical_comparison(path, time_from_file(path), band, "archive_file_mtime_utc")
+for folder, pattern, band in [("band0_refv2", "petal_h_*.png", 0), ("band5_refv2", "leaf_h_*.png", 5)]:
+    for path in sorted((PROJECT / "versions" / folder).glob(pattern)):
+        with Image.open(path) as image:
+            width, height = image.size
+        assert height % 2 == 0
+        add_event(path, time_from_file(path), band, [0, height // 2, width, height],
+                  [[0, 0, width, height // 2]], "reference_above_houdini_below_no_separator",
+                  "original_file_mtime_utc")
+
+# 6 October 2026: CmpPetal.py code, not its inaccurate header, establishes top-right as generated height.
+for folder, filename, band, source_y in [
+    ("band0_refv2", "band0_refv2_iter03_round-pits_pinks.png", 0, 0),
+    ("band2_refv2", "band2_refv2_iter01_orange-palette.png", 2, 480),
+    ("band5_refv2", "band5_refv2_iter01_shape-veins-colour.png", 5, 905),
+]:
+    path = PROJECT / "versions" / folder / filename
+    with Image.open(path) as image:
+        width, height = image.size
+    half_width, half_height = width // 2, height // 2
+    y0 = max(0, round(CONFIG["edges"][band] * half_width) - source_y)
+    y1 = min(half_height, round(CONFIG["edges"][band + 1] * half_width) - source_y)
+    add_event(path, time_from_file(path), band, [half_width, y0, width, y1],
+              [[0, 0, half_width, height]], "CmpPetal_generated_height_top_right",
+              "original_file_mtime_utc")
+
+for path in [PROJECT / "maps/trim/lily_trim_height_pass01.png",
+             PROJECT / "maps/trim/lily_trim_height_pass02.png",
+             PROJECT / "maps/trim/lily_trim_height.png"]:
+    with Image.open(path) as image:
+        width, height = image.size
+    add_event(path, time_from_file(path), -1, [0, 0, width, height], [],
+              "houdini_production_full_height_export", "export_file_mtime_utc")
+
+EVENTS.sort(key=lambda event: (event["timeUTC"], event["source"], event["band"]))
+state = {}
+state_sources = {}
+records = []
+contact = Image.new("RGB", (8 * 192, ((len(EVENTS) + 7) // 8) * 216), "#eeeeee")
+futures = []
+with ThreadPoolExecutor(max_workers=CONFIG["workers"]) as pool:
+    for number, event in enumerate(EVENTS, 1):
+        band = event["band"]
+        if band == -1:
+            full = event["image"].resize((CONFIG["size"], CONFIG["size"]), Image.Resampling.LANCZOS)
+            for index in range(7):
+                state[index] = full.crop((0, EDGES[index], CONFIG["size"], EDGES[index + 1]))
+                state_sources[index] = event["source"]
+        else:
+            state[band] = event["image"].resize((CONFIG["size"], EDGES[band + 1] - EDGES[band]), Image.Resampling.LANCZOS)
+            state_sources[band] = event["source"]
+        sheet = Image.new("L", (CONFIG["size"], CONFIG["size"]), 100)
+        for index, strip in state.items():
+            assert strip.size == (CONFIG["size"], EDGES[index + 1] - EDGES[index])
+            sheet.paste(strip, (0, EDGES[index]))
+        filename = f"{number:04d}.png"
+        futures.append(pool.submit(sheet.save, FRAMES / filename, compress_level=4))
+        contact.paste(sheet.resize((184, 184)), ((number - 1) % 8 * 192 + 4, (number - 1) // 8 * 216 + 4))
+        label = "Full export" if band == -1 else CONFIG["band_names"][band]
+        ImageDraw.Draw(contact).text(((number - 1) % 8 * 192 + 4, (number - 1) // 8 * 216 + 190), f"{number:03d} {label}", fill="black")
+        record = {key: value for key, value in event.items() if key != "image"}
+        record.update(frame=str(FRAMES / filename), unknownBands=[index for index in range(7) if index not in state],
+                      carriedBandSources={str(index): state_sources.get(index) for index in range(7)})
+        records.append(record)
+    for future in futures:
+        future.result()
+contact.save(OUT.parent / "contact_sheet_complete.jpg", quality=90)
+assert all(EDGES[index + 1] > EDGES[index] for index in range(7))
+assert sum(EDGES[index + 1] - EDGES[index] for index in range(7)) == CONFIG["size"]
+assert records[-1]["source"] == str(PROJECT / "maps/trim/lily_trim_height.png")
+assert not records[-1]["unknownBands"]
+with Image.open(records[-1]["frame"]) as final, Image.open(records[-1]["source"]) as source:
+    assert final.tobytes() == source.convert("L").resize(final.size).tobytes()
+manifest = {"date": CONFIG["date"], "config": CONFIG, "frameCount": len(records),
+            "events": records, "excluded": EXCLUDED,
+            "limits": ["Reconstruction from saved outputs, not historical HIP recooks.",
+                       "Transcript times are image-read times, not exact render times.",
+                       "Archive file mtimes are approximate event times.",
+                       "Missing bands remain flat grey until a saved generated band exists.",
+                       "Snapshots between saved outputs cannot be recovered.",
+                       "Low-resolution recovered crops are upscaled and are not native 2048 detail."],
+            "proof": {"cropBoxesAvoidReferenceAreas": True, "noBandRowGaps": True,
+                      "lastFrameMatchesCurrentProductionHeightPixels": True}}
+(OUT / "Manifest.json").write_text(json.dumps(manifest, indent=2) + "\n")
+lines = [f"# Full trim height evolution, {CONFIG['date']}", "",
+         f"{len(records)} full-sheet states, 2048 x 2048. Generated Houdini regions only. ({CONFIG['date']})", "",
+         f"Reconstructed chronological states; unknown bands are grey. Read timestamps, export mtimes and archive mtimes remain distinct in Manifest.json. No historical graph is recreated. ({CONFIG['date']})", "",
+         f"CmpPetal.py actually puts generated HEIGHT at top-right and generated BASE COLOR at bottom-right; its header is misleading. PetalLab.py and LeafLab.py put the generated strip below the reference. ({CONFIG['date']})", "",
+         "| Frame | UTC | Band | Source |", "|---|---|---|---|"]
+for number, record in enumerate(records, 1):
+    lines.append(f"| {number:04d} ({CONFIG['date']}) | {record['timeUTC']} | {record['band']} | {record['source']} |")
+(OUT / "INDEX.md").write_text("\n".join(lines) + "\n")
+movie = OUT.parent / "height_evolution_complete.mp4"
+command = ["ffmpeg", "-y", "-v", "error", "-framerate", str(CONFIG["fps"] / CONFIG["frames_per_step"]),
+           "-start_number", "1", "-i", str(FRAMES / "%04d.png"), "-vf", "format=yuv420p",
+           "-r", str(CONFIG["fps"]), "-c:v", "hevc_videotoolbox", "-b:v", "8M", "-tag:v", "hvc1",
+           "-movflags", "+faststart", "-an", str(movie)]
+subprocess.run(command, check=True)
+probe = json.loads(subprocess.check_output(["ffprobe", "-v", "error", "-show_entries", "format=duration,size:stream=width,height,codec_name,nb_frames", "-of", "json", str(movie)]))
+assert probe["streams"][0]["width"] == CONFIG["size"]
+assert abs(float(probe["format"]["duration"]) - len(records) * CONFIG["frames_per_step"] / CONFIG["fps"]) < 0.1
+(OUT / "VideoVerification.json").write_text(json.dumps(probe, indent=2) + "\n")
+print(json.dumps({"frames": len(records), "movie": str(movie), "duration": probe["format"]["duration"], "excludedRecoveredImages": len(EXCLUDED)}, indent=2))
