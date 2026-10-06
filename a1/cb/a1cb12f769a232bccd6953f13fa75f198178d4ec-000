@@ -1,0 +1,11 @@
+# 6 October 2026 : runs in the ZenRayShards editor (queue). Imports the LIVE base colour (exported from /obj/Lily_Trim BASECOLOR at 4096 on 6 October 2026, newer than maps/trim4096/lily_trim_basecolor.png) in pink and blue and builds MI_LilyTrimLive and MI_LilyTrimLiveBlue (parent M_LilyTrim, NormalStrength copied from MI_LilyTrim). MI_LilyTrim is not touched. FR : base color a jour (graphe Houdini actuel), rose et bleue.
+import unreal, json
+B = '/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/'
+P = json.load(open(B + 'unreal/lily_params.json')); tools = unreal.AssetToolsHelpers.get_asset_tools(); eal = unreal.EditorAssetLibrary; mel = unreal.MaterialEditingLibrary
+src = eal.load_asset(P['tex_dir'] + '/MI_LilyTrim'); ns = mel.get_material_instance_scalar_parameter_value(src, 'NormalStrength')
+for key, tn, mn in (('pink', 'T_LilyBaseColorLive', 'MI_LilyTrimLive'), ('blue', 'T_LilyBaseColorLiveBlue', 'MI_LilyTrimLiveBlue')):
+    t = unreal.AssetImportTask(); t.filename = B + P['variants']['live_textures'][key]; t.destination_path = P['tex_dir']; t.destination_name = tn; t.replace_existing = True; t.automated = True; t.save = True; tools.import_asset_tasks([t])
+    tx = eal.load_asset(P['tex_dir'] + '/' + tn); tx.set_editor_property('srgb', True); tx.set_editor_property('compression_settings', unreal.TextureCompressionSettings.TC_DEFAULT); eal.save_loaded_asset(tx)
+    ip = P['tex_dir'] + '/' + mn; mi = eal.load_asset(ip) if eal.does_asset_exist(ip) else tools.create_asset(mn, P['tex_dir'], unreal.MaterialInstanceConstant, unreal.MaterialInstanceConstantFactoryNew())
+    mi.set_editor_property('parent', src.get_editor_property('parent')); mel.set_material_instance_scalar_parameter_value(mi, 'NormalStrength', ns); mel.set_material_instance_texture_parameter_value(mi, 'BaseColorTexture', tx); mel.update_material_instance(mi); eal.save_loaded_asset(mi)
+print('live instances done, NormalStrength', ns)

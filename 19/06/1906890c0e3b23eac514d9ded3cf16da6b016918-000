@@ -1,0 +1,504 @@
+{
+ "note": "6 October 2026 : the ONE place where the Unreal lily studio is tuned (rule I-08). Centimetres, degrees. Lights: candelas = cd_per_unit * 2^stops, rect lights aimed at aim.",
+ "root": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/",
+ "tex_dir": "/Game/ZenRayShards/Materials/LilyCollection01",
+ "mesh_dir": "/Game/ZenRayShards/Meshes/LilyCollection01",
+ "level": "/Game/ZenRayShards/Levels/L_LilyStudio",
+ "maps": {
+  "BaseColor": "maps/trim4096/lily_trim_basecolor.png",
+  "Normal": "maps/trim4096/lily_trim_normal.png",
+  "Roughness": "maps/trim4096/lily_trim_roughness.png",
+  "AmbientOcclusion": "maps/trim4096/lily_trim_ao.png",
+  "Opacity": "maps/trim4096/lily_trim_opacity.png"
+ },
+ "material": {
+  "normal_strength": 1.0,
+  "normal_y_sign": -1.0,
+  "opacity_clip": 0.5,
+  "specular": 0.5,
+  "two_sided": true
+ },
+ "flower": {
+  "scale": 1.0,
+  "location_cm": [
+   0,
+   0,
+   0
+  ]
+ },
+ "aim_cm": [
+  0,
+  0,
+  55
+ ],
+ "exposure_ev": -3.2,
+ "cd_per_unit": 4.0,
+ "sky_intensity": 0.05,
+ "cyclorama": {
+  "scale": 0.3,
+  "grey": 0.12,
+  "roughness": 0.7,
+  "offset_cm": [
+   0,
+   0,
+   -1
+  ]
+ },
+ "lights": {
+  "softness": 1.0,
+  "tint": [
+   1.0,
+   1.0,
+   1.0
+  ],
+  "key": {
+   "az": -40,
+   "el": 40,
+   "dist_cm": 260,
+   "w_cm": 140,
+   "h_cm": 140,
+   "stops": 8.0
+  },
+  "fill": {
+   "az": 60,
+   "el": 25,
+   "dist_cm": 280,
+   "w_cm": 180,
+   "h_cm": 180,
+   "stops": 5.5
+  },
+  "rim": {
+   "az": 160,
+   "el": 30,
+   "dist_cm": 260,
+   "w_cm": 60,
+   "h_cm": 220,
+   "stops": 8.0
+  }
+ },
+ "camera": {
+  "az": 0,
+  "el": 8,
+  "dist_cm": 175,
+  "focal_mm": 50,
+  "sensor_width_mm": 36,
+  "sensor_height_mm": 36
+ },
+ "storyboard": {
+  "elevations": [
+   10,
+   30,
+   55
+  ],
+  "azimuths": [
+   0,
+   72,
+   144,
+   216,
+   288
+  ],
+  "res": 640,
+  "spatial": 4,
+  "warmup": 24,
+  "out": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/render/storyboard_ue"
+ },
+ "animation": {
+  "seconds": 5,
+  "fps": 24,
+  "el_start": 10,
+  "el_end": 55,
+  "az_start": 0,
+  "az_end": 360,
+  "dist_cm": 175,
+  "focal_mm": 85,
+  "aim_cm": [
+   0,
+   0,
+   68
+  ],
+  "ease": "smoothstep",
+  "res": 2048,
+  "spatial": 6,
+  "warmup": 32,
+  "out": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/render/orbit_anim_ue_2k",
+  "aperture": 32.0
+ },
+ "post": {
+  "tone_curve_amount": 1.0,
+  "saturation": 1.0,
+  "contrast": 1.0
+ },
+ "lighting_variants": {
+  "A_SoftStudio": {
+   "exposure_ev": -3.2,
+   "saturation": 1.1,
+   "contrast": 1.0,
+   "key": {
+    "stops": 8.0,
+    "tint": [
+     1,
+     1,
+     1
+    ],
+    "softness": 1.0
+   },
+   "fill": {
+    "stops": 5.5,
+    "tint": [
+     1,
+     1,
+     1
+    ],
+    "softness": 1.0
+   },
+   "rim": {
+    "stops": 8.0,
+    "tint": [
+     1,
+     1,
+     1
+    ],
+    "softness": 1.0
+   }
+  },
+  "B_WarmKeyCoolFill": {
+   "exposure_ev": -3.6,
+   "saturation": 1.2,
+   "contrast": 1.0,
+   "key": {
+    "stops": 8.4,
+    "tint": [
+     1.0,
+     0.9,
+     0.76
+    ],
+    "softness": 0.8
+   },
+   "fill": {
+    "stops": 5.0,
+    "tint": [
+     0.72,
+     0.85,
+     1.0
+    ],
+    "softness": 1.0
+   },
+   "rim": {
+    "stops": 8.6,
+    "tint": [
+     1,
+     0.97,
+     0.92
+    ],
+    "softness": 1.0
+   }
+  },
+  "C_DramaticLowKey": {
+   "exposure_ev": -4.2,
+   "saturation": 1.25,
+   "contrast": 1.0,
+   "key": {
+    "stops": 9.2,
+    "tint": [
+     1,
+     0.96,
+     0.9
+    ],
+    "softness": 0.45
+   },
+   "fill": {
+    "stops": 3.0,
+    "tint": [
+     0.85,
+     0.92,
+     1.0
+    ],
+    "softness": 1.0
+   },
+   "rim": {
+    "stops": 9.4,
+    "tint": [
+     1,
+     1,
+     1
+    ],
+    "softness": 1.0
+   }
+  }
+ },
+ "lighting_out": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/render/lighting_ue",
+ "variants": {
+  "dir": "unreal/variants/",
+  "names": [
+   "V1",
+   "V2",
+   "V3",
+   "V4",
+   "V5"
+  ],
+  "blue_texture": "maps/trim4096/lily_trim_basecolor_blue.png",
+  "level": "/Game/ZenRayShards/Levels/L_LilyVariants",
+  "spacing_cm": 55,
+  "sheet": {
+   "res": [
+    2560,
+    1000
+   ],
+   "dist_cm": 330,
+   "focal_mm": 35,
+   "sensor_w": 36.0,
+   "sensor_h": 14.06,
+   "aim_cm": [
+    0,
+    0,
+    50
+   ],
+   "spatial": 6,
+   "warmup": 48,
+   "out": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/render/variants_sheet"
+  },
+  "live_textures": {
+   "pink": "maps/trim4096/lily_trim_basecolor_live_6oct.png",
+   "blue": "maps/trim4096/lily_trim_basecolor_live_6oct_blue.png"
+  }
+ },
+ "bed": {
+  "level": "/Game/ZenRayShards/Levels/L_LilyBed",
+  "count": 140,
+  "radius_cm": 170,
+  "scale": [
+   0.38,
+   0.7
+  ],
+  "tilt_deg": 9,
+  "seed": 7,
+  "mix": {
+   "pink": 0.4,
+   "blue": 0.4,
+   "white": 0.2
+  },
+  "white_texture": "maps/trim4096/lily_trim_basecolor_live_6oct_white.png",
+  "camera": {
+   "el": 38,
+   "az": 0,
+   "dist_cm": 430,
+   "focal_mm": 35,
+   "sensor": 36.0,
+   "aim_cm": [
+    0,
+    0,
+    25
+   ]
+  },
+  "res": 2048,
+  "spatial": 6,
+  "warmup": 48,
+  "out": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/render/bed_ue"
+ },
+ "bed_orbit": {
+  "seconds": 10,
+  "fps": 24,
+  "az_start": 0,
+  "az_end": 360,
+  "focal_mm": 50,
+  "sensor": 36.0,
+  "aim_cm": [
+   0,
+   0,
+   28
+  ],
+  "aperture": 32.0,
+  "ease": "smoothstep",
+  "el_start": 14,
+  "el_peak": 50,
+  "dist_start_cm": 380,
+  "dist_min_cm": 290
+ },
+ "bed_orbits": [
+  {
+   "seconds": 10,
+   "fps": 24,
+   "az_start": 0,
+   "az_end": 360,
+   "focal_mm": 50,
+   "sensor": 36.0,
+   "aim_cm": [
+    0,
+    0,
+    28
+   ],
+   "aperture": 32.0,
+   "ease": "smoothstep",
+   "dist_start_cm": 380,
+   "dist_min_cm": 290,
+   "name": "LS_LilyBedOrbit",
+   "cam": "BedOrbitCam",
+   "el_start": 4,
+   "el_peak": 55
+  },
+  {
+   "seconds": 10,
+   "fps": 24,
+   "az_start": 0,
+   "az_end": 360,
+   "focal_mm": 50,
+   "sensor": 36.0,
+   "aim_cm": [
+    0,
+    0,
+    28
+   ],
+   "aperture": 32.0,
+   "ease": "smoothstep",
+   "dist_start_cm": 380,
+   "dist_min_cm": 290,
+   "name": "LS_LilyBedOrbitFlat",
+   "cam": "BedOrbitCamFlat",
+   "el_start": 22,
+   "el_peak": 22
+  },
+  {
+   "seconds": 10,
+   "fps": 24,
+   "az_start": 0,
+   "az_end": 360,
+   "focal_mm": 85,
+   "sensor": 36.0,
+   "aim_cm": [
+    0,
+    0,
+    82
+   ],
+   "aperture": 32.0,
+   "ease": "smoothstep",
+   "dist_start_cm": 150,
+   "dist_min_cm": 95,
+   "name": "LS_LilyFlowerCloseOrbit",
+   "cam": "BedOrbitCamClose",
+   "el_start": 12,
+   "el_peak": 12
+  }
+ ],
+ "bed_lighting": {
+  "out": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/render/bed_lighting_ue",
+  "res": 1024,
+  "spatial": 6,
+  "warmup": 64,
+  "variants": {
+   "A_ShojiPaperLight": {
+    "exposure_ev": -3.4,
+    "saturation": 1.1,
+    "sky": 0.02,
+    "key": {
+     "cd": 300,
+     "soft": 2.2,
+     "color": [
+      255,
+      238,
+      215
+     ]
+    },
+    "fill": {
+     "cd": 45,
+     "soft": 1.0,
+     "color": [
+      190,
+      215,
+      255
+     ]
+    },
+    "rim": {
+     "cd": 256,
+     "soft": 1.0,
+     "color": [
+      255,
+      247,
+      234
+     ]
+    }
+   },
+   "B_MistyMorning": {
+    "exposure_ev": -3.0,
+    "saturation": 1.05,
+    "sky": 0.03,
+    "key": {
+     "cd": 128,
+     "soft": 2.6,
+     "color": [
+      228,
+      238,
+      255
+     ]
+    },
+    "fill": {
+     "cd": 90,
+     "soft": 1.2,
+     "color": [
+      235,
+      240,
+      250
+     ]
+    },
+    "rim": {
+     "cd": 180,
+     "soft": 1.0,
+     "color": [
+      245,
+      245,
+      240
+     ]
+    }
+   },
+   "C_KomorebiSideLight": {
+    "exposure_ev": -4.0,
+    "saturation": 1.15,
+    "sky": 0.015,
+    "key": {
+     "cd": 700,
+     "soft": 0.45,
+     "color": [
+      255,
+      226,
+      185
+     ]
+    },
+    "fill": {
+     "cd": 22,
+     "soft": 1.0,
+     "color": [
+      170,
+      200,
+      255
+     ]
+    },
+    "rim": {
+     "cd": 128,
+     "soft": 1.0,
+     "color": [
+      255,
+      240,
+      225
+     ]
+    }
+   }
+  }
+ },
+ "bed_render": {
+  "sequence": "/Game/ZenRayShards/Cinematics/LS_LilyFlowerCloseOrbit",
+  "frames": 240,
+  "res": 2048,
+  "spatial": 6,
+  "warmup": 48,
+  "prefix": "close",
+  "out": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/render/flower_close_orbit_2k"
+ },
+ "bed_render_bed_backup": {
+  "sequence": "/Game/ZenRayShards/Cinematics/LS_LilyBedOrbitFlat",
+  "frames": 240,
+  "res": 2048,
+  "spatial": 6,
+  "warmup": 48,
+  "prefix": "flat",
+  "out": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/render/bed_orbit_flat_2k"
+ }
+}

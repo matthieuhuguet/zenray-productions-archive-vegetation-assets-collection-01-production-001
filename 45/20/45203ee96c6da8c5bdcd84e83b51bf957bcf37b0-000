@@ -1,0 +1,32 @@
+{
+ "V1": {
+  "seed": 7,
+  "tepal_width": 0.039,
+  "stem_height": 0.745,
+  "stem_bend": 0.02
+ },
+ "V2": {
+  "seed": 12,
+  "tepal_width": 0.034,
+  "stem_height": 0.62,
+  "stem_bend": 0.1
+ },
+ "V3": {
+  "seed": 23,
+  "tepal_width": 0.045,
+  "stem_height": 0.85,
+  "stem_bend": 0.05
+ },
+ "V4": {
+  "seed": 31,
+  "tepal_width": 0.036,
+  "stem_height": 0.55,
+  "stem_bend": 0.16
+ },
+ "V5": {
+  "seed": 44,
+  "tepal_width": 0.042,
+  "stem_height": 0.7,
+  "stem_bend": 0.12
+ }
+}

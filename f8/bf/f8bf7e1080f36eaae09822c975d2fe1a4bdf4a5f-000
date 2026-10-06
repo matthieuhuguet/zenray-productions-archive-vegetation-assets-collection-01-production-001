@@ -1,0 +1,9 @@
+# 6 October 2026 : runs in the ZenRayShards editor (queue). M_LilyTrim still held the OLD T_LilyBaseColor as the default of its BaseColorTexture parameter: point it to T_LilyBaseColorLive, recompile, save, then delete the old texture if nothing references it. FR : le parent pointait encore l'ancienne texture.
+import unreal
+TD = '/Game/ZenRayShards/Materials/LilyCollection01'; eal = unreal.EditorAssetLibrary; mel = unreal.MaterialEditingLibrary
+mat = eal.load_asset(TD + '/M_LilyTrim'); live = eal.load_asset(TD + '/T_LilyBaseColorLive'); n = 0
+for e in mel.get_material_expressions(mat):
+    if isinstance(e, unreal.MaterialExpressionTextureSampleParameter2D) and str(e.get_editor_property('parameter_name')) == 'BaseColorTexture': e.set_editor_property('texture', live); n += 1
+mel.recompile_material(mat); eal.save_loaded_asset(mat); print('repointed', n)
+p = TD + '/T_LilyBaseColor'; refs = [r for r in eal.find_package_referencers_for_asset(p, True) if r != p]
+print('KEPT', refs) if refs else print('deleted' if eal.delete_asset(p) else 'FAILED', p)

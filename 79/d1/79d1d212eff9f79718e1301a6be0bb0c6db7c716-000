@@ -1,0 +1,23 @@
+# 6 October 2026 : runs in the ZenRayShards editor (queue). Matthieu: "delete les mauvaises textures et les mauvais materiaux, ca prend de la RAM". Repoints every user of the OLD base colour (MI_LilyTrim, MI_LilyTrimBlue) to MI_LilyTrimLive (NormalStrength already copied), saves, checks that nothing references them, THEN deletes T_LilyBaseColor, T_LilyBaseColorBlue, MI_LilyTrimBlue and MI_LilyTrim. Never deletes an asset still referenced (ForceDeleteObjects corrupts packages). FR : repointe puis supprime les anciennes textures et instances.
+import unreal, json
+B = '/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/'
+P = json.load(open(B + 'unreal/lily_params.json')); eal = unreal.EditorAssetLibrary; eas = unreal.get_editor_subsystem(unreal.EditorActorSubsystem); les = unreal.get_editor_subsystem(unreal.LevelEditorSubsystem)
+TD = P['tex_dir']; live = eal.load_asset(TD + '/MI_LilyTrimLive'); old = [TD + '/MI_LilyTrim', TD + '/MI_LilyTrimBlue']; oldobj = [eal.load_asset(p) for p in old if eal.does_asset_exist(p)]
+for n in ['SM_Lily'] + ['SM_Lily' + v for v in P['variants']['names']]:
+    p = P['mesh_dir'] + '/' + n
+    if eal.does_asset_exist(p): m = eal.load_asset(p); m.set_material(0, live); eal.save_loaded_asset(m)
+for lv in (P['level'], P['variants']['level']):
+    if not eal.does_asset_exist(lv): continue
+    les.load_level(lv); k = 0
+    for a in eas.get_all_level_actors():
+        if isinstance(a, unreal.StaticMeshActor):
+            c = a.static_mesh_component
+            for i in range(c.get_num_materials()):
+                if c.get_material(i) in oldobj: c.set_material(i, live); k += 1
+    les.save_current_level(); print('level', lv, 'repointed', k)
+les.load_level(P['level'])
+for p in (TD + '/MI_LilyTrimBlue', TD + '/MI_LilyTrim', TD + '/T_LilyBaseColorBlue', TD + '/T_LilyBaseColor'):
+    if not eal.does_asset_exist(p): print('absent', p); continue
+    refs = [r for r in eal.find_package_referencers_for_asset(p, True) if r != p]
+    if refs: print('KEPT (still referenced)', p, refs); continue
+    print('deleted' if eal.delete_asset(p) else 'FAILED', p)

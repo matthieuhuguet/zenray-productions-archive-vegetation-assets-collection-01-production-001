@@ -1,0 +1,3 @@
+# 6 October 2026 : runs in the ZenRayShards editor (queue). Saves the open level and every dirty asset, touching nothing else (the lights are Matthieu's). FR : sauvegarde le niveau et les assets modifies, rien d'autre.
+import unreal
+unreal.get_editor_subsystem(unreal.LevelEditorSubsystem).save_current_level(); unreal.EditorLoadingAndSavingUtils.save_dirty_packages(True, True); print('saved')

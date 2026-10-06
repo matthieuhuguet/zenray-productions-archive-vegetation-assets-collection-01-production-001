@@ -1,0 +1,36 @@
+# 6 October 2026 : runs in the ZenRayShards editor (queue). STORYBOARD of the lily orbit: one frame per (elevation, azimuth) keyed on a camera in LS_LilyStoryboard, rendered by the Movie Render Queue at low resolution (Matthieu: "3 propositions d'angle, 5 images sur 5 secondes"). Everything is in lily_params.json 'storyboard'. FR : planche de 15 images basse resolution, 3 elevations x 5 azimuts, puis arret.
+import unreal, json, math
+B = '/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/'
+P = json.load(open(B + 'unreal/lily_params.json')); S = P['storyboard']; C = P['camera']; V = unreal.Vector
+les = unreal.get_editor_subsystem(unreal.LevelEditorSubsystem); eas = unreal.get_editor_subsystem(unreal.EditorActorSubsystem); eal = unreal.EditorAssetLibrary
+if unreal.EditorLevelLibrary.get_editor_world().get_name() != P['level'].rsplit('/', 1)[1]: les.load_level(P['level'])
+world = unreal.EditorLevelLibrary.get_editor_world()
+for a in eas.get_all_level_actors():
+    if a.get_actor_label() == 'LilyStoryCam': eas.destroy_actor(a)
+aim = V(*P['aim_cm']); cam = eas.spawn_actor_from_class(unreal.CineCameraActor, V(0, 0, 0)); cam.set_actor_label('LilyStoryCam')
+cc = cam.get_cine_camera_component(); cc.set_editor_property('current_focal_length', C['focal_mm']); fb = cc.filmback; fb.sensor_width = C['sensor_width_mm']; fb.sensor_height = C['sensor_height_mm']; cc.set_editor_property('filmback', fb)
+SD, SN = '/Game/ZenRayShards/Cinematics', 'LS_LilyStoryboard'
+if eal.does_asset_exist(SD + '/' + SN):
+    seq = eal.load_asset(SD + '/' + SN)
+    for b in list(unreal.MovieSceneSequenceExtensions.get_bindings(seq)): unreal.MovieSceneBindingExtensions.remove(b)
+    for t in list(unreal.MovieSceneSequenceExtensions.get_tracks(seq)): unreal.MovieSceneSequenceExtensions.remove_track(seq, t)
+else: seq = unreal.AssetToolsHelpers.get_asset_tools().create_asset(SN, SD, unreal.LevelSequence, unreal.LevelSequenceFactoryNew())
+rows = [(el, az) for el in S['elevations'] for az in S['azimuths']]; N = len(rows)
+seq.set_display_rate(unreal.FrameRate(24, 1)); seq.set_playback_start(0); seq.set_playback_end(N)
+cut = seq.add_track(unreal.MovieSceneCameraCutTrack); b = seq.add_possessable(cam); cs = cut.add_section(); cs.set_range(0, N); cs.set_camera_binding_id(unreal.MovieSceneSequenceExtensions.get_binding_id(seq, b))
+sec = b.add_track(unreal.MovieScene3DTransformTrack).add_section(); sec.set_range(0, N); ch = sec.get_all_channels()
+for i, (el, az) in enumerate(rows):
+    a = math.radians(az); e = math.radians(el); r = C['dist_cm']
+    pos = V(aim.x + math.sin(a) * math.cos(e) * r, aim.y + math.cos(a) * math.cos(e) * r, aim.z + math.sin(e) * r); rot = unreal.MathLibrary.find_look_at_rotation(pos, aim)
+    for c, v in zip(ch[:9], (pos.x, pos.y, pos.z, rot.roll, rot.pitch, rot.yaw, 1.0, 1.0, 1.0)): c.add_key(unreal.FrameNumber(i), v, interpolation=unreal.MovieSceneKeyInterpolation.CONSTANT)
+eal.save_loaded_asset(seq)
+sub = unreal.get_editor_subsystem(unreal.MoviePipelineQueueSubsystem); queue = sub.get_queue(); queue.delete_all_jobs()
+job = queue.allocate_new_job(unreal.MoviePipelineExecutorJob); job.sequence = unreal.SoftObjectPath(SD + '/' + SN)
+job.map = unreal.SoftObjectPath(world.get_path_name().split('.')[0] + '.' + world.get_name()); job.job_name = 'LilyStoryboard'; cfg = job.get_configuration()
+out = cfg.find_or_add_setting_by_class(unreal.MoviePipelineOutputSetting); out.output_resolution = unreal.IntPoint(S['res'], S['res']); out.output_directory = unreal.DirectoryPath(S['out'])
+out.file_name_format = 'sb_{frame_number}'; out.zero_pad_frame_numbers = 2; out.override_existing_output = True; out.use_custom_playback_range = True; out.custom_start_frame = 0; out.custom_end_frame = N
+cfg.find_or_add_setting_by_class(unreal.MoviePipelineDeferredPassBase); cfg.find_or_add_setting_by_class(unreal.MoviePipelineImageSequenceOutput_PNG)
+aa = cfg.find_or_add_setting_by_class(unreal.MoviePipelineAntiAliasingSetting); aa.override_anti_aliasing = True; aa.anti_aliasing_method = unreal.AntiAliasingMethod.AAM_NONE
+aa.spatial_sample_count = S['spatial']; aa.temporal_sample_count = 1; aa.render_warm_up_count = S['warmup']; aa.engine_warm_up_count = S['warmup']
+cv = cfg.find_or_add_setting_by_class(unreal.MoviePipelineConsoleVariableSetting); cv.add_or_update_console_variable('r.DepthOfFieldQuality', 0)
+sub.render_queue_with_executor(unreal.MoviePipelinePIEExecutor); print('storyboard started', N, 'frames')

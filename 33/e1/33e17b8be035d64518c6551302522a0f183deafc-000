@@ -1,0 +1,10 @@
+# 6 October 2026 : runs in the ZenRayShards editor (queue). ADOPTS the Shoji lighting (variant A_ShojiPaperLight of lily_params.json 'bed_lighting', chosen by Matthieu on 6 October 2026) in L_LilyBed and SAVES the level. Previous values stay in lights_backup_LilyBed.json. FR : adopte l'eclairage Shoji et sauvegarde.
+import unreal, json
+B = '/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/'
+P = json.load(open(B + 'unreal/lily_params.json')); Vt = P['bed_lighting']['variants']['A_ShojiPaperLight']; bak = json.load(open(B + 'unreal/lights_backup_LilyBed.json'))
+les = unreal.get_editor_subsystem(unreal.LevelEditorSubsystem); eas = unreal.get_editor_subsystem(unreal.EditorActorSubsystem); les.load_level(P['bed']['level'])
+L = {a.get_actor_label(): a for a in eas.get_all_level_actors()}
+for n, role in (('LilyKeyLight', 'key'), ('LilyFillLight', 'fill'), ('LilyRimLight', 'rim')):
+    d = Vt[role]; c = L[n].light_component; c.set_editor_property('intensity', d['cd']); c.set_editor_property('source_width', bak[n]['w'] * d['soft']); c.set_editor_property('source_height', bak[n]['h'] * d['soft']); c.set_editor_property('light_color', unreal.Color(r=d['color'][0], g=d['color'][1], b=d['color'][2], a=255))
+ppv = L['LilyPostProcess']; st = ppv.settings; st.set_editor_property('override_auto_exposure_bias', True); st.set_editor_property('auto_exposure_bias', Vt['exposure_ev']); st.set_editor_property('override_color_saturation', True); q = Vt['saturation']; st.set_editor_property('color_saturation', unreal.Vector4(q, q, q, 1.0)); ppv.set_editor_property('settings', st)
+L['LilySkyLight'].light_component.set_editor_property('intensity', Vt['sky']); les.save_current_level(); print('Shoji adopted and saved')

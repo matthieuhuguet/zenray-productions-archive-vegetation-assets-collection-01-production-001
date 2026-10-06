@@ -1,0 +1,15 @@
+# 6 October 2026 : runs in the ZenRayShards editor (queue). Imports the five HDA variations SM_LilyV1..V5 (seed, tepal_width, stem_height, stem_bend, see unreal/variants/variants.json) and the blue base colour, builds MI_LilyTrimBlue (same parent M_LilyTrim, same NormalStrength as MI_LilyTrim). Touches no existing asset except by replacement of the five new meshes. FR : importe les cinq variations et cree l'instance bleue.
+import unreal, json
+B = '/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/'
+P = json.load(open(B + 'unreal/lily_params.json')); Vr = P['variants']; tools = unreal.AssetToolsHelpers.get_asset_tools(); eal = unreal.EditorAssetLibrary; mel = unreal.MaterialEditingLibrary
+for n in Vr['names']:
+    t = unreal.AssetImportTask(); t.filename = B + Vr['dir'] + 'SM_Lily' + n + '.fbx'; t.destination_path = P['mesh_dir']; t.destination_name = 'SM_Lily' + n; t.automated = True; t.replace_existing = True; t.save = True
+    ui = unreal.FbxImportUI(); ui.import_materials = False; ui.import_textures = False; ui.import_animations = False; ui.static_mesh_import_data.combine_meshes = True; t.options = ui; tools.import_asset_tasks([t])
+    m = eal.load_asset(P['mesh_dir'] + '/SM_Lily' + n); m.set_material(0, eal.load_asset(P['tex_dir'] + '/MI_LilyTrim')); eal.save_loaded_asset(m)
+t = unreal.AssetImportTask(); t.filename = B + Vr['blue_texture']; t.destination_path = P['tex_dir']; t.destination_name = 'T_LilyBaseColorBlue'; t.replace_existing = True; t.automated = True; t.save = True; tools.import_asset_tasks([t])
+tx = eal.load_asset(P['tex_dir'] + '/T_LilyBaseColorBlue'); tx.set_editor_property('srgb', True); tx.set_editor_property('compression_settings', unreal.TextureCompressionSettings.TC_DEFAULT); eal.save_loaded_asset(tx)
+src = eal.load_asset(P['tex_dir'] + '/MI_LilyTrim'); ip = P['tex_dir'] + '/MI_LilyTrimBlue'
+mi = eal.load_asset(ip) if eal.does_asset_exist(ip) else tools.create_asset('MI_LilyTrimBlue', P['tex_dir'], unreal.MaterialInstanceConstant, unreal.MaterialInstanceConstantFactoryNew())
+mi.set_editor_property('parent', src.get_editor_property('parent'))
+ns = mel.get_material_instance_scalar_parameter_value(src, 'NormalStrength'); mel.set_material_instance_scalar_parameter_value(mi, 'NormalStrength', ns); mel.set_material_instance_texture_parameter_value(mi, 'BaseColorTexture', tx); mel.update_material_instance(mi); eal.save_loaded_asset(mi)
+print('variants imported, blue instance, NormalStrength', ns)

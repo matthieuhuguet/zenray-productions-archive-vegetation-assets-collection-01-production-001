@@ -1,0 +1,24 @@
+# 6 October 2026 : runs in the ZenRayShards editor (queue). Applies ONE lighting variant of lily_params.json 'lighting_variants' (name read from lighting_job.json) to the level actors (rect light stops, tints, softness, exposure, saturation, contrast) and renders frame 60 of LS_LilyAnim at 1080 into 'lighting_out' as <name>_NNNN.png. Matthieu: "trouvons l'eclairage parfait, 3 propositions". FR : applique une variante d'eclairage et rend la frame 60.
+import unreal, json
+B = '/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/'
+P = json.load(open(B + 'unreal/lily_params.json')); name = json.load(open(B + 'unreal/lighting_job.json'))['variant']; Vt = P['lighting_variants'][name]; A = P['animation']
+les = unreal.get_editor_subsystem(unreal.LevelEditorSubsystem); eas = unreal.get_editor_subsystem(unreal.EditorActorSubsystem)
+if unreal.EditorLevelLibrary.get_editor_world().get_name() != P['level'].rsplit('/', 1)[1]: les.load_level(P['level'])
+world = unreal.EditorLevelLibrary.get_editor_world(); L = {a.get_actor_label(): a for a in eas.get_all_level_actors()}
+for role in ('key', 'fill', 'rim'):
+    d = Vt[role]; base = P['lights'][role]; c = L['Lily' + role.capitalize() + 'Light'].light_component
+    c.set_editor_property('intensity', P['cd_per_unit'] * 2.0 ** d['stops']); c.set_editor_property('source_width', base['w_cm'] * d['softness']); c.set_editor_property('source_height', base['h_cm'] * d['softness'])
+    c.set_editor_property('light_color', unreal.Color(r=int(d['tint'][0] * 255), g=int(d['tint'][1] * 255), b=int(d['tint'][2] * 255), a=255))
+ppv = L['LilyPostProcess']; st = ppv.settings
+def ov(n, v): st.set_editor_property('override_' + n, True); st.set_editor_property(n, v)
+ov('auto_exposure_bias', Vt['exposure_ev']); q = Vt['saturation']; ov('color_saturation', unreal.Vector4(q, q, q, 1.0)); q = Vt['contrast']; ov('color_contrast', unreal.Vector4(q, q, q, 1.0)); ppv.set_editor_property('settings', st)
+sub = unreal.get_editor_subsystem(unreal.MoviePipelineQueueSubsystem); queue = sub.get_queue(); queue.delete_all_jobs()
+job = queue.allocate_new_job(unreal.MoviePipelineExecutorJob); job.sequence = unreal.SoftObjectPath('/Game/ZenRayShards/Cinematics/LS_LilyAnim')
+job.map = unreal.SoftObjectPath(world.get_path_name().split('.')[0] + '.' + world.get_name()); job.job_name = name; cfg = job.get_configuration()
+out = cfg.find_or_add_setting_by_class(unreal.MoviePipelineOutputSetting); out.output_resolution = unreal.IntPoint(A['res'], A['res']); out.output_directory = unreal.DirectoryPath(P['lighting_out'])
+out.file_name_format = name + '_{frame_number}'; out.zero_pad_frame_numbers = 4; out.override_existing_output = True; out.use_custom_playback_range = True; out.custom_start_frame = 60; out.custom_end_frame = 61
+cfg.find_or_add_setting_by_class(unreal.MoviePipelineDeferredPassBase); cfg.find_or_add_setting_by_class(unreal.MoviePipelineImageSequenceOutput_PNG)
+aa = cfg.find_or_add_setting_by_class(unreal.MoviePipelineAntiAliasingSetting); aa.override_anti_aliasing = True; aa.anti_aliasing_method = unreal.AntiAliasingMethod.AAM_NONE
+aa.spatial_sample_count = A['spatial']; aa.temporal_sample_count = 1; aa.render_warm_up_count = 64; aa.engine_warm_up_count = 64
+cv = cfg.find_or_add_setting_by_class(unreal.MoviePipelineConsoleVariableSetting); cv.add_or_update_console_variable('r.DepthOfFieldQuality', 0)
+sub.render_queue_with_executor(unreal.MoviePipelinePIEExecutor); print('lighting started', name)

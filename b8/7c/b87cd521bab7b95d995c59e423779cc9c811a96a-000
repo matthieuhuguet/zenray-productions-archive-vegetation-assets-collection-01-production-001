@@ -1,0 +1,27 @@
+# 6 October 2026 : runs in the ZenRayShards editor (queue). Builds LS_LilyStudio (one frame, one camera cut on LilyCamera) and starts a Movie Render Queue job (Lumen) writing lily_<n>.png into render_job_lily.json 'out'. Reads lily_params.json and render_job_lily.json {"res": [w, h], "spatial": n, "temporal": n, "warmup": n, "out": folder}. Never -ExecutePythonScript. FR : sequence d'une image et rendu MRQ du studio du lys.
+import unreal, json
+B = '/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/'
+P = json.load(open(B + 'unreal/lily_params.json')); J = json.load(open(B + 'unreal/render_job_lily.json'))
+les = unreal.get_editor_subsystem(unreal.LevelEditorSubsystem); eas = unreal.get_editor_subsystem(unreal.EditorActorSubsystem); eal = unreal.EditorAssetLibrary
+if unreal.EditorLevelLibrary.get_editor_world().get_name() != P['level'].rsplit('/', 1)[1]: les.load_level(P['level'])
+world = unreal.EditorLevelLibrary.get_editor_world(); assert world.get_name() == P['level'].rsplit('/', 1)[1], world.get_name()
+cam = [a for a in eas.get_all_level_actors() if a.get_actor_label() == 'LilyCamera'][0]
+SD, SN = '/Game/ZenRayShards/Cinematics', 'LS_LilyStudio'
+if eal.does_asset_exist(SD + '/' + SN):
+    seq = eal.load_asset(SD + '/' + SN)
+    for b in list(unreal.MovieSceneSequenceExtensions.get_bindings(seq)): unreal.MovieSceneBindingExtensions.remove(b)
+    for t in list(unreal.MovieSceneSequenceExtensions.get_tracks(seq)): unreal.MovieSceneSequenceExtensions.remove_track(seq, t)
+else: seq = unreal.AssetToolsHelpers.get_asset_tools().create_asset(SN, SD, unreal.LevelSequence, unreal.LevelSequenceFactoryNew())
+seq.set_display_rate(unreal.FrameRate(24, 1)); seq.set_playback_start(0); seq.set_playback_end(1)
+cut = seq.add_track(unreal.MovieSceneCameraCutTrack); b = seq.add_possessable(cam); cs = cut.add_section(); cs.set_range(0, 1)
+cs.set_camera_binding_id(unreal.MovieSceneSequenceExtensions.get_binding_id(seq, b)); eal.save_loaded_asset(seq)
+sub = unreal.get_editor_subsystem(unreal.MoviePipelineQueueSubsystem); queue = sub.get_queue(); queue.delete_all_jobs()
+job = queue.allocate_new_job(unreal.MoviePipelineExecutorJob); job.sequence = unreal.SoftObjectPath(SD + '/' + SN)
+job.map = unreal.SoftObjectPath(world.get_path_name().split('.')[0] + '.' + world.get_name()); job.job_name = 'LilyStudio'; cfg = job.get_configuration()
+out = cfg.find_or_add_setting_by_class(unreal.MoviePipelineOutputSetting); out.output_resolution = unreal.IntPoint(J['res'][0], J['res'][1]); out.output_directory = unreal.DirectoryPath(J['out'])
+out.file_name_format = 'lily_{frame_number}'; out.zero_pad_frame_numbers = 4; out.override_existing_output = True; out.use_custom_playback_range = True; out.custom_start_frame = 0; out.custom_end_frame = 1
+cfg.find_or_add_setting_by_class(unreal.MoviePipelineDeferredPassBase); cfg.find_or_add_setting_by_class(unreal.MoviePipelineImageSequenceOutput_PNG)
+aa = cfg.find_or_add_setting_by_class(unreal.MoviePipelineAntiAliasingSetting); aa.override_anti_aliasing = True; aa.anti_aliasing_method = unreal.AntiAliasingMethod.AAM_NONE
+aa.spatial_sample_count = J['spatial']; aa.temporal_sample_count = J['temporal']; aa.render_warm_up_count = J['warmup']; aa.engine_warm_up_count = J['warmup']
+cv = cfg.find_or_add_setting_by_class(unreal.MoviePipelineConsoleVariableSetting); cv.add_or_update_console_variable('r.DepthOfFieldQuality', 0)
+sub.render_queue_with_executor(unreal.MoviePipelinePIEExecutor); print('render started', J)

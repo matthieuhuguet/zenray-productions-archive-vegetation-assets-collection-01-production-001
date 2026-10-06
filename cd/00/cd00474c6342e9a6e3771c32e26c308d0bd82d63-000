@@ -1,0 +1,15 @@
+# 6 October 2026 : runs in the ZenRayShards editor (queue). Applies the WARM lighting variant to the level (no render) and puts MI_LilyTrim NormalStrength back to 0.2, the value Matthieu set by hand. FR : applique l'eclairage warm sans rendu, remet la force de normale a 0.2.
+import unreal, json
+B = '/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/'
+P = json.load(open(B + 'unreal/lily_params.json')); Vt = P['lighting_variants']['B_WarmKeyCoolFill']
+eas = unreal.get_editor_subsystem(unreal.EditorActorSubsystem); les = unreal.get_editor_subsystem(unreal.LevelEditorSubsystem); mel = unreal.MaterialEditingLibrary
+L = {a.get_actor_label(): a for a in eas.get_all_level_actors()}
+for role in ('key', 'fill', 'rim'):
+    d = Vt[role]; base = P['lights'][role]; c = L['Lily' + role.capitalize() + 'Light'].light_component
+    c.set_editor_property('intensity', P['cd_per_unit'] * 2.0 ** d['stops']); c.set_editor_property('source_width', base['w_cm'] * d['softness']); c.set_editor_property('source_height', base['h_cm'] * d['softness'])
+    c.set_editor_property('light_color', unreal.Color(r=int(d['tint'][0] * 255), g=int(d['tint'][1] * 255), b=int(d['tint'][2] * 255), a=255))
+ppv = L['LilyPostProcess']; st = ppv.settings
+def ov(n, v): st.set_editor_property('override_' + n, True); st.set_editor_property(n, v)
+ov('auto_exposure_bias', Vt['exposure_ev']); q = Vt['saturation']; ov('color_saturation', unreal.Vector4(q, q, q, 1.0)); ppv.set_editor_property('settings', st)
+mi = unreal.EditorAssetLibrary.load_asset(P['tex_dir'] + '/MI_LilyTrim'); mel.set_material_instance_scalar_parameter_value(mi, 'NormalStrength', 0.2); mel.update_material_instance(mi); unreal.EditorAssetLibrary.save_loaded_asset(mi)
+les.save_current_level(); print('warm applied, NormalStrength 0.2')

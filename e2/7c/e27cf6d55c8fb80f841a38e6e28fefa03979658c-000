@@ -1,0 +1,84 @@
+# 6 October 2026 : runs in the ZenRayShards editor (queue, Scripts/UeQueue.py of CeramicTiles). Imports the lily trim textures and mesh into /Game/ZenRayShards, builds M_LilyTrim (masked, two sided, opacity cut-out) with its instance, and the level L_LilyStudio: cyclorama, 3 point lights (key, fill, rim), sky light, Lumen post process, camera. Every number is in lily_params.json (rule I-08). Idempotent, never deletes an asset in use.
+# FR : importe textures et mesh du lys, construit le materiau a opacite decoupee et le niveau studio (cyclorama, 3 lumieres, camera, Lumen).
+import unreal, json, math
+B = '/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/'
+P = json.load(open(B + 'unreal/lily_params.json'))
+tools = unreal.AssetToolsHelpers.get_asset_tools(); eal = unreal.EditorAssetLibrary; mel = unreal.MaterialEditingLibrary
+les = unreal.get_editor_subsystem(unreal.LevelEditorSubsystem); eas = unreal.get_editor_subsystem(unreal.EditorActorSubsystem); V = unreal.Vector
+TD, MD = P['tex_dir'], P['mesh_dir']
+SRGB = {'BaseColor': (True, unreal.TextureCompressionSettings.TC_DEFAULT), 'Normal': (False, unreal.TextureCompressionSettings.TC_NORMALMAP), 'Roughness': (False, unreal.TextureCompressionSettings.TC_MASKS), 'AmbientOcclusion': (False, unreal.TextureCompressionSettings.TC_MASKS), 'Opacity': (False, unreal.TextureCompressionSettings.TC_MASKS)}
+tasks = []
+for k, f in P['maps'].items():
+    t = unreal.AssetImportTask(); t.filename = P['root'] + f; t.destination_path = TD; t.destination_name = 'T_Lily' + k; t.replace_existing = True; t.automated = True; t.save = True; tasks.append(t)
+tools.import_asset_tasks(tasks); tex = {}
+for k in P['maps']:
+    a = eal.load_asset(TD + '/T_Lily' + k); a.set_editor_property('srgb', SRGB[k][0]); a.set_editor_property('compression_settings', SRGB[k][1]); eal.save_loaded_asset(a); tex[k] = a
+t = unreal.AssetImportTask(); t.filename = P['root'] + 'unreal/SM_Lily.fbx'; t.destination_path = MD; t.destination_name = 'SM_Lily'; t.automated = True; t.replace_existing = True; t.save = True
+ui = unreal.FbxImportUI(); ui.import_materials = False; ui.import_textures = False; ui.import_animations = False; ui.static_mesh_import_data.combine_meshes = True; t.options = ui; tools.import_asset_tasks([t])
+lily = eal.load_asset(MD + '/SM_Lily'); b = lily.get_bounds(); print('SM_Lily origin', b.origin, 'extent', b.box_extent, 'slots', len(lily.static_materials))
+# ---- material
+mp = TD + '/M_LilyTrim'
+if eal.does_asset_exist(mp): mat = eal.load_asset(mp); mel.delete_all_material_expressions(mat)
+else: mat = tools.create_asset('M_LilyTrim', TD, unreal.Material, unreal.MaterialFactoryNew())
+M = P['material']; C = unreal.MaterialSamplerType
+def node(cls, x, y): return mel.create_material_expression(mat, cls, x, y)
+def tp(name, key, x, y, st):
+    s = node(unreal.MaterialExpressionTextureSampleParameter2D, x, y); s.set_editor_property('parameter_name', name); s.set_editor_property('texture', tex[key]); s.set_editor_property('sampler_type', st); return s
+def sc(name, v, x, y):
+    s = node(unreal.MaterialExpressionScalarParameter, x, y); s.set_editor_property('parameter_name', name); s.set_editor_property('default_value', v); return s
+def conn(a, ao, b, bi): assert mel.connect_material_expressions(a, ao, b, bi), (ao, bi)
+bc = tp('BaseColorTexture', 'BaseColor', -1200, -400, C.SAMPLERTYPE_COLOR); rg = tp('RoughnessTexture', 'Roughness', -1200, 0, C.SAMPLERTYPE_MASKS)
+ao = tp('AmbientOcclusionTexture', 'AmbientOcclusion', -1200, 300, C.SAMPLERTYPE_MASKS); op = tp('OpacityTexture', 'Opacity', -1200, 600, C.SAMPLERTYPE_MASKS)
+nm = tp('NormalTexture', 'Normal', -1500, 950, C.SAMPLERTYPE_NORMAL)
+mxy = node(unreal.MaterialExpressionComponentMask, -1250, 950); mxy.set_editor_property('r', True); mxy.set_editor_property('g', True); mxy.set_editor_property('b', False); mxy.set_editor_property('a', False)
+mz = node(unreal.MaterialExpressionComponentMask, -1250, 1100); mz.set_editor_property('r', False); mz.set_editor_property('g', False); mz.set_editor_property('b', True); mz.set_editor_property('a', False)
+one = node(unreal.MaterialExpressionConstant, -1500, 1250); one.set_editor_property('r', 1.0); sgn = sc('NormalYSign', M['normal_y_sign'], -1500, 1300); ns = sc('NormalStrength', M['normal_strength'], -1500, 1180)
+sgv = node(unreal.MaterialExpressionAppendVector, -1300, 1280); conn(one, '', sgv, 'A'); conn(sgn, '', sgv, 'B')
+s0 = node(unreal.MaterialExpressionMultiply, -1150, 980); s1 = node(unreal.MaterialExpressionMultiply, -1050, 980); app = node(unreal.MaterialExpressionAppendVector, -850, 1000); nz = node(unreal.MaterialExpressionNormalize, -650, 1000)
+conn(nm, 'RGB', mxy, ''); conn(nm, 'RGB', mz, ''); conn(mxy, '', s0, 'A'); conn(sgv, '', s0, 'B'); conn(s0, '', s1, 'A'); conn(ns, '', s1, 'B'); conn(s1, '', app, 'A'); conn(mz, '', app, 'B'); conn(app, '', nz, '')
+spec = sc('Specular', M['specular'], -900, 1250); clip = sc('OpacityClip', M['opacity_clip'], -900, 700)
+mma = node(unreal.MaterialExpressionMakeMaterialAttributes, -350, 300)
+for src, out, pin in ((bc, 'RGB', 'BaseColor'), (rg, 'R', 'Roughness'), (nz, '', 'Normal'), (ao, 'R', 'AmbientOcclusion'), (spec, '', 'Specular'), (op, 'R', 'OpacityMask')): conn(src, out, mma, pin)
+mat.set_editor_property('use_material_attributes', True); mat.set_editor_property('blend_mode', unreal.BlendMode.BLEND_MASKED); mat.set_editor_property('two_sided', M['two_sided']); mat.set_editor_property('opacity_mask_clip_value', M['opacity_clip'])
+assert mel.connect_material_property(mma, '', unreal.MaterialProperty.MP_MATERIAL_ATTRIBUTES); mel.recompile_material(mat); eal.save_loaded_asset(mat)
+ip = TD + '/MI_LilyTrim'
+mi = eal.load_asset(ip) if eal.does_asset_exist(ip) else tools.create_asset('MI_LilyTrim', TD, unreal.MaterialInstanceConstant, unreal.MaterialInstanceConstantFactoryNew())
+mi.set_editor_property('parent', mat); mel.update_material_instance(mi); eal.save_loaded_asset(mi); print('material ok')
+# ---- cyclorama material
+cp = TD + '/M_LilyCyclorama'
+if eal.does_asset_exist(cp): cm = eal.load_asset(cp); mel.delete_all_material_expressions(cm)
+else: cm = tools.create_asset('M_LilyCyclorama', TD, unreal.Material, unreal.MaterialFactoryNew())
+g = P['cyclorama']['grey']; col = mel.create_material_expression(cm, unreal.MaterialExpressionVectorParameter, -500, 0); col.set_editor_property('parameter_name', 'CycloramaGrey'); col.set_editor_property('default_value', unreal.LinearColor(g, g, g, 1.0))
+rh = mel.create_material_expression(cm, unreal.MaterialExpressionScalarParameter, -500, 200); rh.set_editor_property('parameter_name', 'Roughness'); rh.set_editor_property('default_value', P['cyclorama']['roughness'])
+assert mel.connect_material_property(col, '', unreal.MaterialProperty.MP_BASE_COLOR); assert mel.connect_material_property(rh, '', unreal.MaterialProperty.MP_ROUGHNESS)
+mel.recompile_material(cm); eal.save_loaded_asset(cm)
+# ---- level
+if eal.does_asset_exist(P['level']): les.load_level(P['level'])
+else: les.new_level(P['level'])
+for a in eas.get_all_level_actors():
+    if a.get_actor_label().startswith('Lily') and a.get_actor_label() not in ('LilyAnimCam', 'LilyStoryCam'): eas.destroy_actor(a)      # the sequence cameras are rebuilt by their own scripts, killing them unbinds the sequences (found 6 October 2026)
+fl = P['flower']; a = eas.spawn_actor_from_object(lily, V(*fl['location_cm'])); a.set_actor_label('LilyFlower'); a.set_actor_scale3d(V(fl['scale'], fl['scale'], fl['scale']))
+for i in range(len(lily.static_materials)): a.static_mesh_component.set_material(i, mi)
+cyc = eal.load_asset('/Game/ZenRayShards/Meshes/CeramicAd/SM_CeramicAdCyclorama'); co = P['cyclorama']
+ca = eas.spawn_actor_from_object(cyc, V(*co['offset_cm'])); ca.set_actor_label('LilyCyclorama'); s = co['scale']; ca.set_actor_scale3d(V(s, s, s)); ca.static_mesh_component.set_material(0, cm)
+L = P['lights']; aim = V(*P['aim_cm'])
+def rect(label, role):
+    d = L[role]; az = math.radians(d['az']); el = math.radians(d['el']); r = d['dist_cm']
+    pos = V(aim.x + math.sin(az) * math.cos(el) * r, aim.y + math.cos(az) * math.cos(el) * r, aim.z + math.sin(el) * r)
+    rot = unreal.MathLibrary.find_look_at_rotation(pos, aim); l = eas.spawn_actor_from_class(unreal.RectLight, pos, rot); l.set_actor_label(label); c = l.light_component
+    c.set_editor_property('intensity_units', unreal.LightUnits.CANDELAS); c.set_editor_property('intensity', P['cd_per_unit'] * 2.0 ** d['stops'])
+    c.set_editor_property('source_width', d['w_cm'] * L['softness']); c.set_editor_property('source_height', d['h_cm'] * L['softness']); c.set_editor_property('attenuation_radius', 4000.0)
+    c.set_editor_property('light_color', unreal.Color(r=int(L['tint'][0] * 255), g=int(L['tint'][1] * 255), b=int(L['tint'][2] * 255), a=255)); c.set_editor_property('cast_shadows', True); l.root_component.set_mobility(unreal.ComponentMobility.MOVABLE)
+for role in ('key', 'fill', 'rim'): rect('Lily' + role.capitalize() + 'Light', role)
+sl = eas.spawn_actor_from_class(unreal.SkyLight, V(0, 0, 300)); sl.set_actor_label('LilySkyLight'); sl.light_component.set_editor_property('intensity', P['sky_intensity']); sl.root_component.set_mobility(unreal.ComponentMobility.MOVABLE)
+ppv = eas.spawn_actor_from_class(unreal.PostProcessVolume, V(0, 0, 0)); ppv.set_actor_label('LilyPostProcess'); ppv.set_editor_property('unbound', True); st = ppv.settings
+def ov(n, v): st.set_editor_property('override_' + n, True); st.set_editor_property(n, v)
+ov('auto_exposure_method', unreal.AutoExposureMethod.AEM_MANUAL); ov('auto_exposure_apply_physical_camera_exposure', False); ov('auto_exposure_bias', P['exposure_ev'])
+ov('dynamic_global_illumination_method', unreal.DynamicGlobalIlluminationMethod.LUMEN); ov('reflection_method', unreal.ReflectionMethod.LUMEN)
+for n in ('bloom_intensity', 'lens_flare_intensity', 'film_grain_intensity', 'motion_blur_amount'): ov(n, 0.0)
+ppv.set_editor_property('settings', st)
+cm_ = P['camera']; az = math.radians(cm_['az']); el = math.radians(cm_['el']); r = cm_['dist_cm']
+cp_ = V(aim.x + math.sin(az) * math.cos(el) * r, aim.y + math.cos(az) * math.cos(el) * r, aim.z + math.sin(el) * r)
+cam = eas.spawn_actor_from_class(unreal.CineCameraActor, cp_, unreal.MathLibrary.find_look_at_rotation(cp_, aim)); cam.set_actor_label('LilyCamera')
+cc = cam.get_cine_camera_component(); cc.set_editor_property('current_focal_length', cm_['focal_mm']); fs = cc.filmback; fs.sensor_width = cm_['sensor_width_mm']; fs.sensor_height = cm_['sensor_height_mm']; cc.set_editor_property('filmback', fs)
+les.save_current_level(); print('level built', P['level'], 'cyclorama bounds', cyc.get_bounds().box_extent)

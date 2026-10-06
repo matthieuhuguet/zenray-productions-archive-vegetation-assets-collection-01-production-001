@@ -1,0 +1,13 @@
+# 6 October 2026 : runs in the ZenRayShards editor (queue). Switches L_LilyBed between the BED (140 scattered flowers visible) and SINGLE (only the base flower SM_Lily with MI_LilyTrimLive, bed actors hidden in game) from lighting_job.json {"mode": "single" | "bed"}. Nothing is saved, nothing deleted: the scatter is only hidden (hidden-in-game is what the Movie Render Queue honours). FR : bascule parterre / fleur seule sans rien supprimer ni sauvegarder.
+import unreal, json
+B = '/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/'
+P = json.load(open(B + 'unreal/lily_params.json')); mode = json.load(open(B + 'unreal/lighting_job.json'))['mode']
+les = unreal.get_editor_subsystem(unreal.LevelEditorSubsystem); eas = unreal.get_editor_subsystem(unreal.EditorActorSubsystem); eal = unreal.EditorAssetLibrary
+if unreal.EditorLevelLibrary.get_editor_world().get_name() != 'L_LilyBed': les.load_level(P['bed']['level'])
+acts = eas.get_all_level_actors(); beds = [a for a in acts if a.get_actor_label().startswith('LilyBed') and 'Cam' not in a.get_actor_label()]
+single = [a for a in acts if a.get_actor_label() == 'LilyFlowerSingle']
+if not single:
+    s = eas.spawn_actor_from_object(eal.load_asset(P['mesh_dir'] + '/SM_Lily'), unreal.Vector(0, 0, 0)); s.set_actor_label('LilyFlowerSingle'); s.static_mesh_component.set_material(0, eal.load_asset(P['tex_dir'] + '/MI_LilyTrimLive')); single = [s]
+for a in beds: a.set_actor_hidden_in_game(mode == 'single'); a.set_is_temporarily_hidden_in_editor(mode == 'single')
+for a in single: a.set_actor_hidden_in_game(mode != 'single'); a.set_is_temporarily_hidden_in_editor(mode != 'single')
+print('mode', mode, 'bed actors', len(beds))

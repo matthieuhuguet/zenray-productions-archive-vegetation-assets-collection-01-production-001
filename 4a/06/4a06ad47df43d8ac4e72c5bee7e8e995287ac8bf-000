@@ -1,0 +1,10 @@
+# 6 October 2026 : runs in the ZenRayShards editor (queue). REPAIR: ue_bed_lily.py wrote the scatter into L_LilyStudio (save_map left the world named L_LilyStudio). Removes every LilyBed* actor and the bed camera, puts LilyFlower back (SM_Lily, MI_LilyTrimLive, origin) and saves. The lights and LilyCamera were never touched. FR : repare L_LilyStudio.
+import unreal, json
+P = json.load(open('/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/unreal/lily_params.json')); eal = unreal.EditorAssetLibrary
+eas = unreal.get_editor_subsystem(unreal.EditorActorSubsystem); les = unreal.get_editor_subsystem(unreal.LevelEditorSubsystem)
+les.load_level(P['level']); k = 0
+for a in eas.get_all_level_actors():
+    if a.get_actor_label().startswith('LilyBed'): eas.destroy_actor(a); k += 1
+if not [a for a in eas.get_all_level_actors() if a.get_actor_label() == 'LilyFlower']:
+    f = eas.spawn_actor_from_object(eal.load_asset(P['mesh_dir'] + '/SM_Lily'), unreal.Vector(0, 0, 0)); f.set_actor_label('LilyFlower'); f.static_mesh_component.set_material(0, eal.load_asset(P['tex_dir'] + '/MI_LilyTrimLive'))
+les.save_current_level(); print('removed', k, 'labels now', sorted(set(a.get_actor_label() for a in eas.get_all_level_actors())))

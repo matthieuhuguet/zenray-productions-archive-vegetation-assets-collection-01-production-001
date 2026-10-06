@@ -1,0 +1,42 @@
+# 6 October 2026 : runs in the ZenRayShards editor (queue). CAMERA ANIMATION of the lily: 5 s at 24 fps, elevation 10 to 55 degrees and a full orbit, eased, keyed every frame on LilyAnimCam in LS_LilyAnim, then a Movie Render Queue job (preview resolution). Everything is in lily_params.json 'animation' (rule I-08). FR : animation de camera, elevation 10 vers 55 degres avec un tour complet.
+import unreal, json, math
+B = '/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/'
+P = json.load(open(B + 'unreal/lily_params.json')); A = P['animation']; C = P['camera']; V = unreal.Vector
+les = unreal.get_editor_subsystem(unreal.LevelEditorSubsystem); eas = unreal.get_editor_subsystem(unreal.EditorActorSubsystem); eal = unreal.EditorAssetLibrary
+if unreal.EditorLevelLibrary.get_editor_world().get_name() != P['level'].rsplit('/', 1)[1]: les.load_level(P['level'])
+world = unreal.EditorLevelLibrary.get_editor_world()
+for a in eas.get_all_level_actors():
+    if a.get_actor_label() == 'LilyAnimCam': eas.destroy_actor(a)
+aim = V(*A['aim_cm']); cam = eas.spawn_actor_from_class(unreal.CineCameraActor, V(0, 0, 0)); cam.set_actor_label('LilyAnimCam')
+cc = cam.get_cine_camera_component(); cc.set_editor_property('current_focal_length', A['focal_mm']); cc.set_editor_property('current_aperture', A['aperture']); fsx = cc.get_editor_property('focus_settings'); fsx.focus_method = unreal.CameraFocusMethod.MANUAL; fsx.manual_focus_distance = A['dist_cm']; cc.set_editor_property('focus_settings', fsx); fb = cc.filmback; fb.sensor_width = C['sensor_width_mm']; fb.sensor_height = C['sensor_height_mm']; cc.set_editor_property('filmback', fb)
+SD, SN = '/Game/ZenRayShards/Cinematics', 'LS_LilyAnim'; N = int(A['seconds'] * A['fps'])
+if eal.does_asset_exist(SD + '/' + SN):
+    seq = eal.load_asset(SD + '/' + SN)
+    for b in list(unreal.MovieSceneSequenceExtensions.get_bindings(seq)): unreal.MovieSceneBindingExtensions.remove(b)
+    for t in list(unreal.MovieSceneSequenceExtensions.get_tracks(seq)): unreal.MovieSceneSequenceExtensions.remove_track(seq, t)
+else: seq = unreal.AssetToolsHelpers.get_asset_tools().create_asset(SN, SD, unreal.LevelSequence, unreal.LevelSequenceFactoryNew())
+seq.set_display_rate(unreal.FrameRate(A['fps'], 1)); seq.set_playback_start(0); seq.set_playback_end(N)
+cut = seq.add_track(unreal.MovieSceneCameraCutTrack); b = seq.add_possessable(cam); cs = cut.add_section(); cs.set_range(0, N); cs.set_camera_binding_id(unreal.MovieSceneSequenceExtensions.get_binding_id(seq, b))
+sec = b.add_track(unreal.MovieScene3DTransformTrack).add_section(); sec.set_range(0, N); ch = sec.get_all_channels()
+rots = []; prev = None
+for i in range(N):
+    t = i / float(N); s = t * t * (3 - 2 * t) if A['ease'] == 'smoothstep' else t
+    el = math.radians(A['el_start'] + (A['el_end'] - A['el_start']) * s); az = math.radians(A['az_start'] + (A['az_end'] - A['az_start']) * s); r = A['dist_cm']
+    pos = V(aim.x + math.sin(az) * math.cos(el) * r, aim.y + math.cos(az) * math.cos(el) * r, aim.z + math.sin(el) * r); rot = unreal.MathLibrary.find_look_at_rotation(pos, aim)
+    yaw = rot.yaw
+    if prev is not None:
+        while yaw - prev > 180: yaw -= 360
+        while yaw - prev < -180: yaw += 360
+    prev = yaw
+    for c, v in zip(ch[:9], (pos.x, pos.y, pos.z, rot.roll, rot.pitch, yaw, 1.0, 1.0, 1.0)): c.add_key(unreal.FrameNumber(i), v, interpolation=unreal.MovieSceneKeyInterpolation.LINEAR)
+eal.save_loaded_asset(seq)
+sub = unreal.get_editor_subsystem(unreal.MoviePipelineQueueSubsystem); queue = sub.get_queue(); queue.delete_all_jobs()
+job = queue.allocate_new_job(unreal.MoviePipelineExecutorJob); job.sequence = unreal.SoftObjectPath(SD + '/' + SN)
+job.map = unreal.SoftObjectPath(world.get_path_name().split('.')[0] + '.' + world.get_name()); job.job_name = 'LilyAnim'; cfg = job.get_configuration()
+out = cfg.find_or_add_setting_by_class(unreal.MoviePipelineOutputSetting); out.output_resolution = unreal.IntPoint(A['res'], A['res']); out.output_directory = unreal.DirectoryPath(A['out'])
+out.file_name_format = 'an_{frame_number}'; out.zero_pad_frame_numbers = 4; out.override_existing_output = True; out.use_custom_playback_range = True; out.custom_start_frame = 0; out.custom_end_frame = N
+cfg.find_or_add_setting_by_class(unreal.MoviePipelineDeferredPassBase); cfg.find_or_add_setting_by_class(unreal.MoviePipelineImageSequenceOutput_PNG)
+aa = cfg.find_or_add_setting_by_class(unreal.MoviePipelineAntiAliasingSetting); aa.override_anti_aliasing = True; aa.anti_aliasing_method = unreal.AntiAliasingMethod.AAM_NONE
+aa.spatial_sample_count = A['spatial']; aa.temporal_sample_count = 1; aa.render_warm_up_count = A['warmup']; aa.engine_warm_up_count = A['warmup']
+cv = cfg.find_or_add_setting_by_class(unreal.MoviePipelineConsoleVariableSetting); cv.add_or_update_console_variable('r.DepthOfFieldQuality', 0)
+sub.render_queue_with_executor(unreal.MoviePipelinePIEExecutor); print('anim started', N, 'frames')

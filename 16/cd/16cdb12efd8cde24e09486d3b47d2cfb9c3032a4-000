@@ -1,0 +1,14 @@
+# 6 October 2026 : runs in the ZenRayShards editor (queue). Reads the lights and the post process of the open level (Matthieu's own hand-tuned values) into lights_backup_<level>.json, prints them. Read only. FR : sauvegarde en lecture seule des lumieres de Matthieu.
+import unreal, json, math
+B = '/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/'
+P = json.load(open(B + 'unreal/lily_params.json')); les = unreal.get_editor_subsystem(unreal.LevelEditorSubsystem); eas = unreal.get_editor_subsystem(unreal.EditorActorSubsystem)
+les.load_level(P['bed']['level']); D = {}
+for a in eas.get_all_level_actors():
+    n = a.get_actor_label()
+    if n in ('LilyKeyLight', 'LilyFillLight', 'LilyRimLight'):
+        c = a.light_component; col = c.get_editor_property('light_color'); loc = a.get_actor_location(); rot = a.get_actor_rotation()
+        D[n] = {'cd': c.get_editor_property('intensity'), 'w': c.get_editor_property('source_width'), 'h': c.get_editor_property('source_height'), 'color': [col.r, col.g, col.b], 'loc': [loc.x, loc.y, loc.z], 'rot': [rot.roll, rot.pitch, rot.yaw]}
+    if n == 'LilyPostProcess':
+        s = a.settings; D[n] = {'bias': s.get_editor_property('auto_exposure_bias'), 'sat': list(s.get_editor_property('color_saturation').to_tuple()) if hasattr(s.get_editor_property('color_saturation'), 'to_tuple') else str(s.get_editor_property('color_saturation'))}
+    if n == 'LilySkyLight': D[n] = {'intensity': a.light_component.get_editor_property('intensity')}
+json.dump(D, open(B + 'unreal/lights_backup_LilyBed.json', 'w'), indent=1); print(json.dumps(D))
