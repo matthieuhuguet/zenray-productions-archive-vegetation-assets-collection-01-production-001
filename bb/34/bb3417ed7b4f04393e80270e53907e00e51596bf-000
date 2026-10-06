@@ -1,0 +1,12 @@
+# Lily short montage (6 October 2026)
+
+- Opening: 10 seconds, bed orbit on the left and close orbit on the right; each 2048 square source is centrally cropped to 1024 by 2048, then scaled to its 2048 by 4096 half. (6 October 2026)
+- Steps: original LilySteps_v004.mov follows from 10 to 38 seconds, preserving its seven ordered four-second captions. (6 October 2026)
+- Output: 4096 by 4096, 30 fps, Apple HEVC hvc1, BT.709, optimized for size at 16 Mbps, AAC 256 kbps. The original 2K footage and 1920-square steps are enlarged; this does not add source detail. (6 October 2026)
+- Title: How did I create these shots? / FLEUR DE LYS, original Vogun Medium, pure yellow #FFFF00, centered black shadow. Title appears from 1 to 2.5 seconds, holds until 4.5 seconds, exits by 6 seconds. (6 October 2026)
+- Title movement: original four-band electrical crossconnections, left to right then top to bottom, local ping-pong on exit, no external particles. (6 October 2026)
+- Music: Feverkin, Alternate Realities Part I (Soundtrack), artist upload https://www.youtube.com/watch?v=uU98ipYijlE, 265 seconds; the montage uses 136 to 174 seconds. MP3 obtained with yt-dlp, no browser cookies. (6 October 2026)
+- Audio: deterministic 0.75-second electric cue at title start, mixed with music, two-pass EBU R128 normalization to -14 LUFS with target true peak -1.5 dBTP. Verification.json records the final encoded audio measurement. (6 October 2026)
+- Comparison export is the clean 10-second picture alone; final short includes title, steps, soundtrack and cue. (6 October 2026)
+- Edit timings and output names in Montage.json; title timings and appearance in title/Animation.json. Run Scripts/RenderLilyShortTitle.cjs with bundled Playwright NODE_PATH, then Scripts/AssembleLilyShort.py. (6 October 2026)
+- Post is stored in Memory1/Projects/vegetation-assets-collection-01/Posts/6-October-2026-LilyShort/Post.md and linked as post.md. (6 October 2026)

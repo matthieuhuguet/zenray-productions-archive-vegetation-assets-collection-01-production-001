@@ -1,0 +1,1069 @@
+{
+  "date": "6 October 2026",
+  "projectId": "vegetation-assets-collection-01",
+  "inventoryCheckedAt": "2026-10-06T18:09:47.989Z",
+  "files": [
+    {
+      "fileId": "project-notes:Posts/6-October-2026-LilyShort/Post.md",
+      "localPath": "/Users/zenray/.claude/Memory1/Projects/vegetation-assets-collection-01/Posts/6-October-2026-LilyShort/Post.md",
+      "bytes": 255,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:Scripts/AssembleLilyShort.py",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/Scripts/AssembleLilyShort.py",
+      "bytes": 6159,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:Scripts/RenderLilyShortTitle.cjs",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/Scripts/RenderLilyShortTitle.cjs",
+      "bytes": 1637,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/FlowerCloseOrbit_2K_240f.mp4",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/FlowerCloseOrbit_2K_240f.mp4",
+      "bytes": 73290196,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/LilyBedOrbitFlat_2K_v001.mp4",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/LilyBedOrbitFlat_2K_v001.mp4",
+      "bytes": 109007872,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/LilyComparison_4K_v001.mov",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/LilyComparison_4K_v001.mov",
+      "bytes": 20470194,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/LilyShort_4K_v001.mov",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/LilyShort_4K_v001.mov",
+      "bytes": 74489181,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/LilySteps_v004.mov",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/LilySteps_v004.mov",
+      "bytes": 25225655,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/audio/Feverkin-AlternateRealities-PartI.mp3",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/audio/Feverkin-AlternateRealities-PartI.mp3",
+      "bytes": 8688909,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/audio/Mix.wav",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/audio/Mix.wav",
+      "bytes": 7296078,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/audio/NormalizationPass1.json",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/audio/NormalizationPass1.json",
+      "bytes": 263,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/audio/Normalized.wav",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/audio/Normalized.wav",
+      "bytes": 7296078,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/audio/TitleElectric.wav",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/audio/TitleElectric.wav",
+      "bytes": 72044,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/Montage.json",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/Montage.json",
+      "bytes": 532,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/Montage.md",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/Montage.md",
+      "bytes": 1941,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/Preview-0.jpg",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/Preview-0.jpg",
+      "bytes": 91833,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/Preview-10.5.jpg",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/Preview-10.5.jpg",
+      "bytes": 62038,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/Preview-2.6.jpg",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/Preview-2.6.jpg",
+      "bytes": 92246,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/Preview-37.3.jpg",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/Preview-37.3.jpg",
+      "bytes": 81453,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/Preview-5.2.jpg",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/Preview-5.2.jpg",
+      "bytes": 99633,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/Preview-6.2.jpg",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/Preview-6.2.jpg",
+      "bytes": 98925,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/Steps4K.mov",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/Steps4K.mov",
+      "bytes": 50226468,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/title/Animation.html",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/title/Animation.html",
+      "bytes": 4563,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/title/Animation.json",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/title/Animation.json",
+      "bytes": 878,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/title/assets/Vogun-Medium.ttf",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/title/assets/Vogun-Medium.ttf",
+      "bytes": 60792,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/title/frames/0000.png",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/title/frames/0000.png",
+      "bytes": 75789,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/title/frames/0001.png",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/title/frames/0001.png",
+      "bytes": 75857,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/title/frames/0002.png",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/title/frames/0002.png",
+      "bytes": 87055,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/title/frames/0003.png",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/title/frames/0003.png",
+      "bytes": 103955,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/title/frames/0004.png",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/title/frames/0004.png",
+      "bytes": 114992,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/title/frames/0005.png",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/title/frames/0005.png",
+      "bytes": 126280,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/title/frames/0006.png",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/title/frames/0006.png",
+      "bytes": 129872,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/title/frames/0007.png",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/title/frames/0007.png",
+      "bytes": 142521,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/title/frames/0008.png",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/title/frames/0008.png",
+      "bytes": 161719,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/title/frames/0009.png",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/title/frames/0009.png",
+      "bytes": 174154,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/title/frames/0010.png",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/title/frames/0010.png",
+      "bytes": 193667,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/title/frames/0011.png",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/title/frames/0011.png",
+      "bytes": 207552,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/title/frames/0012.png",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/title/frames/0012.png",
+      "bytes": 218922,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/title/frames/0013.png",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/title/frames/0013.png",
+      "bytes": 237976,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/title/frames/0014.png",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/title/frames/0014.png",
+      "bytes": 252645,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/title/frames/0015.png",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/title/frames/0015.png",
+      "bytes": 264208,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/title/frames/0016.png",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/title/frames/0016.png",
+      "bytes": 270003,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/title/frames/0017.png",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/title/frames/0017.png",
+      "bytes": 271836,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/title/frames/0018.png",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/title/frames/0018.png",
+      "bytes": 270058,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/title/frames/0019.png",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/title/frames/0019.png",
+      "bytes": 271458,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/title/frames/0020.png",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/title/frames/0020.png",
+      "bytes": 273488,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/title/frames/0021.png",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/title/frames/0021.png",
+      "bytes": 275668,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/title/frames/0022.png",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/title/frames/0022.png",
+      "bytes": 279139,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/title/frames/0023.png",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/title/frames/0023.png",
+      "bytes": 279139,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/title/frames/0024.png",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/title/frames/0024.png",
+      "bytes": 287376,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/title/frames/0025.png",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/title/frames/0025.png",
+      "bytes": 287497,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/title/frames/0026.png",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/title/frames/0026.png",
+      "bytes": 292793,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/title/frames/0027.png",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/title/frames/0027.png",
+      "bytes": 300906,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/title/frames/0028.png",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/title/frames/0028.png",
+      "bytes": 317635,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/title/frames/0029.png",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/title/frames/0029.png",
+      "bytes": 336795,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/title/frames/0030.png",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/title/frames/0030.png",
+      "bytes": 341736,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/title/frames/0031.png",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/title/frames/0031.png",
+      "bytes": 348480,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/title/frames/0032.png",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/title/frames/0032.png",
+      "bytes": 360877,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/title/frames/0033.png",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/title/frames/0033.png",
+      "bytes": 369346,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/title/frames/0034.png",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/title/frames/0034.png",
+      "bytes": 374127,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/title/frames/0035.png",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/title/frames/0035.png",
+      "bytes": 372020,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/title/frames/0036.png",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/title/frames/0036.png",
+      "bytes": 392863,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/title/frames/0037.png",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/title/frames/0037.png",
+      "bytes": 402208,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/title/frames/0038.png",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/title/frames/0038.png",
+      "bytes": 421632,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/title/frames/0039.png",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/title/frames/0039.png",
+      "bytes": 427546,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/title/frames/0040.png",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/title/frames/0040.png",
+      "bytes": 426161,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/title/frames/0041.png",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/title/frames/0041.png",
+      "bytes": 424720,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/title/frames/0042.png",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/title/frames/0042.png",
+      "bytes": 428136,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/title/frames/0043.png",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/title/frames/0043.png",
+      "bytes": 424305,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/title/frames/0044.png",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/title/frames/0044.png",
+      "bytes": 427372,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/title/frames/0045.png",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/title/frames/0045.png",
+      "bytes": 434517,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/title/frames/0046.png",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/title/frames/0046.png",
+      "bytes": 434517,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/title/frames/0047.png",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/title/frames/0047.png",
+      "bytes": 434517,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/title/frames/0048.png",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/title/frames/0048.png",
+      "bytes": 434517,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/title/frames/0049.png",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/title/frames/0049.png",
+      "bytes": 434517,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/title/frames/0050.png",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/title/frames/0050.png",
+      "bytes": 434517,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/title/frames/0051.png",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/title/frames/0051.png",
+      "bytes": 434517,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/title/frames/0052.png",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/title/frames/0052.png",
+      "bytes": 434517,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/title/frames/0053.png",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/title/frames/0053.png",
+      "bytes": 434517,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/title/frames/0054.png",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/title/frames/0054.png",
+      "bytes": 434517,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/title/frames/0055.png",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/title/frames/0055.png",
+      "bytes": 434517,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/title/frames/0056.png",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/title/frames/0056.png",
+      "bytes": 434517,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/title/frames/0057.png",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/title/frames/0057.png",
+      "bytes": 434517,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/title/frames/0058.png",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/title/frames/0058.png",
+      "bytes": 434517,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/title/frames/0059.png",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/title/frames/0059.png",
+      "bytes": 434517,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/title/frames/0060.png",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/title/frames/0060.png",
+      "bytes": 434517,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/title/frames/0061.png",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/title/frames/0061.png",
+      "bytes": 434517,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/title/frames/0062.png",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/title/frames/0062.png",
+      "bytes": 434517,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/title/frames/0063.png",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/title/frames/0063.png",
+      "bytes": 434517,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/title/frames/0064.png",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/title/frames/0064.png",
+      "bytes": 434517,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/title/frames/0065.png",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/title/frames/0065.png",
+      "bytes": 434517,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/title/frames/0066.png",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/title/frames/0066.png",
+      "bytes": 434517,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/title/frames/0067.png",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/title/frames/0067.png",
+      "bytes": 434517,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/title/frames/0068.png",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/title/frames/0068.png",
+      "bytes": 434517,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/title/frames/0069.png",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/title/frames/0069.png",
+      "bytes": 434517,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/title/frames/0070.png",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/title/frames/0070.png",
+      "bytes": 434517,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/title/frames/0071.png",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/title/frames/0071.png",
+      "bytes": 434517,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/title/frames/0072.png",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/title/frames/0072.png",
+      "bytes": 434517,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/title/frames/0073.png",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/title/frames/0073.png",
+      "bytes": 434517,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/title/frames/0074.png",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/title/frames/0074.png",
+      "bytes": 434517,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/title/frames/0075.png",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/title/frames/0075.png",
+      "bytes": 434517,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/title/frames/0076.png",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/title/frames/0076.png",
+      "bytes": 434517,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/title/frames/0077.png",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/title/frames/0077.png",
+      "bytes": 434517,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/title/frames/0078.png",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/title/frames/0078.png",
+      "bytes": 434517,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/title/frames/0079.png",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/title/frames/0079.png",
+      "bytes": 434517,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/title/frames/0080.png",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/title/frames/0080.png",
+      "bytes": 434517,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/title/frames/0081.png",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/title/frames/0081.png",
+      "bytes": 434517,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/title/frames/0082.png",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/title/frames/0082.png",
+      "bytes": 434517,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/title/frames/0083.png",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/title/frames/0083.png",
+      "bytes": 434517,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/title/frames/0084.png",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/title/frames/0084.png",
+      "bytes": 434517,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/title/frames/0085.png",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/title/frames/0085.png",
+      "bytes": 434517,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/title/frames/0086.png",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/title/frames/0086.png",
+      "bytes": 434517,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/title/frames/0087.png",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/title/frames/0087.png",
+      "bytes": 434517,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/title/frames/0088.png",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/title/frames/0088.png",
+      "bytes": 434517,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/title/frames/0089.png",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/title/frames/0089.png",
+      "bytes": 434517,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/title/frames/0090.png",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/title/frames/0090.png",
+      "bytes": 434517,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/title/frames/0091.png",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/title/frames/0091.png",
+      "bytes": 434517,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/title/frames/0092.png",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/title/frames/0092.png",
+      "bytes": 434517,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/title/frames/0093.png",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/title/frames/0093.png",
+      "bytes": 434517,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/title/frames/0094.png",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/title/frames/0094.png",
+      "bytes": 434517,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/title/frames/0095.png",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/title/frames/0095.png",
+      "bytes": 434517,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/title/frames/0096.png",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/title/frames/0096.png",
+      "bytes": 434517,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/title/frames/0097.png",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/title/frames/0097.png",
+      "bytes": 434517,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/title/frames/0098.png",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/title/frames/0098.png",
+      "bytes": 434517,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/title/frames/0099.png",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/title/frames/0099.png",
+      "bytes": 434517,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/title/frames/0100.png",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/title/frames/0100.png",
+      "bytes": 434517,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/title/frames/0101.png",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/title/frames/0101.png",
+      "bytes": 434517,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/title/frames/0102.png",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/title/frames/0102.png",
+      "bytes": 434517,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/title/frames/0103.png",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/title/frames/0103.png",
+      "bytes": 434517,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/title/frames/0104.png",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/title/frames/0104.png",
+      "bytes": 434517,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/title/frames/0105.png",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/title/frames/0105.png",
+      "bytes": 434517,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/title/frames/0106.png",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/title/frames/0106.png",
+      "bytes": 433385,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/title/frames/0107.png",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/title/frames/0107.png",
+      "bytes": 433637,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/title/frames/0108.png",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/title/frames/0108.png",
+      "bytes": 431010,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/title/frames/0109.png",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/title/frames/0109.png",
+      "bytes": 430355,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/title/frames/0110.png",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/title/frames/0110.png",
+      "bytes": 427927,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/title/frames/0111.png",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/title/frames/0111.png",
+      "bytes": 423259,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/title/frames/0112.png",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/title/frames/0112.png",
+      "bytes": 417888,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/title/frames/0113.png",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/title/frames/0113.png",
+      "bytes": 403531,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/title/frames/0114.png",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/title/frames/0114.png",
+      "bytes": 389425,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/title/frames/0115.png",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/title/frames/0115.png",
+      "bytes": 374890,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/title/frames/0116.png",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/title/frames/0116.png",
+      "bytes": 369289,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/title/frames/0117.png",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/title/frames/0117.png",
+      "bytes": 357882,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/title/frames/0118.png",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/title/frames/0118.png",
+      "bytes": 338958,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/title/frames/0119.png",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/title/frames/0119.png",
+      "bytes": 321089,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/title/frames/0120.png",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/title/frames/0120.png",
+      "bytes": 308507,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/title/frames/0121.png",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/title/frames/0121.png",
+      "bytes": 294361,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/title/frames/0122.png",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/title/frames/0122.png",
+      "bytes": 277522,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/title/frames/0123.png",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/title/frames/0123.png",
+      "bytes": 264116,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/title/frames/0124.png",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/title/frames/0124.png",
+      "bytes": 250322,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/title/frames/0125.png",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/title/frames/0125.png",
+      "bytes": 240185,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/title/frames/0126.png",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/title/frames/0126.png",
+      "bytes": 231305,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/title/frames/0127.png",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/title/frames/0127.png",
+      "bytes": 231305,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/title/frames/0128.png",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/title/frames/0128.png",
+      "bytes": 231931,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/title/frames/0129.png",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/title/frames/0129.png",
+      "bytes": 231798,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/title/frames/0130.png",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/title/frames/0130.png",
+      "bytes": 233103,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/title/frames/0131.png",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/title/frames/0131.png",
+      "bytes": 232320,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/title/frames/0132.png",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/title/frames/0132.png",
+      "bytes": 228746,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/title/frames/0133.png",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/title/frames/0133.png",
+      "bytes": 228818,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/title/frames/0134.png",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/title/frames/0134.png",
+      "bytes": 222904,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/title/frames/0135.png",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/title/frames/0135.png",
+      "bytes": 211274,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/title/frames/0136.png",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/title/frames/0136.png",
+      "bytes": 208435,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/title/frames/0137.png",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/title/frames/0137.png",
+      "bytes": 199475,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/title/frames/0138.png",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/title/frames/0138.png",
+      "bytes": 185978,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/title/frames/0139.png",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/title/frames/0139.png",
+      "bytes": 177518,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/title/frames/0140.png",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/title/frames/0140.png",
+      "bytes": 162952,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/title/frames/0141.png",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/title/frames/0141.png",
+      "bytes": 154603,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/title/frames/0142.png",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/title/frames/0142.png",
+      "bytes": 145379,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/title/frames/0143.png",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/title/frames/0143.png",
+      "bytes": 136651,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/title/frames/0144.png",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/title/frames/0144.png",
+      "bytes": 122442,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/title/frames/0145.png",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/title/frames/0145.png",
+      "bytes": 121177,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/title/frames/0146.png",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/title/frames/0146.png",
+      "bytes": 114382,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/title/frames/0147.png",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/title/frames/0147.png",
+      "bytes": 96310,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/title/frames/0148.png",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/title/frames/0148.png",
+      "bytes": 83949,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/title/frames/0149.png",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/title/frames/0149.png",
+      "bytes": 75789,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/title/Layout.json",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/title/Layout.json",
+      "bytes": 323,
+      "backupRecord": null
+    },
+    {
+      "fileId": "production:video/shorts-lily/Verification.json",
+      "localPath": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/shorts-lily/Verification.json",
+      "bytes": 8743,
+      "backupRecord": null
+    }
+  ]
+}
