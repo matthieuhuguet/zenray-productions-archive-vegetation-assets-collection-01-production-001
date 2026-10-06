@@ -2,6 +2,7 @@
 import hou
 DEFAULT_BASIS = hou.rampBasis.Linear   # tone curves stay linear; SHAPE curves (silhouettes, edges) pass basis=SMOOTH
 SMOOTH = hou.rampBasis.MonotoneCubic
+PIXEL_SCALE = 1.0    # 6 October 2026 : res / 2048, set by the builder before creating nodes
 def ramp(points, rng, basis=None):
     # 5 October 2026 : curves are SMOOTH by default (MonotoneCubic never overshoots its keys); a Linear ramp draws a polyline silhouette. Pass basis=hou.rampBasis.Linear for a deliberate sharp corner.
     basis = basis or DEFAULT_BASIS
@@ -10,7 +11,7 @@ def node(net, kind, name, inputs=(), **parms):
     n = net.node(name) or net.createNode(kind, name)
     for i, src in enumerate(inputs):
         if src is not None: n.setInput(i, src[0] if isinstance(src, tuple) else src, src[1] if isinstance(src, tuple) else 0)
-    for k, v in parms.items(): n.parm(k).set(v)
+    for k, v in parms.items(): n.parm(k).set(v * PIXEL_SCALE if k.endswith(('_pixel', '_pixels')) else v)    # 6 October 2026 : pixel sizes are authored at 2048 and scale with the export resolution
     return n
 def const(net, name, like, value): return node(net, 'remap', name, [like], inputmin=0, inputmax=1, outputmin=value, outputmax=value, useramp=0)
 def lin(net, name, src, in0, in1, out0=0.0, out1=1.0): return node(net, 'remap', name, [src], inputmin=in0, inputmax=in1, outputmin=out0, outputmax=out1, useramp=0)

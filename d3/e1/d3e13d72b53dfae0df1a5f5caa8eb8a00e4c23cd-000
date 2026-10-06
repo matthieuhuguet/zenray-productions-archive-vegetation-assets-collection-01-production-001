@@ -129,7 +129,8 @@ def build(net, with_maps=True):
     return maps
 if __name__ == '__main__':
     hou.hipFile.clear(suppress_save_prompt=True); net = hou.node('/obj').createNode('copnet', 'Lily_Trim_test'); res = int(sys.argv[3]) if len(sys.argv) > 3 else 2048
+    T.PIXEL_SCALE = res / 2048.0    # 6 October 2026 : pixel sized parms follow the resolution
     outs = build(net); print('nodes', len(net.children()), 'errors', [(c.name(), str(c.errors())[:100]) for c in net.children() if c.errors()][:4])
     if len(sys.argv) > 4:
-        import os; os.makedirs(B + 'maps/trim', exist_ok=True)
-        for nm, n in outs.items(): T.export(net, n, B + 'maps/trim/lily_trim_%s.png' % nm, res); print('exported', nm)
+        import os; os.makedirs(B + ('maps/trim' if res == 2048 else 'maps/trim%d' % res), exist_ok=True)
+        for nm, n in outs.items(): T.export(net, n, B + ('maps/trim/' if res == 2048 else 'maps/trim%d/' % res) + 'lily_trim_%s.png' % nm, res); print('exported', nm)
