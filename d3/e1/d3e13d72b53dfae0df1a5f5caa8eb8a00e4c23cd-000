@@ -96,6 +96,15 @@ def build(net, with_maps=True):
             hp = T.mix(net, 'U84_height_detail', bands[0], T.node(net, 'blur', 'U84a_height_soft', [bands[0]], units=1, size_pixel=14.0), 4)      # high pass of the height: fibres, rib, rim
             shade = T.lin(net, 'U85_shade', hp, -0.12, 0.12, 0.82, 1.12)
             m = T.mix(net, 'U86_colour_shaded', cols, shade, 5)
+        if k == 1:      # GREEN CORE of the outer tepal (Matthieu, 6 October 2026): the dark central strip of each tepal is green, like the lily in the photo
+            ax1 = T.mix(net, 'U30_ax1', T.lin(net, 'U30a_cx1', rx3, 0.0, 1.0, -1.0 / 6, 1.0 / 6), T.const(net, 'U30b_zero', ry, 0.0), 9)
+            lv1 = T.lin(net, 'U31_lv_band1', ry, 0.193, 0.388, 0.0, 1.0)
+            core1 = T.mix(net, 'U32_core_mask', T.lin(net, 'U32a_near_axis', T.smooth(net, 'U32b', ax1, 0.0, 0.075), 0.0, 1.0, 1.0, 0.0), T.smooth(net, 'U32c_from_top', lv1, 0.0, 0.03), 5)      # 6 October 2026: a wide GRADIENT, full green on the axis, fading into the pink
+            gr = T.node(net, 'monotorgb', 'U33_green_ramp', [bands[1]]); gr.parm('ramp').set(color_ramp([(0.0, 0.20, 0.32, 0.10), (0.35, 0.40, 0.53, 0.22), (0.6, 0.62, 0.73, 0.40), (1.0, 0.86, 0.91, 0.70)]))      # green version of the band tone: the texture stays, the hue is green (no magenta left)
+            m = T.node(net, 'blend', 'U34_with_green_core', [m, gr, core1], mode=0)
+        if k == 6:      # GREEN CORE of the bud: the middle of each lobe is green
+            inner = T.smooth(net, 'U35_bud_core_mask', T.node(net, 'blur', 'U35a_bud_soft', [B6.opacity(net, ry, rx3)], units=1, size_pixel=14.0), 0.55, 0.9)
+            m = T.node(net, 'blend', 'U36_bud_green_core', [m, flat_colour(net, 'U36a_green', ry, (0.58, 0.68, 0.34)), T.lin(net, 'U36b_amount', inner, 0.0, 1.0, 0.0, 0.85)], mode=0)
         if k == 5:     # colour PADDING (the petals pad themselves: their own ramps already give the ground the petal colour): the part that opacity cuts away gets the colour of the object edge (no dark or pink halo at the cut)
             pad_rgb = (0.30, 0.45, 0.20)
             m = T.node(net, 'blend', 'U7%d_padding' % k, [m, flat_colour(net, 'U7%da_pad' % k, ry, pad_rgb), T.lin(net, 'U7%db_outside' % k, B56.leaf_opacity(net, ry, rx3), 0.0, 1.0, 1.0, 0.0)], mode=0)
