@@ -1,0 +1,74 @@
+{
+  "date": "6 October 2026",
+  "results": [
+    {
+      "id": "01-circuit-sequentiel",
+      "megabytes": 1.22,
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "codec_name": "hevc",
+            "width": 3840,
+            "height": 2160,
+            "r_frame_rate": "30/1",
+            "nb_frames": "150"
+          }
+        ],
+        "format": {
+          "duration": "5.000000",
+          "size": "1215940"
+        }
+      },
+      "blankEndpoints": true,
+      "staticHold": true
+    },
+    {
+      "id": "02-connexions-croisees",
+      "megabytes": 1.26,
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "codec_name": "hevc",
+            "width": 3840,
+            "height": 2160,
+            "r_frame_rate": "30/1",
+            "nb_frames": "150"
+          }
+        ],
+        "format": {
+          "duration": "5.000000",
+          "size": "1260343"
+        }
+      },
+      "blankEndpoints": true,
+      "staticHold": true
+    },
+    {
+      "id": "03-impulsion-synchronisee",
+      "megabytes": 1.36,
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "codec_name": "hevc",
+            "width": 3840,
+            "height": 2160,
+            "r_frame_rate": "30/1",
+            "nb_frames": "150"
+          }
+        ],
+        "format": {
+          "duration": "5.000000",
+          "size": "1363232"
+        }
+      },
+      "blankEndpoints": true,
+      "staticHold": true
+    }
+  ]
+}

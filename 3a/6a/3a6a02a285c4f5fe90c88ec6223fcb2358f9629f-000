@@ -1,0 +1,89 @@
+{
+  "date": "6 October 2026",
+  "result": [
+    {
+      "id": "01-circuit-sequentiel",
+      "layout": [
+        {
+          "text": "ZenRay Végétation Collection 01",
+          "size": 236,
+          "width": 3529.3798828125,
+          "height": 240.72000122070312,
+          "ascent": 181.72000122070312
+        },
+        {
+          "text": "Fleur de Lys",
+          "size": 638,
+          "width": 3530.373046875,
+          "height": 644.3800048828125,
+          "ascent": 484.8800048828125
+        }
+      ],
+      "samples": [
+        "01-circuit-sequentiel-000.png",
+        "01-circuit-sequentiel-009.png",
+        "01-circuit-sequentiel-018.png",
+        "01-circuit-sequentiel-030.png",
+        "01-circuit-sequentiel-120.png",
+        "01-circuit-sequentiel-149.png"
+      ],
+      "bytes": 1215940
+    },
+    {
+      "id": "02-connexions-croisees",
+      "layout": [
+        {
+          "text": "ZenRay Végétation Collection 01",
+          "size": 236,
+          "width": 3529.3798828125,
+          "height": 240.72000122070312,
+          "ascent": 181.72000122070312
+        },
+        {
+          "text": "Fleur de Lys",
+          "size": 638,
+          "width": 3530.373046875,
+          "height": 644.3800048828125,
+          "ascent": 484.8800048828125
+        }
+      ],
+      "samples": [
+        "02-connexions-croisees-000.png",
+        "02-connexions-croisees-009.png",
+        "02-connexions-croisees-018.png",
+        "02-connexions-croisees-030.png",
+        "02-connexions-croisees-120.png",
+        "02-connexions-croisees-149.png"
+      ],
+      "bytes": 1260343
+    },
+    {
+      "id": "03-impulsion-synchronisee",
+      "layout": [
+        {
+          "text": "ZenRay Végétation Collection 01",
+          "size": 236,
+          "width": 3529.3798828125,
+          "height": 240.72000122070312,
+          "ascent": 181.72000122070312
+        },
+        {
+          "text": "Fleur de Lys",
+          "size": 638,
+          "width": 3530.373046875,
+          "height": 644.3800048828125,
+          "ascent": 484.8800048828125
+        }
+      ],
+      "samples": [
+        "03-impulsion-synchronisee-000.png",
+        "03-impulsion-synchronisee-009.png",
+        "03-impulsion-synchronisee-018.png",
+        "03-impulsion-synchronisee-030.png",
+        "03-impulsion-synchronisee-120.png",
+        "03-impulsion-synchronisee-149.png"
+      ],
+      "bytes": 1363232
+    }
+  ]
+}

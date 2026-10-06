@@ -1,0 +1,21 @@
+# 6 October 2026 : apparition du titre ZenRay
+
+6 October 2026 : texte exact, sur deux lignes : « ZenRay Végétation Collection 01 », puis « Fleur de Lys ».
+
+6 October 2026 : police AnthropicSerif Light réelle, graisse 300, sans italique ni graisse synthétique. Chaque ligne occupe environ 92 % de la largeur disponible ; sa taille se calcule depuis la largeur réelle du texte.
+
+6 October 2026 : durée totale 5 secondes à 30 images par seconde : apparition de 0 à 1 seconde, maintien stable de 1 à 4 secondes, disparition en fondu de 4 à 5 secondes. Première et dernière images sans texte.
+
+6 October 2026 : proposition 01, Circuit séquentiel : les lettres s'activent de gauche à droite, avec de très brefs déplacements et variations d'opacité qui s'amortissent avant une seconde.
+
+6 October 2026 : proposition 02, Connexions croisées : l'activation part du centre vers les extrémités ; quatre sections de chaque lettre se raccordent successivement, avec de petits décalages horizontaux et verticaux.
+
+6 October 2026 : proposition 03, Impulsion synchronisée : les lettres s'activent presque ensemble, en ordre décalé ; leurs sections oscillent brièvement puis se verrouillent à leur place.
+
+6 October 2026 : seul le mouvement des lettres et leur opacité sont animés. Aucun halo, particule, éclair, changement de caractère, décoration ou son. Les lettres deviennent entières pendant le maintien afin d'éviter des coutures entre leurs sections.
+
+6 October 2026 : aperçus MOV 3840 × 2160, HEVC avec balise hvc1, fond clair opaque et texte noir. Ces fichiers de choix sont légers ; ils ne contiennent pas de transparence.
+
+6 October 2026 : source éditable Animation.html, paramètres centralisés Animation.json, police embarquée dans assets/. Export reproductible depuis Scripts/RenderTitleAnimations.cjs : NODE_PATH=/Users/zenray/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules node /Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/Scripts/RenderTitleAnimations.cjs.
+
+6 October 2026 : dérivé du gabarit text-asset.html et de la méthode HTML image par image du skill zenray-html-photoshop-pdf-hda-socialmedia-shorts-reel. Le texte reste une source indépendante des textures des pétales.

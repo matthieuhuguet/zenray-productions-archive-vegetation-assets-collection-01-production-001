@@ -1,0 +1,18 @@
+<!doctype html><html lang="fr"><meta charset="utf-8"><title>ZenRay, trois apparitions</title>
+<style>
+/* 6 October 2026 14:00: Derive the text-asset template with deterministic glyph animation. */
+@font-face{font-family:Display;font-weight:300;src:url('assets/AnthropicSerif-Light.ttf')}html,body{margin:0;overflow:hidden}.glyph{position:absolute;font-family:Display;font-weight:300;white-space:pre;transform-origin:center}.piece{position:absolute;inset:0;font:inherit;white-space:pre}
+</style><body><script>
+let config,variant,glyphs=[];
+const smooth=x=>{x=Math.max(0,Math.min(1,x));return x*x*(3-2*x)};
+window.setup=async(c,v)=>{config=c;variant=v;document.body.style.background=c.background;document.body.style.color=c.foreground;await document.fonts.load('300 200px Display');
+const canvas=document.createElement('canvas'),ctx=canvas.getContext('2d');let rows=[];
+for(const text of c.lines){let size=200;ctx.font=`300 ${size}px Display`;size=Math.floor(size*c.width*c.widthRatio/ctx.measureText(text).width);ctx.font=`300 ${size}px Display`;const metrics=ctx.measureText(text);rows.push({text,size,width:metrics.width,height:metrics.actualBoundingBoxAscent+metrics.actualBoundingBoxDescent,ascent:metrics.actualBoundingBoxAscent});}
+let top=(c.height-rows.reduce((s,r)=>s+r.height,0)-c.lineGap)/2;
+rows.forEach((r,row)=>{ctx.font=`300 ${r.size}px Display`;let left=(c.width-r.width)/2;const baseline=top+r.ascent;
+Array.from(r.text).forEach((letter,i)=>{if(letter===' ')return;const prefix=r.text.slice(0,i),x=left+ctx.measureText(prefix).width;const el=document.createElement('span');el.className='glyph';el.style.cssText=`left:${x}px;top:${baseline-r.size}px;font-size:${r.size}px;line-height:1;width:${ctx.measureText(letter).width+8}px;height:${r.size*1.25}px`;const whole=document.createElement("span");whole.textContent=letter;whole.style.opacity=0;el.append(whole);let pieces=[];for(let k=0;k<4;k++){const p=document.createElement('span');p.className='piece';p.textContent=letter;p.style.clipPath=`inset(${k*25}% 0 ${75-k*25}% 0)`;el.append(p);pieces.push(p)}document.body.append(el);glyphs.push({el,whole,pieces,index:i,row,count:r.text.length});});top+=r.height+c.lineGap;});window.renderFrame(0);return rows;};
+window.renderFrame=t=>{for(const g of glyphs){const u=g.index/(g.count-1);let order=variant.motion===1?u:variant.motion===2?Math.abs(u-.5)*2:((g.index*7+g.row*3)%13)/13;const start=order*variant.spread+g.row*.015;const p=Math.max(0,Math.min(1,(t-start)/variant.settle));const fade=t>=4?1-smooth((t-4)/config.disappear):1;
+g.whole.style.opacity=p>=1?fade:0;for(let k=0;k<4;k++){let q=Math.max(0,Math.min(1,p-(variant.motion===2?((k+g.index)%4)*.07:0)));let opacity=smooth(q*2.8);let dx=0,dy=0;
+if(p<1){const env=(1-p)**2;dx=Math.sin(t*variant.frequency+g.index*2.1+k)*variant.amplitude*env*(variant.motion===1?.35:1);dy=Math.cos(t*variant.frequency*1.4+g.index+k)*variant.amplitude*env*.24;if(variant.motion===3)dy+=(1-q)*(-1)**k*variant.amplitude*.5;if(q>0&&q<.5)opacity*=.65+.35*Math.sin(t*100+g.index+k)**2;}
+const part=g.pieces[k];part.style.transform=`translate(${dx}px,${dy}px)`;part.style.opacity=p>=1?0:opacity*fade;}}};
+</script></body></html>
