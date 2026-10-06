@@ -1,0 +1,306 @@
+{
+  "date": "6 October 2026",
+  "mediumOriginalUnchanged": true,
+  "results": [
+    {
+      "id": "vogun-mixed-pop-1s",
+      "popAt": 1,
+      "MB": 0.74,
+      "layout": [
+        {
+          "text": "ZenRay Vegetation Collection 01",
+          "family": "VogunDisplay",
+          "weight": 500,
+          "size": 248,
+          "width": 3598.975830078125,
+          "height": 241.552001953125,
+          "ascent": 179.8000030517578,
+          "x": 120.5120849609375,
+          "baseline": 882.5439910888672,
+          "top": 702.7439880371094,
+          "bottom": 944.2959899902344
+        },
+        {
+          "text": "FLEUR DE LYS",
+          "family": "VogunDisplay",
+          "weight": 500,
+          "size": 552,
+          "width": 3605.112060546875,
+          "height": 402.96002197265625,
+          "ascent": 397.44000244140625,
+          "x": 117.4439697265625,
+          "baseline": 1451.7359924316406,
+          "top": 1054.2959899902344,
+          "bottom": 1457.2560119628906
+        }
+      ],
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "width": 3840,
+            "height": 2160,
+            "nb_frames": "150"
+          }
+        ],
+        "format": {
+          "duration": "5.000000"
+        }
+      },
+      "noFade": true,
+      "noCropping": true,
+      "stableToFinalFrame": true
+    },
+    {
+      "id": "vogun-mixed-pop-1_5s",
+      "popAt": 1.5,
+      "MB": 0.79,
+      "layout": [
+        {
+          "text": "ZenRay Vegetation Collection 01",
+          "family": "VogunDisplay",
+          "weight": 500,
+          "size": 248,
+          "width": 3598.975830078125,
+          "height": 241.552001953125,
+          "ascent": 179.8000030517578,
+          "x": 120.5120849609375,
+          "baseline": 882.5439910888672,
+          "top": 702.7439880371094,
+          "bottom": 944.2959899902344
+        },
+        {
+          "text": "FLEUR DE LYS",
+          "family": "VogunDisplay",
+          "weight": 500,
+          "size": 552,
+          "width": 3605.112060546875,
+          "height": 402.96002197265625,
+          "ascent": 397.44000244140625,
+          "x": 117.4439697265625,
+          "baseline": 1451.7359924316406,
+          "top": 1054.2959899902344,
+          "bottom": 1457.2560119628906
+        }
+      ],
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "width": 3840,
+            "height": 2160,
+            "nb_frames": "150"
+          }
+        ],
+        "format": {
+          "duration": "5.000000"
+        }
+      },
+      "noFade": true,
+      "noCropping": true,
+      "stableToFinalFrame": true
+    },
+    {
+      "id": "vogun-caps-pop-1s",
+      "popAt": 1,
+      "MB": 0.7,
+      "layout": [
+        {
+          "text": "ZENRAY VEGETATION COLLECTION 01",
+          "family": "VogunDisplay",
+          "weight": 500,
+          "size": 195,
+          "width": 3601.26025390625,
+          "height": 142.54501342773438,
+          "ascent": 140.59500122070312,
+          "x": 119.369873046875,
+          "baseline": 892.8424835205078,
+          "top": 752.2474822998047,
+          "bottom": 894.7924957275391
+        },
+        {
+          "text": "FLEUR DE LYS",
+          "family": "VogunDisplay",
+          "weight": 500,
+          "size": 552,
+          "width": 3605.112060546875,
+          "height": 402.96002197265625,
+          "ascent": 397.44000244140625,
+          "x": 117.4439697265625,
+          "baseline": 1402.2324981689453,
+          "top": 1004.7924957275391,
+          "bottom": 1407.7525177001953
+        }
+      ],
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "width": 3840,
+            "height": 2160,
+            "nb_frames": "150"
+          }
+        ],
+        "format": {
+          "duration": "5.000000"
+        }
+      },
+      "noFade": true,
+      "noCropping": true,
+      "stableToFinalFrame": true
+    },
+    {
+      "id": "vogun-caps-pop-1_5s",
+      "popAt": 1.5,
+      "MB": 0.65,
+      "layout": [
+        {
+          "text": "ZENRAY VEGETATION COLLECTION 01",
+          "family": "VogunDisplay",
+          "weight": 500,
+          "size": 195,
+          "width": 3601.26025390625,
+          "height": 142.54501342773438,
+          "ascent": 140.59500122070312,
+          "x": 119.369873046875,
+          "baseline": 892.8424835205078,
+          "top": 752.2474822998047,
+          "bottom": 894.7924957275391
+        },
+        {
+          "text": "FLEUR DE LYS",
+          "family": "VogunDisplay",
+          "weight": 500,
+          "size": 552,
+          "width": 3605.112060546875,
+          "height": 402.96002197265625,
+          "ascent": 397.44000244140625,
+          "x": 117.4439697265625,
+          "baseline": 1402.2324981689453,
+          "top": 1004.7924957275391,
+          "bottom": 1407.7525177001953
+        }
+      ],
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "width": 3840,
+            "height": 2160,
+            "nb_frames": "150"
+          }
+        ],
+        "format": {
+          "duration": "5.000000"
+        }
+      },
+      "noFade": true,
+      "noCropping": true,
+      "stableToFinalFrame": true
+    },
+    {
+      "id": "vogun-spaced-caps-pop-1s",
+      "popAt": 1,
+      "MB": 0.66,
+      "layout": [
+        {
+          "text": "ZENRAY VEGETATION COLLECTION 01",
+          "family": "VogunDisplay",
+          "weight": 500,
+          "size": 176,
+          "width": 3605.007080078125,
+          "height": 128.65602111816406,
+          "ascent": 126.89600372314453,
+          "x": 117.4964599609375,
+          "baseline": 907.6229705810547,
+          "top": 780.7269668579102,
+          "bottom": 909.3829879760742
+        },
+        {
+          "text": "FLEUR DE LYS",
+          "family": "VogunDisplay",
+          "weight": 500,
+          "size": 493,
+          "width": 3604.322998046875,
+          "height": 359.8900451660156,
+          "ascent": 354.96002197265625,
+          "x": 117.8385009765625,
+          "baseline": 1374.3430099487305,
+          "top": 1019.3829879760742,
+          "bottom": 1379.2730331420898
+        }
+      ],
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "width": 3840,
+            "height": 2160,
+            "nb_frames": "150"
+          }
+        ],
+        "format": {
+          "duration": "5.000000"
+        }
+      },
+      "noFade": true,
+      "noCropping": true,
+      "stableToFinalFrame": true
+    },
+    {
+      "id": "vogun-spaced-caps-pop-1_5s",
+      "popAt": 1.5,
+      "MB": 0.6,
+      "layout": [
+        {
+          "text": "ZENRAY VEGETATION COLLECTION 01",
+          "family": "VogunDisplay",
+          "weight": 500,
+          "size": 176,
+          "width": 3605.007080078125,
+          "height": 128.65602111816406,
+          "ascent": 126.89600372314453,
+          "x": 117.4964599609375,
+          "baseline": 907.6229705810547,
+          "top": 780.7269668579102,
+          "bottom": 909.3829879760742
+        },
+        {
+          "text": "FLEUR DE LYS",
+          "family": "VogunDisplay",
+          "weight": 500,
+          "size": 493,
+          "width": 3604.322998046875,
+          "height": 359.8900451660156,
+          "ascent": 354.96002197265625,
+          "x": 117.8385009765625,
+          "baseline": 1374.3430099487305,
+          "top": 1019.3829879760742,
+          "bottom": 1379.2730331420898
+        }
+      ],
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "width": 3840,
+            "height": 2160,
+            "nb_frames": "150"
+          }
+        ],
+        "format": {
+          "duration": "5.000000"
+        }
+      },
+      "noFade": true,
+      "noCropping": true,
+      "stableToFinalFrame": true
+    }
+  ]
+}

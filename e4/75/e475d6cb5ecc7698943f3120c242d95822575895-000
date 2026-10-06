@@ -1,0 +1,11 @@
+<!doctype html><html lang="fr"><meta charset="utf-8"><title>ZenRay, titre pop Inter Black</title><style>
+/* 6 October 2026 14:40: Measure both real font faces and snap the Black title on its exact frame. */
+@font-face{font-family:VogunDisplay;font-weight:500;src:url('assets/Vogun-Medium.ttf')}html,body{margin:0;overflow:hidden}canvas{display:block}
+</style><body><canvas id="view"></canvas><script>
+let config,variant,ctx,rows=[];
+const smooth=x=>{x=Math.max(0,Math.min(1,x));return x*x*(3-2*x)};
+window.setup=async(c,v)=>{config=c;variant=v;await document.fonts.load('500 200px VogunDisplay');const canvas=document.getElementById('view');canvas.width=c.width;canvas.height=c.height;ctx=canvas.getContext('2d');
+for(let i=0;i<v.lines.length;i++){const text=v.lines[i],family='VogunDisplay',weight=c.weight;let size=200;ctx.font=`${weight} ${size}px ${family}`;ctx.letterSpacing=`${size*v.trackingEm}px`;size=Math.floor(size*c.width*c.widthRatio/ctx.measureText(text).width);ctx.font=`${weight} ${size}px ${family}`;ctx.letterSpacing=`${size*v.trackingEm}px`;let metrics=ctx.measureText(text);while(metrics.actualBoundingBoxLeft+metrics.actualBoundingBoxRight>c.width*c.widthRatio){size--;ctx.font=`${weight} ${size}px ${family}`;ctx.letterSpacing=`${size*v.trackingEm}px`;metrics=ctx.measureText(text)}rows.push({text,family,weight,size,width:metrics.width,height:metrics.actualBoundingBoxAscent+metrics.actualBoundingBoxDescent,ascent:metrics.actualBoundingBoxAscent});}
+let top=(c.height-rows.reduce((s,r)=>s+r.height,0)-c.lineGap)/2;for(const r of rows){r.x=(c.width-r.width)/2;r.baseline=top+r.ascent;r.top=top;r.bottom=top+r.height;top+=r.height+c.lineGap;}renderFrame(0);return rows;};
+window.renderFrame=t=>{ctx.globalAlpha=1;ctx.shadowColor='transparent';ctx.fillStyle=config.background;ctx.fillRect(0,0,config.width,config.height);if(t>=5)return;rows.forEach((r,i)=>{let opacity=t>=variant.popAt?1:0;if(!opacity)return;ctx.globalAlpha=opacity;ctx.font=`${r.weight} ${r.size}px ${r.family}`;ctx.letterSpacing=`${r.size*variant.trackingEm}px`;ctx.fillStyle=config.foreground;ctx.shadowColor=config.shadow.color;ctx.shadowBlur=config.shadow.blur;ctx.shadowOffsetX=0;ctx.shadowOffsetY=0;ctx.fillText(r.text,r.x,r.baseline);});ctx.globalAlpha=1;ctx.shadowColor='transparent';};
+</script></body></html>

@@ -1,0 +1,958 @@
+{
+  "root": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation",
+  "mode": "archive-unselected-title-animations",
+  "ops": [
+    {
+      "op": "mkdir",
+      "dst": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive/6-October-2026/vogun-pop"
+    },
+    {
+      "op": "move",
+      "src": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/.DS_Store",
+      "dst": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive/6-October-2026/.DS_Store",
+      "why": "Archive previous animation candidates"
+    },
+    {
+      "op": "move",
+      "src": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/01-circuit-sequentiel-000.png",
+      "dst": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive/6-October-2026/01-circuit-sequentiel-000.png",
+      "why": "Archive previous animation candidates"
+    },
+    {
+      "op": "move",
+      "src": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/01-circuit-sequentiel-009.png",
+      "dst": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive/6-October-2026/01-circuit-sequentiel-009.png",
+      "why": "Archive previous animation candidates"
+    },
+    {
+      "op": "move",
+      "src": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/01-circuit-sequentiel-018.png",
+      "dst": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive/6-October-2026/01-circuit-sequentiel-018.png",
+      "why": "Archive previous animation candidates"
+    },
+    {
+      "op": "move",
+      "src": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/01-circuit-sequentiel-030.png",
+      "dst": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive/6-October-2026/01-circuit-sequentiel-030.png",
+      "why": "Archive previous animation candidates"
+    },
+    {
+      "op": "move",
+      "src": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/01-circuit-sequentiel-120.png",
+      "dst": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive/6-October-2026/01-circuit-sequentiel-120.png",
+      "why": "Archive previous animation candidates"
+    },
+    {
+      "op": "move",
+      "src": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/01-circuit-sequentiel-149.png",
+      "dst": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive/6-October-2026/01-circuit-sequentiel-149.png",
+      "why": "Archive previous animation candidates"
+    },
+    {
+      "op": "move",
+      "src": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/01-circuit-sequentiel.log",
+      "dst": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive/6-October-2026/01-circuit-sequentiel.log",
+      "why": "Archive previous animation candidates"
+    },
+    {
+      "op": "move",
+      "src": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/01-circuit-sequentiel.mov",
+      "dst": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive/6-October-2026/01-circuit-sequentiel.mov",
+      "why": "Archive previous animation candidates"
+    },
+    {
+      "op": "move",
+      "src": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/02-cmy-variants.json",
+      "dst": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive/6-October-2026/02-cmy-variants.json",
+      "why": "Archive previous animation candidates"
+    },
+    {
+      "op": "move",
+      "src": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/02-cmy-verification.json",
+      "dst": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive/6-October-2026/02-cmy-verification.json",
+      "why": "Archive previous animation candidates"
+    },
+    {
+      "op": "move",
+      "src": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/02-color-variants.json",
+      "dst": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive/6-October-2026/02-color-variants.json",
+      "why": "Archive previous animation candidates"
+    },
+    {
+      "op": "move",
+      "src": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/02-colors-comparison.png",
+      "dst": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive/6-October-2026/02-colors-comparison.png",
+      "why": "Archive previous animation candidates"
+    },
+    {
+      "op": "move",
+      "src": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/02-colors-verification.json",
+      "dst": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive/6-October-2026/02-colors-verification.json",
+      "why": "Archive previous animation candidates"
+    },
+    {
+      "op": "move",
+      "src": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/02-connexions-croisees-000.png",
+      "dst": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive/6-October-2026/02-connexions-croisees-000.png",
+      "why": "Archive previous animation candidates"
+    },
+    {
+      "op": "move",
+      "src": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/02-connexions-croisees-009.png",
+      "dst": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive/6-October-2026/02-connexions-croisees-009.png",
+      "why": "Archive previous animation candidates"
+    },
+    {
+      "op": "move",
+      "src": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/02-connexions-croisees-018.png",
+      "dst": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive/6-October-2026/02-connexions-croisees-018.png",
+      "why": "Archive previous animation candidates"
+    },
+    {
+      "op": "move",
+      "src": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/02-connexions-croisees-030.png",
+      "dst": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive/6-October-2026/02-connexions-croisees-030.png",
+      "why": "Archive previous animation candidates"
+    },
+    {
+      "op": "move",
+      "src": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/02-connexions-croisees-045.png",
+      "dst": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive/6-October-2026/02-connexions-croisees-045.png",
+      "why": "Archive previous animation candidates"
+    },
+    {
+      "op": "move",
+      "src": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/02-connexions-croisees-105.png",
+      "dst": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive/6-October-2026/02-connexions-croisees-105.png",
+      "why": "Archive previous animation candidates"
+    },
+    {
+      "op": "move",
+      "src": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/02-connexions-croisees-120.png",
+      "dst": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive/6-October-2026/02-connexions-croisees-120.png",
+      "why": "Archive previous animation candidates"
+    },
+    {
+      "op": "move",
+      "src": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/02-connexions-croisees-149.png",
+      "dst": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive/6-October-2026/02-connexions-croisees-149.png",
+      "why": "Archive previous animation candidates"
+    },
+    {
+      "op": "move",
+      "src": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/02-connexions-croisees-cyan-000.png",
+      "dst": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive/6-October-2026/02-connexions-croisees-cyan-000.png",
+      "why": "Archive previous animation candidates"
+    },
+    {
+      "op": "move",
+      "src": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/02-connexions-croisees-cyan-009.png",
+      "dst": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive/6-October-2026/02-connexions-croisees-cyan-009.png",
+      "why": "Archive previous animation candidates"
+    },
+    {
+      "op": "move",
+      "src": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/02-connexions-croisees-cyan-018.png",
+      "dst": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive/6-October-2026/02-connexions-croisees-cyan-018.png",
+      "why": "Archive previous animation candidates"
+    },
+    {
+      "op": "move",
+      "src": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/02-connexions-croisees-cyan-030.png",
+      "dst": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive/6-October-2026/02-connexions-croisees-cyan-030.png",
+      "why": "Archive previous animation candidates"
+    },
+    {
+      "op": "move",
+      "src": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/02-connexions-croisees-cyan-045.png",
+      "dst": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive/6-October-2026/02-connexions-croisees-cyan-045.png",
+      "why": "Archive previous animation candidates"
+    },
+    {
+      "op": "move",
+      "src": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/02-connexions-croisees-cyan-105.png",
+      "dst": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive/6-October-2026/02-connexions-croisees-cyan-105.png",
+      "why": "Archive previous animation candidates"
+    },
+    {
+      "op": "move",
+      "src": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/02-connexions-croisees-cyan-149.png",
+      "dst": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive/6-October-2026/02-connexions-croisees-cyan-149.png",
+      "why": "Archive previous animation candidates"
+    },
+    {
+      "op": "move",
+      "src": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/02-connexions-croisees-cyan-verification.json",
+      "dst": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive/6-October-2026/02-connexions-croisees-cyan-verification.json",
+      "why": "Archive previous animation candidates"
+    },
+    {
+      "op": "move",
+      "src": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/02-connexions-croisees-cyan.json",
+      "dst": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive/6-October-2026/02-connexions-croisees-cyan.json",
+      "why": "Archive previous animation candidates"
+    },
+    {
+      "op": "move",
+      "src": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/02-connexions-croisees-cyan.log",
+      "dst": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive/6-October-2026/02-connexions-croisees-cyan.log",
+      "why": "Archive previous animation candidates"
+    },
+    {
+      "op": "move",
+      "src": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/02-connexions-croisees-cyan.md",
+      "dst": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive/6-October-2026/02-connexions-croisees-cyan.md",
+      "why": "Archive previous animation candidates"
+    },
+    {
+      "op": "move",
+      "src": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/02-connexions-croisees-cyan.mov",
+      "dst": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive/6-October-2026/02-connexions-croisees-cyan.mov",
+      "why": "Archive previous animation candidates"
+    },
+    {
+      "op": "move",
+      "src": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/02-connexions-croisees-magenta-000.png",
+      "dst": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive/6-October-2026/02-connexions-croisees-magenta-000.png",
+      "why": "Archive previous animation candidates"
+    },
+    {
+      "op": "move",
+      "src": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/02-connexions-croisees-magenta-009.png",
+      "dst": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive/6-October-2026/02-connexions-croisees-magenta-009.png",
+      "why": "Archive previous animation candidates"
+    },
+    {
+      "op": "move",
+      "src": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/02-connexions-croisees-magenta-018.png",
+      "dst": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive/6-October-2026/02-connexions-croisees-magenta-018.png",
+      "why": "Archive previous animation candidates"
+    },
+    {
+      "op": "move",
+      "src": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/02-connexions-croisees-magenta-030.png",
+      "dst": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive/6-October-2026/02-connexions-croisees-magenta-030.png",
+      "why": "Archive previous animation candidates"
+    },
+    {
+      "op": "move",
+      "src": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/02-connexions-croisees-magenta-045.png",
+      "dst": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive/6-October-2026/02-connexions-croisees-magenta-045.png",
+      "why": "Archive previous animation candidates"
+    },
+    {
+      "op": "move",
+      "src": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/02-connexions-croisees-magenta-105.png",
+      "dst": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive/6-October-2026/02-connexions-croisees-magenta-105.png",
+      "why": "Archive previous animation candidates"
+    },
+    {
+      "op": "move",
+      "src": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/02-connexions-croisees-magenta-149.png",
+      "dst": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive/6-October-2026/02-connexions-croisees-magenta-149.png",
+      "why": "Archive previous animation candidates"
+    },
+    {
+      "op": "move",
+      "src": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/02-connexions-croisees-magenta-verification.json",
+      "dst": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive/6-October-2026/02-connexions-croisees-magenta-verification.json",
+      "why": "Archive previous animation candidates"
+    },
+    {
+      "op": "move",
+      "src": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/02-connexions-croisees-magenta.json",
+      "dst": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive/6-October-2026/02-connexions-croisees-magenta.json",
+      "why": "Archive previous animation candidates"
+    },
+    {
+      "op": "move",
+      "src": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/02-connexions-croisees-magenta.log",
+      "dst": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive/6-October-2026/02-connexions-croisees-magenta.log",
+      "why": "Archive previous animation candidates"
+    },
+    {
+      "op": "move",
+      "src": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/02-connexions-croisees-magenta.md",
+      "dst": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive/6-October-2026/02-connexions-croisees-magenta.md",
+      "why": "Archive previous animation candidates"
+    },
+    {
+      "op": "move",
+      "src": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/02-connexions-croisees-magenta.mov",
+      "dst": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive/6-October-2026/02-connexions-croisees-magenta.mov",
+      "why": "Archive previous animation candidates"
+    },
+    {
+      "op": "move",
+      "src": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/02-connexions-croisees-others-before.json",
+      "dst": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive/6-October-2026/02-connexions-croisees-others-before.json",
+      "why": "Archive previous animation candidates"
+    },
+    {
+      "op": "move",
+      "src": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/02-connexions-croisees-turquoise-000.png",
+      "dst": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive/6-October-2026/02-connexions-croisees-turquoise-000.png",
+      "why": "Archive previous animation candidates"
+    },
+    {
+      "op": "move",
+      "src": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/02-connexions-croisees-turquoise-009.png",
+      "dst": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive/6-October-2026/02-connexions-croisees-turquoise-009.png",
+      "why": "Archive previous animation candidates"
+    },
+    {
+      "op": "move",
+      "src": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/02-connexions-croisees-turquoise-018.png",
+      "dst": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive/6-October-2026/02-connexions-croisees-turquoise-018.png",
+      "why": "Archive previous animation candidates"
+    },
+    {
+      "op": "move",
+      "src": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/02-connexions-croisees-turquoise-030.png",
+      "dst": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive/6-October-2026/02-connexions-croisees-turquoise-030.png",
+      "why": "Archive previous animation candidates"
+    },
+    {
+      "op": "move",
+      "src": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/02-connexions-croisees-turquoise-045.png",
+      "dst": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive/6-October-2026/02-connexions-croisees-turquoise-045.png",
+      "why": "Archive previous animation candidates"
+    },
+    {
+      "op": "move",
+      "src": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/02-connexions-croisees-turquoise-105.png",
+      "dst": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive/6-October-2026/02-connexions-croisees-turquoise-105.png",
+      "why": "Archive previous animation candidates"
+    },
+    {
+      "op": "move",
+      "src": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/02-connexions-croisees-turquoise-149.png",
+      "dst": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive/6-October-2026/02-connexions-croisees-turquoise-149.png",
+      "why": "Archive previous animation candidates"
+    },
+    {
+      "op": "move",
+      "src": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/02-connexions-croisees-turquoise-verification.json",
+      "dst": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive/6-October-2026/02-connexions-croisees-turquoise-verification.json",
+      "why": "Archive previous animation candidates"
+    },
+    {
+      "op": "move",
+      "src": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/02-connexions-croisees-turquoise.json",
+      "dst": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive/6-October-2026/02-connexions-croisees-turquoise.json",
+      "why": "Archive previous animation candidates"
+    },
+    {
+      "op": "move",
+      "src": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/02-connexions-croisees-turquoise.log",
+      "dst": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive/6-October-2026/02-connexions-croisees-turquoise.log",
+      "why": "Archive previous animation candidates"
+    },
+    {
+      "op": "move",
+      "src": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/02-connexions-croisees-turquoise.md",
+      "dst": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive/6-October-2026/02-connexions-croisees-turquoise.md",
+      "why": "Archive previous animation candidates"
+    },
+    {
+      "op": "move",
+      "src": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/02-connexions-croisees-turquoise.mov",
+      "dst": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive/6-October-2026/02-connexions-croisees-turquoise.mov",
+      "why": "Archive previous animation candidates"
+    },
+    {
+      "op": "move",
+      "src": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/02-connexions-croisees-verification.json",
+      "dst": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive/6-October-2026/02-connexions-croisees-verification.json",
+      "why": "Archive previous animation candidates"
+    },
+    {
+      "op": "move",
+      "src": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/02-connexions-croisees-yellow-000.png",
+      "dst": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive/6-October-2026/02-connexions-croisees-yellow-000.png",
+      "why": "Archive previous animation candidates"
+    },
+    {
+      "op": "move",
+      "src": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/02-connexions-croisees-yellow-009.png",
+      "dst": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive/6-October-2026/02-connexions-croisees-yellow-009.png",
+      "why": "Archive previous animation candidates"
+    },
+    {
+      "op": "move",
+      "src": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/02-connexions-croisees-yellow-018.png",
+      "dst": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive/6-October-2026/02-connexions-croisees-yellow-018.png",
+      "why": "Archive previous animation candidates"
+    },
+    {
+      "op": "move",
+      "src": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/02-connexions-croisees-yellow-030.png",
+      "dst": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive/6-October-2026/02-connexions-croisees-yellow-030.png",
+      "why": "Archive previous animation candidates"
+    },
+    {
+      "op": "move",
+      "src": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/02-connexions-croisees-yellow-045.png",
+      "dst": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive/6-October-2026/02-connexions-croisees-yellow-045.png",
+      "why": "Archive previous animation candidates"
+    },
+    {
+      "op": "move",
+      "src": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/02-connexions-croisees-yellow-105.png",
+      "dst": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive/6-October-2026/02-connexions-croisees-yellow-105.png",
+      "why": "Archive previous animation candidates"
+    },
+    {
+      "op": "move",
+      "src": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/02-connexions-croisees-yellow-149.png",
+      "dst": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive/6-October-2026/02-connexions-croisees-yellow-149.png",
+      "why": "Archive previous animation candidates"
+    },
+    {
+      "op": "move",
+      "src": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/02-connexions-croisees-yellow.json",
+      "dst": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive/6-October-2026/02-connexions-croisees-yellow.json",
+      "why": "Archive previous animation candidates"
+    },
+    {
+      "op": "move",
+      "src": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/02-connexions-croisees-yellow.log",
+      "dst": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive/6-October-2026/02-connexions-croisees-yellow.log",
+      "why": "Archive previous animation candidates"
+    },
+    {
+      "op": "move",
+      "src": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/02-connexions-croisees-yellow.md",
+      "dst": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive/6-October-2026/02-connexions-croisees-yellow.md",
+      "why": "Archive previous animation candidates"
+    },
+    {
+      "op": "move",
+      "src": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/02-connexions-croisees-yellow.mov",
+      "dst": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive/6-October-2026/02-connexions-croisees-yellow.mov",
+      "why": "Archive previous animation candidates"
+    },
+    {
+      "op": "move",
+      "src": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/02-connexions-croisees.html",
+      "dst": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive/6-October-2026/02-connexions-croisees.html",
+      "why": "Archive previous animation candidates"
+    },
+    {
+      "op": "move",
+      "src": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/02-connexions-croisees.json",
+      "dst": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive/6-October-2026/02-connexions-croisees.json",
+      "why": "Archive previous animation candidates"
+    },
+    {
+      "op": "move",
+      "src": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/02-connexions-croisees.log",
+      "dst": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive/6-October-2026/02-connexions-croisees.log",
+      "why": "Archive previous animation candidates"
+    },
+    {
+      "op": "move",
+      "src": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/02-connexions-croisees.md",
+      "dst": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive/6-October-2026/02-connexions-croisees.md",
+      "why": "Archive previous animation candidates"
+    },
+    {
+      "op": "move",
+      "src": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/02-connexions-croisees.mov",
+      "dst": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive/6-October-2026/02-connexions-croisees.mov",
+      "why": "Archive previous animation candidates"
+    },
+    {
+      "op": "move",
+      "src": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/02-white-english-final.png",
+      "dst": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive/6-October-2026/02-white-english-final.png",
+      "why": "Archive previous animation candidates"
+    },
+    {
+      "op": "move",
+      "src": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/03-impulsion-synchronisee-000.png",
+      "dst": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive/6-October-2026/03-impulsion-synchronisee-000.png",
+      "why": "Archive previous animation candidates"
+    },
+    {
+      "op": "move",
+      "src": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/03-impulsion-synchronisee-009.png",
+      "dst": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive/6-October-2026/03-impulsion-synchronisee-009.png",
+      "why": "Archive previous animation candidates"
+    },
+    {
+      "op": "move",
+      "src": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/03-impulsion-synchronisee-018.png",
+      "dst": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive/6-October-2026/03-impulsion-synchronisee-018.png",
+      "why": "Archive previous animation candidates"
+    },
+    {
+      "op": "move",
+      "src": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/03-impulsion-synchronisee-030.png",
+      "dst": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive/6-October-2026/03-impulsion-synchronisee-030.png",
+      "why": "Archive previous animation candidates"
+    },
+    {
+      "op": "move",
+      "src": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/03-impulsion-synchronisee-120.png",
+      "dst": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive/6-October-2026/03-impulsion-synchronisee-120.png",
+      "why": "Archive previous animation candidates"
+    },
+    {
+      "op": "move",
+      "src": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/03-impulsion-synchronisee-149.png",
+      "dst": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive/6-October-2026/03-impulsion-synchronisee-149.png",
+      "why": "Archive previous animation candidates"
+    },
+    {
+      "op": "move",
+      "src": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/03-impulsion-synchronisee.log",
+      "dst": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive/6-October-2026/03-impulsion-synchronisee.log",
+      "why": "Archive previous animation candidates"
+    },
+    {
+      "op": "move",
+      "src": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/03-impulsion-synchronisee.mov",
+      "dst": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive/6-October-2026/03-impulsion-synchronisee.mov",
+      "why": "Archive previous animation candidates"
+    },
+    {
+      "op": "move",
+      "src": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/Animation.html",
+      "dst": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive/6-October-2026/Animation.html",
+      "why": "Archive previous animation candidates"
+    },
+    {
+      "op": "move",
+      "src": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/Animation.json",
+      "dst": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive/6-October-2026/Animation.json",
+      "why": "Archive previous animation candidates"
+    },
+    {
+      "op": "move",
+      "src": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/Animation.md",
+      "dst": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive/6-October-2026/Animation.md",
+      "why": "Archive previous animation candidates"
+    },
+    {
+      "op": "move",
+      "src": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/Comparison.png",
+      "dst": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive/6-October-2026/Comparison.png",
+      "why": "Archive previous animation candidates"
+    },
+    {
+      "op": "move",
+      "src": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/RenderReport.json",
+      "dst": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive/6-October-2026/RenderReport.json",
+      "why": "Archive previous animation candidates"
+    },
+    {
+      "op": "move",
+      "src": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/Verification.json",
+      "dst": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive/6-October-2026/Verification.json",
+      "why": "Archive previous animation candidates"
+    },
+    {
+      "op": "move",
+      "src": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive-before-timing-1_5",
+      "dst": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive/6-October-2026/archive-before-timing-1_5",
+      "why": "Archive previous animation candidates"
+    },
+    {
+      "op": "move",
+      "src": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive-v1",
+      "dst": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive/6-October-2026/archive-v1",
+      "why": "Archive previous animation candidates"
+    },
+    {
+      "op": "move",
+      "src": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/assets",
+      "dst": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive/6-October-2026/assets",
+      "why": "Archive previous animation candidates"
+    },
+    {
+      "op": "move",
+      "src": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/pop-variants",
+      "dst": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive/6-October-2026/pop-variants",
+      "why": "Archive previous animation candidates"
+    },
+    {
+      "op": "move",
+      "src": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/voxel-variants",
+      "dst": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive/6-October-2026/voxel-variants",
+      "why": "Archive previous animation candidates"
+    },
+    {
+      "op": "move",
+      "src": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/vogun-pop/Animation.json",
+      "dst": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive/6-October-2026/vogun-pop/Animation.json",
+      "why": "Preserve selected mixed Vogun 1 second only"
+    },
+    {
+      "op": "move",
+      "src": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/vogun-pop/Animation.md",
+      "dst": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive/6-October-2026/vogun-pop/Animation.md",
+      "why": "Preserve selected mixed Vogun 1 second only"
+    },
+    {
+      "op": "move",
+      "src": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/vogun-pop/Comparison.png",
+      "dst": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive/6-October-2026/vogun-pop/Comparison.png",
+      "why": "Preserve selected mixed Vogun 1 second only"
+    },
+    {
+      "op": "move",
+      "src": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/vogun-pop/RenderReport.json",
+      "dst": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive/6-October-2026/vogun-pop/RenderReport.json",
+      "why": "Preserve selected mixed Vogun 1 second only"
+    },
+    {
+      "op": "move",
+      "src": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/vogun-pop/Verification.json",
+      "dst": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive/6-October-2026/vogun-pop/Verification.json",
+      "why": "Preserve selected mixed Vogun 1 second only"
+    },
+    {
+      "op": "move",
+      "src": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/vogun-pop/vogun-caps-pop-1_5s-000.png",
+      "dst": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive/6-October-2026/vogun-pop/vogun-caps-pop-1_5s-000.png",
+      "why": "Preserve selected mixed Vogun 1 second only"
+    },
+    {
+      "op": "move",
+      "src": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/vogun-pop/vogun-caps-pop-1_5s-009.png",
+      "dst": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive/6-October-2026/vogun-pop/vogun-caps-pop-1_5s-009.png",
+      "why": "Preserve selected mixed Vogun 1 second only"
+    },
+    {
+      "op": "move",
+      "src": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/vogun-pop/vogun-caps-pop-1_5s-018.png",
+      "dst": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive/6-October-2026/vogun-pop/vogun-caps-pop-1_5s-018.png",
+      "why": "Preserve selected mixed Vogun 1 second only"
+    },
+    {
+      "op": "move",
+      "src": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/vogun-pop/vogun-caps-pop-1_5s-030.png",
+      "dst": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive/6-October-2026/vogun-pop/vogun-caps-pop-1_5s-030.png",
+      "why": "Preserve selected mixed Vogun 1 second only"
+    },
+    {
+      "op": "move",
+      "src": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/vogun-pop/vogun-caps-pop-1_5s-045.png",
+      "dst": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive/6-October-2026/vogun-pop/vogun-caps-pop-1_5s-045.png",
+      "why": "Preserve selected mixed Vogun 1 second only"
+    },
+    {
+      "op": "move",
+      "src": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/vogun-pop/vogun-caps-pop-1_5s-149.png",
+      "dst": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive/6-October-2026/vogun-pop/vogun-caps-pop-1_5s-149.png",
+      "why": "Preserve selected mixed Vogun 1 second only"
+    },
+    {
+      "op": "move",
+      "src": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/vogun-pop/vogun-caps-pop-1_5s.json",
+      "dst": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive/6-October-2026/vogun-pop/vogun-caps-pop-1_5s.json",
+      "why": "Preserve selected mixed Vogun 1 second only"
+    },
+    {
+      "op": "move",
+      "src": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/vogun-pop/vogun-caps-pop-1_5s.log",
+      "dst": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive/6-October-2026/vogun-pop/vogun-caps-pop-1_5s.log",
+      "why": "Preserve selected mixed Vogun 1 second only"
+    },
+    {
+      "op": "move",
+      "src": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/vogun-pop/vogun-caps-pop-1_5s.md",
+      "dst": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive/6-October-2026/vogun-pop/vogun-caps-pop-1_5s.md",
+      "why": "Preserve selected mixed Vogun 1 second only"
+    },
+    {
+      "op": "move",
+      "src": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/vogun-pop/vogun-caps-pop-1_5s.mov",
+      "dst": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive/6-October-2026/vogun-pop/vogun-caps-pop-1_5s.mov",
+      "why": "Preserve selected mixed Vogun 1 second only"
+    },
+    {
+      "op": "move",
+      "src": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/vogun-pop/vogun-caps-pop-1s-000.png",
+      "dst": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive/6-October-2026/vogun-pop/vogun-caps-pop-1s-000.png",
+      "why": "Preserve selected mixed Vogun 1 second only"
+    },
+    {
+      "op": "move",
+      "src": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/vogun-pop/vogun-caps-pop-1s-009.png",
+      "dst": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive/6-October-2026/vogun-pop/vogun-caps-pop-1s-009.png",
+      "why": "Preserve selected mixed Vogun 1 second only"
+    },
+    {
+      "op": "move",
+      "src": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/vogun-pop/vogun-caps-pop-1s-018.png",
+      "dst": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive/6-October-2026/vogun-pop/vogun-caps-pop-1s-018.png",
+      "why": "Preserve selected mixed Vogun 1 second only"
+    },
+    {
+      "op": "move",
+      "src": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/vogun-pop/vogun-caps-pop-1s-030.png",
+      "dst": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive/6-October-2026/vogun-pop/vogun-caps-pop-1s-030.png",
+      "why": "Preserve selected mixed Vogun 1 second only"
+    },
+    {
+      "op": "move",
+      "src": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/vogun-pop/vogun-caps-pop-1s-045.png",
+      "dst": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive/6-October-2026/vogun-pop/vogun-caps-pop-1s-045.png",
+      "why": "Preserve selected mixed Vogun 1 second only"
+    },
+    {
+      "op": "move",
+      "src": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/vogun-pop/vogun-caps-pop-1s-149.png",
+      "dst": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive/6-October-2026/vogun-pop/vogun-caps-pop-1s-149.png",
+      "why": "Preserve selected mixed Vogun 1 second only"
+    },
+    {
+      "op": "move",
+      "src": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/vogun-pop/vogun-caps-pop-1s.json",
+      "dst": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive/6-October-2026/vogun-pop/vogun-caps-pop-1s.json",
+      "why": "Preserve selected mixed Vogun 1 second only"
+    },
+    {
+      "op": "move",
+      "src": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/vogun-pop/vogun-caps-pop-1s.log",
+      "dst": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive/6-October-2026/vogun-pop/vogun-caps-pop-1s.log",
+      "why": "Preserve selected mixed Vogun 1 second only"
+    },
+    {
+      "op": "move",
+      "src": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/vogun-pop/vogun-caps-pop-1s.md",
+      "dst": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive/6-October-2026/vogun-pop/vogun-caps-pop-1s.md",
+      "why": "Preserve selected mixed Vogun 1 second only"
+    },
+    {
+      "op": "move",
+      "src": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/vogun-pop/vogun-caps-pop-1s.mov",
+      "dst": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive/6-October-2026/vogun-pop/vogun-caps-pop-1s.mov",
+      "why": "Preserve selected mixed Vogun 1 second only"
+    },
+    {
+      "op": "move",
+      "src": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/vogun-pop/vogun-mixed-pop-1_5s-000.png",
+      "dst": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive/6-October-2026/vogun-pop/vogun-mixed-pop-1_5s-000.png",
+      "why": "Preserve selected mixed Vogun 1 second only"
+    },
+    {
+      "op": "move",
+      "src": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/vogun-pop/vogun-mixed-pop-1_5s-009.png",
+      "dst": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive/6-October-2026/vogun-pop/vogun-mixed-pop-1_5s-009.png",
+      "why": "Preserve selected mixed Vogun 1 second only"
+    },
+    {
+      "op": "move",
+      "src": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/vogun-pop/vogun-mixed-pop-1_5s-018.png",
+      "dst": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive/6-October-2026/vogun-pop/vogun-mixed-pop-1_5s-018.png",
+      "why": "Preserve selected mixed Vogun 1 second only"
+    },
+    {
+      "op": "move",
+      "src": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/vogun-pop/vogun-mixed-pop-1_5s-030.png",
+      "dst": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive/6-October-2026/vogun-pop/vogun-mixed-pop-1_5s-030.png",
+      "why": "Preserve selected mixed Vogun 1 second only"
+    },
+    {
+      "op": "move",
+      "src": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/vogun-pop/vogun-mixed-pop-1_5s-045.png",
+      "dst": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive/6-October-2026/vogun-pop/vogun-mixed-pop-1_5s-045.png",
+      "why": "Preserve selected mixed Vogun 1 second only"
+    },
+    {
+      "op": "move",
+      "src": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/vogun-pop/vogun-mixed-pop-1_5s-149.png",
+      "dst": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive/6-October-2026/vogun-pop/vogun-mixed-pop-1_5s-149.png",
+      "why": "Preserve selected mixed Vogun 1 second only"
+    },
+    {
+      "op": "move",
+      "src": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/vogun-pop/vogun-mixed-pop-1_5s.json",
+      "dst": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive/6-October-2026/vogun-pop/vogun-mixed-pop-1_5s.json",
+      "why": "Preserve selected mixed Vogun 1 second only"
+    },
+    {
+      "op": "move",
+      "src": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/vogun-pop/vogun-mixed-pop-1_5s.log",
+      "dst": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive/6-October-2026/vogun-pop/vogun-mixed-pop-1_5s.log",
+      "why": "Preserve selected mixed Vogun 1 second only"
+    },
+    {
+      "op": "move",
+      "src": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/vogun-pop/vogun-mixed-pop-1_5s.md",
+      "dst": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive/6-October-2026/vogun-pop/vogun-mixed-pop-1_5s.md",
+      "why": "Preserve selected mixed Vogun 1 second only"
+    },
+    {
+      "op": "move",
+      "src": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/vogun-pop/vogun-mixed-pop-1_5s.mov",
+      "dst": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive/6-October-2026/vogun-pop/vogun-mixed-pop-1_5s.mov",
+      "why": "Preserve selected mixed Vogun 1 second only"
+    },
+    {
+      "op": "move",
+      "src": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/vogun-pop/vogun-mixed-pop-1s-000.png",
+      "dst": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive/6-October-2026/vogun-pop/vogun-mixed-pop-1s-000.png",
+      "why": "Preserve selected mixed Vogun 1 second only"
+    },
+    {
+      "op": "move",
+      "src": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/vogun-pop/vogun-mixed-pop-1s-009.png",
+      "dst": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive/6-October-2026/vogun-pop/vogun-mixed-pop-1s-009.png",
+      "why": "Preserve selected mixed Vogun 1 second only"
+    },
+    {
+      "op": "move",
+      "src": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/vogun-pop/vogun-mixed-pop-1s-018.png",
+      "dst": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive/6-October-2026/vogun-pop/vogun-mixed-pop-1s-018.png",
+      "why": "Preserve selected mixed Vogun 1 second only"
+    },
+    {
+      "op": "move",
+      "src": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/vogun-pop/vogun-mixed-pop-1s-030.png",
+      "dst": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive/6-October-2026/vogun-pop/vogun-mixed-pop-1s-030.png",
+      "why": "Preserve selected mixed Vogun 1 second only"
+    },
+    {
+      "op": "move",
+      "src": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/vogun-pop/vogun-mixed-pop-1s-045.png",
+      "dst": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive/6-October-2026/vogun-pop/vogun-mixed-pop-1s-045.png",
+      "why": "Preserve selected mixed Vogun 1 second only"
+    },
+    {
+      "op": "move",
+      "src": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/vogun-pop/vogun-mixed-pop-1s-149.png",
+      "dst": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive/6-October-2026/vogun-pop/vogun-mixed-pop-1s-149.png",
+      "why": "Preserve selected mixed Vogun 1 second only"
+    },
+    {
+      "op": "move",
+      "src": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/vogun-pop/vogun-mixed-pop-1s.log",
+      "dst": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive/6-October-2026/vogun-pop/vogun-mixed-pop-1s.log",
+      "why": "Preserve selected mixed Vogun 1 second only"
+    },
+    {
+      "op": "move",
+      "src": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/vogun-pop/vogun-spaced-caps-pop-1_5s-000.png",
+      "dst": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive/6-October-2026/vogun-pop/vogun-spaced-caps-pop-1_5s-000.png",
+      "why": "Preserve selected mixed Vogun 1 second only"
+    },
+    {
+      "op": "move",
+      "src": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/vogun-pop/vogun-spaced-caps-pop-1_5s-009.png",
+      "dst": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive/6-October-2026/vogun-pop/vogun-spaced-caps-pop-1_5s-009.png",
+      "why": "Preserve selected mixed Vogun 1 second only"
+    },
+    {
+      "op": "move",
+      "src": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/vogun-pop/vogun-spaced-caps-pop-1_5s-018.png",
+      "dst": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive/6-October-2026/vogun-pop/vogun-spaced-caps-pop-1_5s-018.png",
+      "why": "Preserve selected mixed Vogun 1 second only"
+    },
+    {
+      "op": "move",
+      "src": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/vogun-pop/vogun-spaced-caps-pop-1_5s-030.png",
+      "dst": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive/6-October-2026/vogun-pop/vogun-spaced-caps-pop-1_5s-030.png",
+      "why": "Preserve selected mixed Vogun 1 second only"
+    },
+    {
+      "op": "move",
+      "src": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/vogun-pop/vogun-spaced-caps-pop-1_5s-045.png",
+      "dst": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive/6-October-2026/vogun-pop/vogun-spaced-caps-pop-1_5s-045.png",
+      "why": "Preserve selected mixed Vogun 1 second only"
+    },
+    {
+      "op": "move",
+      "src": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/vogun-pop/vogun-spaced-caps-pop-1_5s-149.png",
+      "dst": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive/6-October-2026/vogun-pop/vogun-spaced-caps-pop-1_5s-149.png",
+      "why": "Preserve selected mixed Vogun 1 second only"
+    },
+    {
+      "op": "move",
+      "src": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/vogun-pop/vogun-spaced-caps-pop-1_5s.json",
+      "dst": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive/6-October-2026/vogun-pop/vogun-spaced-caps-pop-1_5s.json",
+      "why": "Preserve selected mixed Vogun 1 second only"
+    },
+    {
+      "op": "move",
+      "src": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/vogun-pop/vogun-spaced-caps-pop-1_5s.log",
+      "dst": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive/6-October-2026/vogun-pop/vogun-spaced-caps-pop-1_5s.log",
+      "why": "Preserve selected mixed Vogun 1 second only"
+    },
+    {
+      "op": "move",
+      "src": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/vogun-pop/vogun-spaced-caps-pop-1_5s.md",
+      "dst": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive/6-October-2026/vogun-pop/vogun-spaced-caps-pop-1_5s.md",
+      "why": "Preserve selected mixed Vogun 1 second only"
+    },
+    {
+      "op": "move",
+      "src": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/vogun-pop/vogun-spaced-caps-pop-1_5s.mov",
+      "dst": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive/6-October-2026/vogun-pop/vogun-spaced-caps-pop-1_5s.mov",
+      "why": "Preserve selected mixed Vogun 1 second only"
+    },
+    {
+      "op": "move",
+      "src": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/vogun-pop/vogun-spaced-caps-pop-1s-000.png",
+      "dst": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive/6-October-2026/vogun-pop/vogun-spaced-caps-pop-1s-000.png",
+      "why": "Preserve selected mixed Vogun 1 second only"
+    },
+    {
+      "op": "move",
+      "src": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/vogun-pop/vogun-spaced-caps-pop-1s-009.png",
+      "dst": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive/6-October-2026/vogun-pop/vogun-spaced-caps-pop-1s-009.png",
+      "why": "Preserve selected mixed Vogun 1 second only"
+    },
+    {
+      "op": "move",
+      "src": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/vogun-pop/vogun-spaced-caps-pop-1s-018.png",
+      "dst": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive/6-October-2026/vogun-pop/vogun-spaced-caps-pop-1s-018.png",
+      "why": "Preserve selected mixed Vogun 1 second only"
+    },
+    {
+      "op": "move",
+      "src": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/vogun-pop/vogun-spaced-caps-pop-1s-030.png",
+      "dst": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive/6-October-2026/vogun-pop/vogun-spaced-caps-pop-1s-030.png",
+      "why": "Preserve selected mixed Vogun 1 second only"
+    },
+    {
+      "op": "move",
+      "src": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/vogun-pop/vogun-spaced-caps-pop-1s-045.png",
+      "dst": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive/6-October-2026/vogun-pop/vogun-spaced-caps-pop-1s-045.png",
+      "why": "Preserve selected mixed Vogun 1 second only"
+    },
+    {
+      "op": "move",
+      "src": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/vogun-pop/vogun-spaced-caps-pop-1s-149.png",
+      "dst": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive/6-October-2026/vogun-pop/vogun-spaced-caps-pop-1s-149.png",
+      "why": "Preserve selected mixed Vogun 1 second only"
+    },
+    {
+      "op": "move",
+      "src": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/vogun-pop/vogun-spaced-caps-pop-1s.json",
+      "dst": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive/6-October-2026/vogun-pop/vogun-spaced-caps-pop-1s.json",
+      "why": "Preserve selected mixed Vogun 1 second only"
+    },
+    {
+      "op": "move",
+      "src": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/vogun-pop/vogun-spaced-caps-pop-1s.log",
+      "dst": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive/6-October-2026/vogun-pop/vogun-spaced-caps-pop-1s.log",
+      "why": "Preserve selected mixed Vogun 1 second only"
+    },
+    {
+      "op": "move",
+      "src": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/vogun-pop/vogun-spaced-caps-pop-1s.md",
+      "dst": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive/6-October-2026/vogun-pop/vogun-spaced-caps-pop-1s.md",
+      "why": "Preserve selected mixed Vogun 1 second only"
+    },
+    {
+      "op": "move",
+      "src": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/vogun-pop/vogun-spaced-caps-pop-1s.mov",
+      "dst": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/archive/6-October-2026/vogun-pop/vogun-spaced-caps-pop-1s.mov",
+      "why": "Preserve selected mixed Vogun 1 second only"
+    }
+  ]
+}
