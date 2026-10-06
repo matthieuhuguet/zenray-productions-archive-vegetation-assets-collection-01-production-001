@@ -1,0 +1,135 @@
+{
+  "date": "6 October 2026",
+  "width": 1920,
+  "height": 1920,
+  "fps": 30,
+  "appear": 1,
+  "hold": 2,
+  "disappear": 1,
+  "lines": [
+    "ZenRay Vegetation Collection 01",
+    "FLEUR DE LYS"
+  ],
+  "font": "Vogun-Medium.ttf",
+  "foreground": "#FFFFFF",
+  "background": "#000000",
+  "widthRatio": 0.84,
+  "lineGap": 0,
+  "variants": [
+    {
+      "id": "step-01",
+      "name": "creating hda",
+      "lines": [
+        "creating hda"
+      ],
+      "image": "inputs/1 creating hda.png",
+      "motion": 2,
+      "amplitude": 45,
+      "frequency": 120,
+      "foreground": "#FFFFFF",
+      "source": "/Users/zenray/Downloads/steps/1 creating hda.png",
+      "sha256": "6b6141941923b81b1194a3c4bf698a223d2e8d8fb8a321bb54510a0ca571f373"
+    },
+    {
+      "id": "step-02",
+      "name": "almost final height",
+      "lines": [
+        "almost final height"
+      ],
+      "image": "inputs/2 almost final height.png",
+      "motion": 2,
+      "amplitude": 45,
+      "frequency": 120,
+      "foreground": "#FFFFFF",
+      "source": "/Users/zenray/Downloads/steps/2 almost final height.png",
+      "sha256": "2129526c334e9072988419096e2a1c4ef823492f31e5bb20cc7ccec2c2d08f3c"
+    },
+    {
+      "id": "step-03",
+      "name": "back and forth with texturing",
+      "lines": [
+        "back and forth with texturing"
+      ],
+      "image": "inputs/3 back and forth with texturing.png",
+      "motion": 2,
+      "amplitude": 45,
+      "frequency": 120,
+      "foreground": "#FFFFFF",
+      "source": "/Users/zenray/Downloads/steps/3 back and forth with texturing.png",
+      "sha256": "01d0b232bf7732b056eff7e23f94bbd543331cc3f7d22ef521544892c6ac6424"
+    },
+    {
+      "id": "step-04",
+      "name": "importing into unreal with opacity",
+      "lines": [
+        "importing into unreal with opacity"
+      ],
+      "image": "inputs/4 importing into unreal with opacity.png",
+      "motion": 2,
+      "amplitude": 45,
+      "frequency": 120,
+      "foreground": "#FFFFFF",
+      "source": "/Users/zenray/Downloads/steps/4 importing into unreal with opacity.png",
+      "sha256": "4bae4352be668354f1e33b36aee26c2128c4621616d4592f7ac83af547548f2b"
+    },
+    {
+      "id": "step-05",
+      "name": "setup before 3 point lighting",
+      "lines": [
+        "setup before 3 point lighting"
+      ],
+      "image": "inputs/5 setup before 3 point lighting.png",
+      "motion": 2,
+      "amplitude": 45,
+      "frequency": 120,
+      "foreground": "#FFFFFF",
+      "source": "/Users/zenray/Downloads/steps/5 setup before 3 point lighting.png",
+      "sha256": "325a67cae09015d40ebb239246848707ab44d36a156b63608dedd0132d1eeff4"
+    },
+    {
+      "id": "step-06",
+      "name": "preview the first shot",
+      "lines": [
+        "preview the first shot"
+      ],
+      "image": "inputs/6 preview the first shot.png",
+      "motion": 2,
+      "amplitude": 45,
+      "frequency": 120,
+      "foreground": "#FFFFFF",
+      "source": "/Users/zenray/Downloads/steps/6 preview the first shot.png",
+      "sha256": "595f678e3b98bf456ff6fa4f6025fa60c7bd9073f4b0057eb8c72b9cefe43d33"
+    },
+    {
+      "id": "step-07",
+      "name": "final scattering",
+      "lines": [
+        "final scattering"
+      ],
+      "image": "inputs/7 final scattering.png",
+      "motion": 2,
+      "amplitude": 45,
+      "frequency": 120,
+      "foreground": "#FFFFFF",
+      "source": "/Users/zenray/Downloads/steps/7 final scattering.png",
+      "sha256": "c0838bb714f036011fd2c639463a586abd8570a6b4b1d1b82d608df876022275"
+    }
+  ],
+  "rowDelay": 0,
+  "firstStart": 0.015,
+  "spread": 0.65,
+  "settle": 0.32,
+  "slices": 4,
+  "sourceHTML": "Animation.html",
+  "shadow": {
+    "color": "rgba(0,0,0,0.55)",
+    "blur": 8,
+    "offsetX": 0,
+    "offsetY": 0
+  },
+  "weight": 500,
+  "pingPongCycles": 2,
+  "pingPongAmplitude": 14,
+  "subtitleTop": 1690,
+  "maxFontSize": 80
+}

@@ -1,0 +1,145 @@
+{
+  "date": "6 October 2026",
+  "result": [
+    {
+      "id": "step-01",
+      "layout": [
+        {
+          "text": "creating hda",
+          "size": 80,
+          "width": 453.3599548339844,
+          "height": 77.92000579833984,
+          "ascent": 58
+        }
+      ],
+      "samples": [
+        "step-01-000.png",
+        "step-01-009.png",
+        "step-01-018.png",
+        "step-01-030.png",
+        "step-01-090.png"
+      ],
+      "bytes": 3427697
+    },
+    {
+      "id": "step-02",
+      "layout": [
+        {
+          "text": "almost final height",
+          "size": 80,
+          "width": 679.199951171875,
+          "height": 77.92000579833984,
+          "ascent": 58
+        }
+      ],
+      "samples": [
+        "step-02-000.png",
+        "step-02-009.png",
+        "step-02-018.png",
+        "step-02-030.png",
+        "step-02-090.png"
+      ],
+      "bytes": 3443621
+    },
+    {
+      "id": "step-03",
+      "layout": [
+        {
+          "text": "back and forth with texturing",
+          "size": 80,
+          "width": 1054.4798583984375,
+          "height": 77.92000579833984,
+          "ascent": 58
+        }
+      ],
+      "samples": [
+        "step-03-000.png",
+        "step-03-009.png",
+        "step-03-018.png",
+        "step-03-030.png",
+        "step-03-090.png"
+      ],
+      "bytes": 3824957
+    },
+    {
+      "id": "step-04",
+      "layout": [
+        {
+          "text": "importing into unreal with opacity",
+          "size": 80,
+          "width": 1236.639892578125,
+          "height": 77.92000579833984,
+          "ascent": 58
+        }
+      ],
+      "samples": [
+        "step-04-000.png",
+        "step-04-009.png",
+        "step-04-018.png",
+        "step-04-030.png",
+        "step-04-090.png"
+      ],
+      "bytes": 3947353
+    },
+    {
+      "id": "step-05",
+      "layout": [
+        {
+          "text": "setup before 3 point lighting",
+          "size": 80,
+          "width": 1007.5999145507812,
+          "height": 77.92000579833984,
+          "ascent": 58
+        }
+      ],
+      "samples": [
+        "step-05-000.png",
+        "step-05-009.png",
+        "step-05-018.png",
+        "step-05-030.png",
+        "step-05-090.png"
+      ],
+      "bytes": 3137144
+    },
+    {
+      "id": "step-06",
+      "layout": [
+        {
+          "text": "preview the first shot",
+          "size": 80,
+          "width": 764.2399291992188,
+          "height": 72.24000549316406,
+          "ascent": 58
+        }
+      ],
+      "samples": [
+        "step-06-000.png",
+        "step-06-009.png",
+        "step-06-018.png",
+        "step-06-030.png",
+        "step-06-090.png"
+      ],
+      "bytes": 3368026
+    },
+    {
+      "id": "step-07",
+      "layout": [
+        {
+          "text": "final scattering",
+          "size": 80,
+          "width": 553.1199340820312,
+          "height": 77.92000579833984,
+          "ascent": 58
+        }
+      ],
+      "samples": [
+        "step-07-000.png",
+        "step-07-009.png",
+        "step-07-018.png",
+        "step-07-030.png",
+        "step-07-090.png"
+      ],
+      "bytes": 4081899
+    }
+  ]
+}
