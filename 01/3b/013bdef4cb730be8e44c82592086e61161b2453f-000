@@ -1,0 +1,39 @@
+{
+  "date": "6 October 2026",
+  "width": 3840,
+  "height": 2160,
+  "fps": 30,
+  "appear": 1,
+  "hold": 3,
+  "disappear": 1,
+  "lines": [
+    "ZenRay Vegetation Collection 01",
+    "Fleur de Lys"
+  ],
+  "font": "AnthropicSerif-Light.ttf",
+  "foreground": "#191919",
+  "background": "#f6f4ee",
+  "widthRatio": 0.92,
+  "lineGap": 110,
+  "variants": [
+    {
+      "id": "06-blocs-voxels",
+      "name": "Blocs voxel",
+      "tile": 40,
+      "travel": 360,
+      "drift": 170
+    }
+  ],
+  "rowDelay": 0.5,
+  "firstStart": 0.015,
+  "spread": 0.28,
+  "settle": 0.17,
+  "slices": 8,
+  "verticalSpread": 0.025,
+  "associations": {
+    "movie": "06-blocs-voxels.mov",
+    "description": "06-blocs-voxels.md",
+    "source": "Animation.html",
+    "font": "assets/AnthropicSerif-Light.ttf"
+  }
+}

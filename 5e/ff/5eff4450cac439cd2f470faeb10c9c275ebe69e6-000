@@ -1,0 +1,37 @@
+# 6 October 2026 14:30: Verify exports and associate each movie with its parameters and description.
+from pathlib import Path
+from PIL import Image, ImageChops, ImageDraw
+import json, subprocess, sys
+p = Path(sys.argv[1])
+c = json.loads((p / 'Animation.json').read_text())
+report = json.loads((p / 'RenderReport.json').read_text())
+results = []
+sheet = Image.new('RGB', (1536, 950), c['background'])
+draw = ImageDraw.Draw(sheet)
+for row, (variant, record) in enumerate(zip(c['variants'], report['result'])):
+    name = variant['id']
+    movie = p / (name + '.mov')
+    probe = json.loads(subprocess.check_output(['ffprobe', '-v', 'error', '-show_entries', 'stream=codec_name,width,height,nb_frames:format=duration,size', '-of', 'json', str(movie)]))
+    stream = probe['streams'][0]
+    assert (stream['width'], stream['height'], int(stream['nb_frames'])) == (c['width'], c['height'], c['fps'] * 5)
+    assert float(probe['format']['duration']) == 5
+    for frame in (0, 149):
+        image = Image.open(p / f'{name}-{frame:03d}.png').convert('RGB')
+        assert ImageChops.difference(image, Image.new('RGB', image.size, c['background'])).getbbox() is None
+    assert ImageChops.difference(Image.open(p / (name + '-030.png')), Image.open(p / (name + '-120.png'))).getbbox() is None
+    assert record['layout']['topComplete'] < record['layout']['bottomStart']
+    for column, frame in enumerate((9, 18, 30)):
+        image = Image.open(p / f'{name}-{frame:03d}.png').convert('RGB')
+        image.thumbnail((512, 288))
+        sheet.paste(image, (column * 512, row * 316 + 25))
+    draw.text((12, row * 316 + 8), f"{variant['name']} / {variant['tile']} px : 0.30s / 0.60s / maintien", fill='black')
+    instance = dict(c)
+    instance['variants'] = [variant]
+    instance['associations'] = dict(movie=movie.name, description=name + '.md', source='Animation.html', font='assets/AnthropicSerif-Light.ttf')
+    (p / (name + '.json')).write_text(json.dumps(instance, ensure_ascii=False, indent=2))
+    (p / (name + '.md')).write_text(f"# 6 October 2026 : {variant['name']}\n\n6 October 2026 : « ZenRay Vegetation Collection 01 » en anglais, puis « Fleur de Lys » en français, Anthropic Serif Light 300.\n\n6 October 2026 : grille de blocs carrés de {variant['tile']} pixels en 3840 × 2160 ; {record['layout']['tileCount']} blocs convergent sur le masque des lettres. Les grains arrivent de la gauche et s'agglomèrent ; la ligne du haut se termine avant celle du bas.\n\n6 October 2026 : apparition de 0 à 1 seconde, maintien de 1 à 4 secondes, désagrégation et disparition de 4 à 5 secondes dans le même ordre. Les contours retrouvent la police originale au repos.\n\n6 October 2026 : MOV HEVC 4K, 30 images par seconde, fond clair opaque, sans son, {movie.stat().st_size/1e6:.2f} Mo. Aucun halo ou décor supplémentaire.\n\n6 October 2026 : fichiers associés : {movie.name}, {name}.json, Animation.html et assets/AnthropicSerif-Light.ttf. Les sources précédentes restent intactes dans le dossier parent.\n")
+    results.append(dict(id=name, MB=round(movie.stat().st_size/1e6, 2), tile=variant['tile'], probe=probe, staticHold=True, blankEndpoints=True, order=record['layout']))
+sheet.save(p / 'Comparison.png')
+(p / 'Verification.json').write_text(json.dumps(dict(date='6 October 2026', results=results), indent=2))
+(p / 'Animation.md').write_text('# 6 October 2026 : trois agglomérations de pixels\n\n6 October 2026 : trois nouvelles variantes indépendantes, de 4, 14 et 40 pixels, forment les mêmes deux lignes : « ZenRay Vegetation Collection 01 » en anglais et « Fleur de Lys » en français.\n\n6 October 2026 : le mouvement suit la lecture, de gauche à droite, puis de haut en bas. Durée 5 secondes : apparition 1 seconde, maintien 3 secondes, disparition 1 seconde.\n\n6 October 2026 : chaque MOV dispose de son descriptif .md et de son instance .json de même nom ; Animation.html et la police embarquée constituent la définition partagée. Les MOV sont des aperçus 4K sur fond clair opaque, sans transparence.\n\n6 October 2026 : contrôles dans Verification.json : dimensions 3840 × 2160, 150 images à 30 images par seconde, première et dernière images vides, maintien fixe, ligne du haut entièrement assemblée avant le début de celle du bas.\n')
+print([(result['id'], result['MB']) for result in results])

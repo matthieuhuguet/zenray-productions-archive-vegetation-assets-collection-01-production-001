@@ -1,0 +1,37 @@
+{
+  "id": "02-connexions-croisees-magenta",
+  "MB": 1.2,
+  "foreground": "#ff35b7",
+  "shadow": {
+    "color": "rgba(0,0,0,0.55)",
+    "blur": 16,
+    "offsetX": 0,
+    "offsetY": 0
+  },
+  "timing": [
+    1.5,
+    2,
+    1.5
+  ],
+  "probe": {
+    "programs": [],
+    "stream_groups": [],
+    "streams": [
+      {
+        "width": 3840,
+        "height": 2160,
+        "nb_frames": "150"
+      }
+    ],
+    "format": {
+      "duration": "5.000000",
+      "size": "1203010"
+    }
+  },
+  "staticHold": true,
+  "blankEndpoints": true,
+  "text": [
+    "ZenRay Vegetation Collection 01",
+    "Fleur de Lys"
+  ]
+}

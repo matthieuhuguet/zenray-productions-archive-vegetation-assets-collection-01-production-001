@@ -1,0 +1,9 @@
+# 6 October 2026 : trois agglomérations de pixels
+
+6 October 2026 : trois nouvelles variantes indépendantes, de 4, 14 et 40 pixels, forment les mêmes deux lignes : « ZenRay Vegetation Collection 01 » en anglais et « Fleur de Lys » en français.
+
+6 October 2026 : le mouvement suit la lecture, de gauche à droite, puis de haut en bas. Durée 5 secondes : apparition 1 seconde, maintien 3 secondes, disparition 1 seconde.
+
+6 October 2026 : chaque MOV dispose de son descriptif .md et de son instance .json de même nom ; Animation.html et la police embarquée constituent la définition partagée. Les MOV sont des aperçus 4K sur fond clair opaque, sans transparence.
+
+6 October 2026 : contrôles dans Verification.json : dimensions 3840 × 2160, 150 images à 30 images par seconde, première et dernière images vides, maintien fixe, ligne du haut entièrement assemblée avant le début de celle du bas.

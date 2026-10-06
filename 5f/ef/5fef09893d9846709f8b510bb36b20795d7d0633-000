@@ -27,3 +27,7 @@
 6 October 2026 : le courant devient discontinu : micro-coupures franches, bandes de lettres décalées horizontalement, impulsions qui se verrouillent en place. Aucune particule ni décoration. Variante 01 : Courant haché ; variante 02 : Micro-coupures ; variante 03 : Décharge numérique.
 
 6 October 2026 : apparition de la ligne du haut entre 0,015 et 0,485 seconde ; apparition de la ligne du bas entre 0,515 et 0,985 seconde. Le maintien reste stable de 1 à 4 secondes. Les fichiers de la première version sont conservés dans archive-v1/.
+
+## 6 October 2026 : variante 02 retenue, timing et langues
+
+6 October 2026 : 02-connexions-croisees.mov seul utilise maintenant 1,5 seconde d’apparition, 2 secondes de maintien et 1,5 seconde de disparition, avec « ZenRay Vegetation Collection 01 » en anglais et « Fleur de Lys » en français. Ses sources dédiées et sa vérification portent le même préfixe.

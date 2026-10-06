@@ -1,0 +1,15 @@
+# 6 October 2026 : Micro-coupures, timing retenu
+
+6 October 2026 : texte corrigé : « ZenRay Vegetation Collection 01 » en anglais, puis « Fleur de Lys » en français, Anthropic Serif Light.
+
+6 October 2026 : apparition 0 à 1,5 seconde, maintien 1,5 à 3,5 secondes, disparition 3,5 à 5 secondes. Le mouvement original est ralenti sans remplacer son effet ; lecture de gauche à droite, puis de haut en bas.
+
+6 October 2026 : seul 02-connexions-croisees.mov est réexporté. Les autres MOV restent identiques par contrôle SHA256. Version précédente conservée dans archive-before-timing-1_5/.
+
+6 October 2026 : sources associées : 02-connexions-croisees.html, 02-connexions-croisees.json ; preuve 02-connexions-croisees-verification.json. MOV 3840 × 2160, 30 images par seconde, 150 images, fond clair opaque.
+
+## 6 October 2026 : couleur et ombre centrée
+
+6 October 2026 : couleur #ffffff, ombre noire à 55 % avec flou de 16 pixels en 4K, décalage X et Y nul. Texte anglais « ZenRay Vegetation Collection 01 », puis français « Fleur de Lys ».
+
+6 October 2026 : apparition 1,5 seconde, maintien 2 secondes, disparition 1,5 seconde, durée totale 5 secondes. MOV 3840 × 2160 à 30 images par seconde, 0.95 Mo, fond clair opaque. Source 02-connexions-croisees.html ; paramètres 02-connexions-croisees.json ; preuve 02-connexions-croisees-verification.json.

@@ -2,14 +2,14 @@
   "date": "6 October 2026",
   "result": [
     {
-      "id": "01-circuit-sequentiel",
+      "id": "02-connexions-croisees-cyan",
       "layout": [
         {
-          "text": "ZenRay Végétation Collection 01",
+          "text": "ZenRay Vegetation Collection 01",
           "size": 236,
           "width": 3529.3798828125,
-          "height": 240.72000122070312,
-          "ascent": 181.72000122070312
+          "height": 238.36000061035156,
+          "ascent": 179.36000061035156
         },
         {
           "text": "Fleur de Lys",
@@ -20,24 +20,25 @@
         }
       ],
       "samples": [
-        "01-circuit-sequentiel-000.png",
-        "01-circuit-sequentiel-009.png",
-        "01-circuit-sequentiel-018.png",
-        "01-circuit-sequentiel-030.png",
-        "01-circuit-sequentiel-120.png",
-        "01-circuit-sequentiel-149.png"
+        "02-connexions-croisees-cyan-000.png",
+        "02-connexions-croisees-cyan-009.png",
+        "02-connexions-croisees-cyan-018.png",
+        "02-connexions-croisees-cyan-030.png",
+        "02-connexions-croisees-cyan-045.png",
+        "02-connexions-croisees-cyan-105.png",
+        "02-connexions-croisees-cyan-149.png"
       ],
-      "bytes": 1082881
+      "bytes": 1255282
     },
     {
-      "id": "02-connexions-croisees",
+      "id": "02-connexions-croisees-magenta",
       "layout": [
         {
-          "text": "ZenRay Végétation Collection 01",
+          "text": "ZenRay Vegetation Collection 01",
           "size": 236,
           "width": 3529.3798828125,
-          "height": 240.72000122070312,
-          "ascent": 181.72000122070312
+          "height": 238.36000061035156,
+          "ascent": 179.36000061035156
         },
         {
           "text": "Fleur de Lys",
@@ -48,24 +49,25 @@
         }
       ],
       "samples": [
-        "02-connexions-croisees-000.png",
-        "02-connexions-croisees-009.png",
-        "02-connexions-croisees-018.png",
-        "02-connexions-croisees-030.png",
-        "02-connexions-croisees-120.png",
-        "02-connexions-croisees-149.png"
+        "02-connexions-croisees-magenta-000.png",
+        "02-connexions-croisees-magenta-009.png",
+        "02-connexions-croisees-magenta-018.png",
+        "02-connexions-croisees-magenta-030.png",
+        "02-connexions-croisees-magenta-045.png",
+        "02-connexions-croisees-magenta-105.png",
+        "02-connexions-croisees-magenta-149.png"
       ],
-      "bytes": 1061425
+      "bytes": 1203010
     },
     {
-      "id": "03-impulsion-synchronisee",
+      "id": "02-connexions-croisees-turquoise",
       "layout": [
         {
-          "text": "ZenRay Végétation Collection 01",
+          "text": "ZenRay Vegetation Collection 01",
           "size": 236,
           "width": 3529.3798828125,
-          "height": 240.72000122070312,
-          "ascent": 181.72000122070312
+          "height": 238.36000061035156,
+          "ascent": 179.36000061035156
         },
         {
           "text": "Fleur de Lys",
@@ -76,14 +78,15 @@
         }
       ],
       "samples": [
-        "03-impulsion-synchronisee-000.png",
-        "03-impulsion-synchronisee-009.png",
-        "03-impulsion-synchronisee-018.png",
-        "03-impulsion-synchronisee-030.png",
-        "03-impulsion-synchronisee-120.png",
-        "03-impulsion-synchronisee-149.png"
+        "02-connexions-croisees-turquoise-000.png",
+        "02-connexions-croisees-turquoise-009.png",
+        "02-connexions-croisees-turquoise-018.png",
+        "02-connexions-croisees-turquoise-030.png",
+        "02-connexions-croisees-turquoise-045.png",
+        "02-connexions-croisees-turquoise-105.png",
+        "02-connexions-croisees-turquoise-149.png"
       ],
-      "bytes": 974320
+      "bytes": 1196448
     }
   ]
 }

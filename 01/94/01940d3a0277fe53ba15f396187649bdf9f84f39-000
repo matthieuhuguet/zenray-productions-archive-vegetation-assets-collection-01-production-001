@@ -1,0 +1,41 @@
+{
+  "date": "6 October 2026",
+  "width": 3840,
+  "height": 2160,
+  "fps": 30,
+  "appear": 1.5,
+  "hold": 2,
+  "disappear": 1.5,
+  "lines": [
+    "ZenRay Vegetation Collection 01",
+    "Fleur de Lys"
+  ],
+  "font": "AnthropicSerif-Light.ttf",
+  "foreground": "#ffffff",
+  "background": "#f6f4ee",
+  "widthRatio": 0.92,
+  "lineGap": 110,
+  "variants": [
+    {
+      "id": "02-connexions-croisees",
+      "name": "Micro-coupures",
+      "motion": 2,
+      "spread": 0.48,
+      "settle": 0.48,
+      "amplitude": 125,
+      "frequency": 120
+    }
+  ],
+  "rowDelay": 0.5,
+  "firstStart": 0.015,
+  "spread": 0.3,
+  "settle": 0.17,
+  "slices": 8,
+  "sourceHTML": "02-connexions-croisees.html",
+  "shadow": {
+    "color": "rgba(0,0,0,0.55)",
+    "blur": 16,
+    "offsetX": 0,
+    "offsetY": 0
+  }
+}
