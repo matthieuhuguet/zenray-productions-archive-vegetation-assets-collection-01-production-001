@@ -1,0 +1,42 @@
+{
+  "date": "6 October 2026",
+  "mediumHash": "56ffff6b5917bca6d05b05d5983a0171cb37d8c833018893aa84524eb3fb3ec0",
+  "mediumUnchanged": true,
+  "sampleInkAreas": [
+    16984.839215686276,
+    20377.04705882353,
+    23687.317647058822,
+    27376.07843137255,
+    31115.29411764706
+  ],
+  "fonts": [
+    {
+      "style": "Light",
+      "weight": 300,
+      "path": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/assets/fonts/Vogun/Vogun-Light.ttf",
+      "installPath": "/Users/zenray/Library/Fonts/Vogun-Light.ttf",
+      "codepoints": 361
+    },
+    {
+      "style": "Regular",
+      "weight": 400,
+      "path": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/assets/fonts/Vogun/Vogun-Regular.ttf",
+      "installPath": "/Users/zenray/Library/Fonts/Vogun-Regular.ttf",
+      "codepoints": 361
+    },
+    {
+      "style": "Semibold",
+      "weight": 600,
+      "path": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/assets/fonts/Vogun/Vogun-Semibold.ttf",
+      "installPath": "/Users/zenray/Library/Fonts/Vogun-Semibold.ttf",
+      "codepoints": 361
+    },
+    {
+      "style": "Bold",
+      "weight": 700,
+      "path": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/assets/fonts/Vogun/Vogun-Bold.ttf",
+      "installPath": "/Users/zenray/Library/Fonts/Vogun-Bold.ttf",
+      "codepoints": 361
+    }
+  ]
+}

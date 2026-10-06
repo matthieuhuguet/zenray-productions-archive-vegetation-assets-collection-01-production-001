@@ -1,0 +1,42 @@
+[
+  {
+    "family" : "Vogun",
+    "postScriptName" : "Vogun-Light",
+    "registered" : false,
+    "registrationNote" : "Error Domain=com.apple.CoreText.CTFontManagerErrorDomain Code=105 \"The file has already been registered in the specified scope.\" UserInfo={NSLocalizedDescription=The file has already been registered in the specified scope., CTFontManagerErrorFontURLs=(\n    \"file:\/\/\/Users\/zenray\/Library\/Fonts\/Vogun-Light.ttf\"\n), NSLocalizedFailureReason=Font registration was unsuccessful.}",
+    "style" : "Light",
+    "weightTrait" : -0.23000000417232513
+  },
+  {
+    "family" : "Vogun",
+    "postScriptName" : "Vogun-Regular",
+    "registered" : false,
+    "registrationNote" : "Error Domain=com.apple.CoreText.CTFontManagerErrorDomain Code=105 \"The file has already been registered in the specified scope.\" UserInfo={NSLocalizedDescription=The file has already been registered in the specified scope., CTFontManagerErrorFontURLs=(\n    \"file:\/\/\/Users\/zenray\/Library\/Fonts\/Vogun-Regular.ttf\"\n), NSLocalizedFailureReason=Font registration was unsuccessful.}",
+    "style" : "Regular",
+    "weightTrait" : 0
+  },
+  {
+    "family" : "Vogun",
+    "postScriptName" : "Vogun-Medium",
+    "registered" : false,
+    "registrationNote" : "Error Domain=com.apple.CoreText.CTFontManagerErrorDomain Code=105 \"The file has already been registered in the specified scope.\" UserInfo={NSLocalizedDescription=The file has already been registered in the specified scope., CTFontManagerErrorFontURLs=(\n    \"file:\/\/\/Users\/zenray\/Library\/Fonts\/Vogun-Medium.ttf\"\n), NSLocalizedFailureReason=Font registration was unsuccessful.}",
+    "style" : "Medium",
+    "weightTrait" : 0.20000000298023224
+  },
+  {
+    "family" : "Vogun",
+    "postScriptName" : "Vogun-Semibold",
+    "registered" : false,
+    "registrationNote" : "Error Domain=com.apple.CoreText.CTFontManagerErrorDomain Code=105 \"The file has already been registered in the specified scope.\" UserInfo={NSLocalizedDescription=The file has already been registered in the specified scope., CTFontManagerErrorFontURLs=(\n    \"file:\/\/\/Users\/zenray\/Library\/Fonts\/Vogun-Semibold.ttf\"\n), NSLocalizedFailureReason=Font registration was unsuccessful.}",
+    "style" : "Semibold",
+    "weightTrait" : 0.30000001192092896
+  },
+  {
+    "family" : "Vogun",
+    "postScriptName" : "Vogun-Bold",
+    "registered" : false,
+    "registrationNote" : "Error Domain=com.apple.CoreText.CTFontManagerErrorDomain Code=105 \"The file has already been registered in the specified scope.\" UserInfo={NSLocalizedDescription=The file has already been registered in the specified scope., CTFontManagerErrorFontURLs=(\n    \"file:\/\/\/Users\/zenray\/Library\/Fonts\/Vogun-Bold.ttf\"\n), NSLocalizedFailureReason=Font registration was unsuccessful.}",
+    "style" : "Bold",
+    "weightTrait" : 0.40000000596046448
+  }
+]

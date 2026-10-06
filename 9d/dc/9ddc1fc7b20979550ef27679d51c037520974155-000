@@ -1,0 +1,14 @@
+Copyright (c) 2000-2025. See AUTHORS for Contributors.
+ License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
+ with many parts BSD <http://fontforge.org/license.html>. Please read LICENSE.
+ Version: 20251009
+ Based on sources from 2025-10-09 19:02 UTC-D.
+Core python package 'pkg_resources' not found: Cannot discover plugins
+The following table(s) in the font have been ignored by FontForge
+  Ignoring 'DSIG' digital signature table
+The following table(s) in the font have been ignored by FontForge
+  Ignoring 'DSIG' digital signature table
+The following table(s) in the font have been ignored by FontForge
+  Ignoring 'DSIG' digital signature table
+The following table(s) in the font have been ignored by FontForge
+  Ignoring 'DSIG' digital signature table
