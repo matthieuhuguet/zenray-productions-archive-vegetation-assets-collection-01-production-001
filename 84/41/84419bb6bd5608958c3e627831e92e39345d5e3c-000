@@ -1,0 +1,31 @@
+# 6 October 2026 : petal (band 0) HEIGHT lab against ref 06: builds band 0 alone with hython, prints metrics and saves versions/band0_refv2/petal_h_NN_<label>.png (ref above, Houdini below) plus a 2x zoom of the first petal. Usage: python3 PetalLab.py <label>. FR : labo des petales.
+import sys, subprocess, glob, os
+import numpy as np
+from PIL import Image, ImageFilter
+B = '/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/'
+R = '/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/refs/flower-sheets/06_gen_trimsheet-height_v2.png'
+HY = '/Users/zenray/Create/Build/Houdini22/Houdini22.0.368/Frameworks/Houdini.framework/Versions/Current/Resources/bin/hython'
+S = '/private/tmp/claude-501/-Users-zenray--claude-Memory1/2562b086-836d-49c5-80c7-0c935a98513c/scratchpad/'
+out = subprocess.run([HY, B + 'Scripts/BuildBand0V3.py', 'x', 'x', '2048'], capture_output=True, text=True).stdout
+print([l for l in out.splitlines() if l.startswith('nodes')])
+H = 242
+ref = Image.open(R).convert('L').crop((0, 0, 1254, H)); us = Image.open(B + 'previews/band0v3_nodes.png').convert('L').resize((1254, 1254), Image.LANCZOS).crop((0, 0, 1254, H))
+a = np.asarray(ref, float) / 255; b = np.asarray(us, float) / 255
+def hp(x): return x - np.asarray(Image.fromarray((x * 255).astype('uint8')).filter(ImageFilter.GaussianBlur(2)), float) / 255
+bg = 0.39
+pa = np.abs(a - bg) > 0.05; pb = np.abs(b - bg) > 0.05
+# restrict to the interior of the first petal, away from the edge: eroded by a blur
+ia = np.asarray(Image.fromarray((pa * 255).astype('uint8')).filter(ImageFilter.MinFilter(15)), float) > 0
+ib = np.asarray(Image.fromarray((pb * 255).astype('uint8')).filter(ImageFilter.MinFilter(15)), float) > 0
+q = [1, 5, 25, 50, 75, 95, 99]
+print('interior tone quantiles ref', np.percentile(a[ia], q).round(2), '\n                         ours', np.percentile(b[ib], q).round(2))
+print('detail energy ref %.4f ours %.4f' % (hp(a)[ia].std(), hp(b)[ib].std()))
+print('dark pit area (<0.45) per interior pixel: ref %.4f ours %.4f' % ((a[ia] < 0.45).mean(), (b[ib] < 0.45).mean()))
+print('petal area fraction ref %.3f ours %.3f' % (pa.mean(), pb.mean()))
+rows = lambda x: [round(float(x[y, 60:360].mean()), 2) for y in range(8, H - 8, 20)]
+print('row profile ref ', rows(a)); print('row profile ours', rows(b))
+n = len(glob.glob(B + 'versions/band0_refv2/petal_h_*.png')) + 1
+os.makedirs(B + 'versions/band0_refv2', exist_ok=True)
+im = Image.new('L', (1254, 2 * H)); im.paste(ref, (0, 0)); im.paste(us, (0, H))
+f = B + 'versions/band0_refv2/petal_h_%02d_%s.png' % (n, sys.argv[1] if len(sys.argv) > 1 else 'iter'); im.save(f); print(f)
+z = Image.new('L', (836 * 1, 2 * H * 2)); z.paste(ref.crop((0, 0, 418, H)).resize((836, H * 2)), (0, 0)); z.paste(us.crop((0, 0, 418, H)).resize((836, H * 2)), (0, H * 2)); z.save(S + 'petal_zoom.png')

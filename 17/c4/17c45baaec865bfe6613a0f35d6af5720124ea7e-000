@@ -1,0 +1,13 @@
+# 6 October 2026 : ablation of the leaf height layers: bypass each added layer in turn and report how much the band changes (mean abs difference, 0..255 scale). A layer under 1.0 is a candidate for removal. FR : ablation de la feuille.
+import hou, sys, numpy as np
+sys.path.insert(0, '/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/Scripts')
+import TrimNodes as T, BuildBands2to6 as B5
+from PIL import Image
+TMP = '/private/tmp/claude-501/-Users-zenray--claude-Memory1/2562b086-836d-49c5-80c7-0c935a98513c/scratchpad/abl.png'
+hou.hipFile.clear(suppress_save_prompt=True); net = hou.node('/obj').createNode('copnet', 'abl'); out = B5.leaf(net)
+def img():
+    T.export(net, out, TMP, 1024); return np.asarray(Image.open(TMP).convert('L'), float)
+base = img(); print('layers measured against the full leaf')
+names = [n.name() for n in net.children() if n.name().endswith('_added') or n.name().endswith('_rib_added')]
+for nm in names:
+    n = net.node(nm); n.bypass(True); d = np.abs(img() - base).mean(); n.bypass(False); print('%-28s %.3f' % (nm, d))

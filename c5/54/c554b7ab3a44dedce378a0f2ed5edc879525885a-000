@@ -1,0 +1,30 @@
+# 6 October 2026 : leaf (band 5) HEIGHT lab: builds the band alone with hython, compares with ref 06 and prints metrics, saves a numbered side by side in versions/band5_refv2. Usage: python3 LeafLab.py <label>. FR : labo de la feuille.
+import sys, subprocess, glob, os
+import numpy as np
+from PIL import Image, ImageFilter
+B = '/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/'
+R = '/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/refs/flower-sheets/06_gen_trimsheet-height_v2.png'
+HY = '/Users/zenray/Create/Build/Houdini22/Houdini22.0.368/Frameworks/Houdini.framework/Versions/Current/Resources/bin/hython'
+out = subprocess.run([HY, B + 'Scripts/BuildBands2to6.py', '5', 'x', '2048'], capture_output=True, text=True).stdout
+print([l for l in out.splitlines() if l.startswith('band')])
+y0, y1 = round(.725 * 1254), round(.837 * 1254)
+ref = Image.open(R).convert('L').crop((0, y0, 1254, y1)); us = Image.open(B + 'previews/band5_nodes.png').convert('L').resize((1254, 1254), Image.LANCZOS).crop((0, y0, 1254, y1))
+a = np.asarray(ref, float) / 255; b = np.asarray(us, float) / 255
+def hp(x): return x - np.asarray(Image.fromarray((x * 255).astype('uint8')).filter(ImageFilter.GaussianBlur(2)), float) / 255
+mid = a.shape[0] // 2
+la = (np.abs(a - np.median(a[:3])) > 0.06); lb = (np.abs(b - np.median(b[:3])) > 0.06)
+iou = (la & lb).sum() / max(1, (la | lb).sum())
+ia = a[la]; ib = b[lb]
+q = [10, 30, 50, 70, 90, 99]
+print('mask IoU %.3f' % iou)
+print('lens tone quantiles ref', np.percentile(ia, q).round(2), 'ours', np.percentile(ib, q).round(2))
+print('detail energy (std of high pass) ref %.4f ours %.4f' % (hp(a)[la].std(), hp(b)[lb].std()))
+print('mean abs error %.4f' % np.abs(a - b)[la | lb].mean())
+rows = lambda x: [round(float(x[y, 150:450].mean()), 2) for y in range(8, a.shape[0] - 8, 12)]
+print('row profile ref ', rows(a)); print('row profile ours', rows(b))
+n = len(glob.glob(B + 'versions/band5_refv2/leaf_h_*.png')) + 1
+os.makedirs(B + 'versions/band5_refv2', exist_ok=True)
+im = Image.new('L', (1254, 2 * a.shape[0])); im.paste(ref, (0, 0)); im.paste(us, (0, a.shape[0]))
+f = B + 'versions/band5_refv2/leaf_h_%02d_%s.png' % (n, sys.argv[1] if len(sys.argv) > 1 else 'iter'); im.save(f); print(f)
+ref.crop((150, 0, 450, a.shape[0])).resize((900, a.shape[0] * 3)).save('/private/tmp/claude-501/-Users-zenray--claude-Memory1/2562b086-836d-49c5-80c7-0c935a98513c/scratchpad/zoom_ref.png')
+us.crop((150, 0, 450, a.shape[0])).resize((900, a.shape[0] * 3)).save('/private/tmp/claude-501/-Users-zenray--claude-Memory1/2562b086-836d-49c5-80c7-0c935a98513c/scratchpad/zoom_us.png')

@@ -46,6 +46,7 @@ def build(net, with_maps=True):
     fin = T.node(net, 'null', 'FINAL_HEIGHT', [tot])
     if not with_maps: return dict(height=fin)
     pal = json.load(open(B + 'ref-maps/band_palettes.json')); rgb = None
+    pal['5'] = [[0.0, 0.24, 0.43, 0.14], [0.38, 0.24, 0.43, 0.14], [0.43, 0.11, 0.28, 0.08], [0.52, 0.15, 0.36, 0.11], [0.60, 0.26, 0.48, 0.17], [0.72, 0.52, 0.70, 0.30], [1.0, 0.80, 0.88, 0.50]]      # 6 October 2026: leaf from ref 07 (ground 0.24 0.43 0.14 LIGHTER than the lens 0.15 0.35 0.11, rib and veins pale yellow green)
     pal['2'] = [[0.0, 0.18, 0.28, 0.07], [0.34, 0.22, 0.32, 0.09], [0.42, 0.45, 0.30, 0.07], [0.50, 0.78, 0.30, 0.05], [0.62, 0.93, 0.47, 0.07], [0.80, 0.98, 0.60, 0.12], [1.0, 1.0, 0.72, 0.22]]      # 6 October 2026: band 2 from the v2 reference: dark green ground, deep orange anthers (measured 0.95 0.5 0.1)
     for k in range(7):
         keys = [tuple(x) for x in pal[str(k)]]
@@ -107,7 +108,7 @@ def build(net, with_maps=True):
             inner = T.smooth(net, 'U35_bud_core_mask', T.node(net, 'blur', 'U35a_bud_soft', [B6.opacity(net, ry, rx3)], units=1, size_pixel=14.0), 0.55, 0.9)
             m = T.node(net, 'blend', 'U36_bud_green_core', [m, flat_colour(net, 'U36a_green', ry, (0.58, 0.68, 0.34)), T.lin(net, 'U36b_amount', inner, 0.0, 1.0, 0.0, 0.85)], mode=0)
         if k == 5:     # colour PADDING (the petals pad themselves: their own ramps already give the ground the petal colour): the part that opacity cuts away gets the colour of the object edge (no dark or pink halo at the cut)
-            pad_rgb = (0.30, 0.45, 0.20)
+            pad_rgb = (0.24, 0.43, 0.14)
             m = T.node(net, 'blend', 'U7%d_padding' % k, [m, flat_colour(net, 'U7%da_pad' % k, ry, pad_rgb), T.lin(net, 'U7%db_outside' % k, B56.leaf_opacity(net, ry, rx3), 0.0, 1.0, 1.0, 0.0)], mode=0)
         bw = T.mix(net, 'U3%d_colour%d_windowed' % (k, k), m, wins[k], 5); rgb = bw if rgb is None else T.mix(net, 'U4%d_colour_plus_band%d' % (k, k), rgb, bw, 3)
     base = T.node(net, 'null', 'BASECOLOR', [rgb])

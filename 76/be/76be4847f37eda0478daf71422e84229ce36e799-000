@@ -9,10 +9,14 @@ SIL = [(0.0, .045), (0.02, .049), (0.041, .052), (0.081, .0623), (0.122, .071), 
 LEVEL = [(0, .80), (.08, .90), (.15, .88), (.22, .83), (.30, .80), (.38, .76), (.46, .74), (.55, .73), (.65, .72), (.75, .68), (.82, .66), (.90, .66), (.95, .65), (1.0, .64)]
 GROUND = 0.40; PIVOT = 1.08            # the fan of fibres starts PIVOT band heights below the top
 UPTO = 99
+def scallop(net, tag, lv, wb):
+    """6 October 2026: the edge of the v2 petals is SCALLOPED (soft lobes about 0.02 canvas long): a slow noise along the edge added to the half width. 3 nodes."""
+    return T.mix(net, tag + '_scalloped', wb, V.grain(net, tag + '_wave', T.const(net, tag + '_zero', lv, 0.0), lv, T.const(net, tag + '_one', lv, 1.0), 0.030, 4.1, 0.009, 1.0, 1.0), 3)
 def coords(net, ry, rx):
     lv = T.lin(net, 'A03_band__lv_0_top_1_bottom', ry, 0.0, BAND_V1); cx = T.lin(net, 'A04_cell__cx_centre', rx, 0.0, 1.0, -1.0 / 6, 1.0 / 6)
     ax = T.mix(net, 'A06_cell__abs_cx', cx, T.const(net, 'A05_const__zero', lv, 0.0), 9)
     wb = T.curve(net, 'B01_silhouette_halfwidth', lv, [(x, y / 0.2) for x, y in SIL], 1.0, 0.0, 0.2, T.SMOOTH)
+    wb = scallop(net, 'B01s', lv, wb)
     mb = T.mix(net, 'B03_petal_mask', T.smooth(net, 'B02_edge', T.mix(net, 'B02a_edge_distance', wb, ax, 4), -EDGE, EDGE), T.smooth(net, 'B02b_top_plateau', lv, 0.014, 0.024), 5)
     return lv, ax, wb, mb
 def build(net):
@@ -24,7 +28,7 @@ def build(net):
     tone = T.mix(net, 'C04_tone', level, dome, 3)
     ground = T.const(net, 'C05_ground', lv, GROUND)
     h = T.mix(net, 'C06_over_ground', ground, T.mix(net, 'C06a_delta_masked', T.mix(net, 'C06b_delta', tone, ground, 4), mb, 5), 3)
-    c = dict(lv=lv, ax=ax, wb=wb, mb=mb, t=t)
+    c = dict(lv=lv, ax=ax, wb=wb, mb=mb, t=t, rx=rx)
     if UPTO >= 1: h = iteration1(net, h, c)
     if UPTO >= 2: h = iteration2(net, h, c)
     return h
@@ -34,16 +38,31 @@ def iteration1(net, h, c):
     n0 = len(net.children()); b = V.box(net, 'G', 'BAND 0 V3 ITERATION 1 : 64 nodes, fan of fibres', (0.7, 0.9, 1.0))
     soft = T.node(net, 'fractalnoise', 'G00_soft_phase_noise', [lv], amp=0.5, center=0.0, elementsize=0.14)
     d_sil = T.mix(net, 'G01_distance_inside', wb, ax, 4)
-    rim = V.profile(net, 'G02_rim', d_sil, [(-0.02, 0.0), (-0.008, -0.04), (-0.002, -0.10), (0.0, -0.02), (0.0008, 0.32), (0.004, 0.06), (0.010, 0.0), (0.05, 0.0)], -0.02, 0.05, -0.15, 0.35)
+    rim = V.profile(net, 'G02_rim', d_sil, [(-0.02, 0.0), (-0.008, -0.04), (-0.002, -0.10), (0.0, -0.02), (0.0015, 0.32), (0.006, 0.24), (0.011, 0.06), (0.016, -0.07), (0.024, 0.0), (0.05, 0.0)], -0.02, 0.05, -0.15, 0.35)      # 6 October 2026: wider bright rim with a groove inside, like the v2 petals
     h = T.mix(net, 'G04_rim__added', h, T.mix(net, 'G03_rim__not_top', rim, T.lin(net, 'G03a', T.smooth(net, 'G03b', lv, 0.70, 0.76), 0.0, 1.0, 1.0, 0.0), 5), 3)
-    rib = V.profile(net, 'G05_rib', ax, [(0.0, 0.0), (0.0015, -0.05), (0.0035, 0.12), (0.006, 0.03), (0.010, -0.12), (0.015, -0.05), (0.03, 0.0)], 0.0, 0.03, -0.15, 0.15)
-    h = T.mix(net, 'G07_rib__added', h, T.mix(net, 'G06_rib__masked', rib, T.smooth(net, 'G06a_below_neck', lv, 0.30, 0.55), 5), 3)
+    rib = V.profile(net, 'G05_rib', ax, [(0.0, 0.0), (0.0015, -0.05), (0.0035, 0.12), (0.006, 0.03), (0.010, -0.12), (0.015, -0.05), (0.03, 0.0)], 0.0, 0.03, -0.25, 0.25)
+    h = T.mix(net, 'G07_rib__added', h, T.mix(net, 'G06_rib__masked', rib, T.smooth(net, 'G06a_below_neck', lv, 0.0, 0.10), 5), 3)
     dy = T.lin(net, 'G10_fan__dy', lv, 0.0, 1.0, PIVOT * BAND_V1, (PIVOT - 1.0) * BAND_V1)
     phi = T.node(net, 'function', 'G11_fan__angle', [T.mix(net, 'G11a_slope', ax, T.mix(net, 'G11b_dy_floor', dy, T.const(net, 'G11c', lv, 0.01), 12), 6)], func=2, func_trig=5, angleunit=2)
-    fade = T.lin(net, 'G12_fan__fade', T.smooth(net, 'G12a', lv, 0.86, 0.96), 0.0, 1.0, 1.0, 0.0)
+    fade = T.lin(net, 'G12_fan__fade', T.smooth(net, 'G12a', lv, 0.97, 1.0), 0.0, 1.0, 1.0, 0.0)
     fm = T.mix(net, 'G14_fan__mask', T.mix(net, 'G13_fan__in_petal', mb, fade, 5), V.modulation(net, 'G13a_modulation', lv, 0.09, 2.0, 0.6, 7.3, 0.25), 5)
     h = V.lines_layer(net, 'G21_fan_main', h, phi, 20, soft, 0.18, 0.11, 0.30, fm, lv)
     h = V.lines_layer(net, 'G22_fan_fine', h, phi, 70, soft, 0.18, 0.075, 0.40, fm, lv)
+    cxs = T.lin(net, 'G50_cx_signed', c['rx'], 0.0, 1.0, -1.0 / 6, 1.0 / 6)      # 6 October 2026: FIBRES BY STREAK BLUR along the RADIAL direction from the pivot below the petal (the stem and leaf method): wavy irregular fibres that fan out by themselves
+    import numpy as np      # 6 October 2026: the v2 fibres follow the lines at a constant fraction of the half width (parallel to the outline, vertical on the axis), not rays from a pivot: direction (v * dw/dy, 1)
+    sx = [k[0] for k in SIL]; sy = [k[1] for k in SIL]; dsil = np.gradient(np.array(sy), np.array(sx)) / BAND_V1
+    dwb = T.curve(net, 'G51_hw_slope', lv, [(x, (d + 2.0) / 4.0) for x, d in zip(sx, dsil)], 1.0, -2.0, 2.0, T.SMOOTH)
+    vs = T.mix(net, 'G51a_v_signed', cxs, T.mix(net, 'G51b_wb_floor', wb, T.const(net, 'G51c_floor', lv, 0.01), 12), 6)
+    flow = T.node(net, 'rgbatouv', 'G52_flow__field', [T.node(net, 'channeljoin', 'G52a_flow__vector', [T.mix(net, 'G52c_dx', vs, dwb, 5), T.const(net, 'G52d_one', lv, 1.0), T.const(net, 'G52b_zero', lv, 0.0)])])
+    def fibre(tag, size, seed, thr, length, gain, sign):
+        nz = T.node(net, 'fractalnoise', tag + '_noise', [lv], amp=0.5, center=0.5, elementsize=size, noisetype=1, offx=seed)
+        sd = T.curve(net, tag + '_cut', nz, [(0.0, 0.0), (thr, 0.0), (thr + 0.06, 1.0), (1.0, 1.0)], 1.0, 0.0, 1.0)
+        st = T.node(net, 'streakblur', tag + '_streak', [sd, flow], dirtype=1, normalizedir=1, units=1, length_pixels=length, border=4)
+        return T.mix(net, tag + '_added', h_cur[0], T.mix(net, tag + '_masked', T.lin(net, tag + '_gain', st, 0.0, 1.0, 0.0, gain), fm, 5), sign)
+    h_cur = [h]
+    for tag, size, seed, thr, length, gain, sign in [('G53_fine', 0.0016, 3.1, 0.64, 260, 0.9, 3), ('G54_medium', 0.0022, 7.7, 0.68, 380, 0.9, 3), ('G55_groove', 0.0016, 11.3, 0.62, 340, 0.8, 4), ('G56_long', 0.0030, 17.1, 0.72, 600, 0.5, 4)]:
+        h_cur[0] = fibre(tag, size, seed, thr, length, gain, sign)
+    h = h_cur[0]
     h = V.grain(net, 'G32_grain', h, lv, mb, 0.0022, 5.3, 0.025)
     sh = V.profile(net, 'G41_contact', d_sil, [(-0.05, 0.0), (-0.025, -0.05), (-0.010, -0.11), (-0.003, -0.08), (0.0, 0.0), (0.05, 0.0)], -0.05, 0.05, -0.15, 0.05)
     h = T.mix(net, 'G43_contact__added', h, T.mix(net, 'G42_contact__outside', sh, T.lin(net, 'G42a', mb, 0.0, 1.0, 1.0, 0.0), 5), 3)
@@ -51,18 +70,19 @@ def iteration1(net, h, c):
 def speckles(net, lv, ax, wb, mb, tag='SP'):
     """THE SPECKLES of the petal (Matthieu, 6 October 2026: add small random dots, like the photo): scattered round dots, dense around the centre and the lower middle of the petal, rarer toward the white edge. Returns a 0..1 mask. The same function builds the same pattern in the height AND in the base colour (deterministic noise), so the dot is dark pink in the colour exactly where it is a bump in the height. 11 nodes. FR : points aleatoires du petale."""
     t = T.node(net, 'clamp', tag + '01_across', [T.mix(net, tag + '01a', ax, T.mix(net, tag + '01b', wb, T.const(net, tag + '01c', lv, 0.01), 12), 6)])
-    region = T.mix(net, tag + '02_region', T.smooth(net, tag + '02a_below_neck', lv, 0.22, 0.52), T.lin(net, tag + '02b_inside', T.smooth(net, tag + '02c', t, 0.55, 0.92), 0.0, 1.0, 1.0, 0.0), 5)
-    nz = T.node(net, 'worleynoise', tag + '03_dots', [lv], elementsize=0.032, jitter=1.0, offx=7.0)      # 6 October 2026: Worley F1 distance, thresholded below, gives perfectly ROUND dots (fractal noise blobs were angular), one per cell, like the pits of the v2 reference
-    dots = T.smooth(net, tag + '04_round', nz, 0.085, 0.125, 1.0, 0.0)
+    region = T.mix(net, tag + '02_region', T.smooth(net, tag + '02a_below_neck', lv, 0.30, 0.48), T.lin(net, tag + '02b_inside', T.smooth(net, tag + '02c', t, 0.50, 0.72), 0.0, 1.0, 1.0, 0.0), 5)
+    nz = T.node(net, 'worleynoise', tag + '03_dots', [lv], elementsize=0.027, jitter=1.0, offx=7.0)      # 6 October 2026: Worley F1 distance, thresholded below, gives perfectly ROUND dots (fractal noise blobs were angular), one per cell, like the pits of the v2 reference
+    dots = T.smooth(net, tag + '04_round', nz, 0.12, 0.17, 1.0, 0.0)
     dens = V.modulation(net, tag + '05_density', lv, 0.14, 1.0, 1.0, 5.3, 0.35)
     region = T.mix(net, tag + '02d_region_off_axis', region, T.smooth(net, tag + '02e_off_axis', ax, 0.014, 0.034), 5)      # no dot on the central ridge
+    region = T.mix(net, tag + '02f_not_bottom', region, T.lin(net, tag + '02g', T.smooth(net, tag + '02h', lv, 0.90, 0.95), 0.0, 1.0, 1.0, 0.0), 5)
     return T.mix(net, tag + '06_mask', T.mix(net, tag + '06a_in_region', dots, region, 5), T.mix(net, tag + '06b_with_density', mb, dens, 5), 5)
 def iteration2(net, h, c):
     """ITERATION 2 (64 nodes): the speckles in the height: small raised dots with a tiny dimple ring, plus fine pores scattered over the whole petal."""
     lv, ax, wb, mb = c['lv'], c['ax'], c['wb'], c['mb']
     n0 = len(net.children()); b = V.box(net, 'H', 'BAND 0 V3 ITERATION 2 : 64 nodes, speckles', (1.0, 0.8, 0.85))
     spk = speckles(net, lv, ax, wb, mb)
-    h = T.mix(net, 'H11_speckles__added', h, T.lin(net, 'H11a_gain', spk, 0.0, 1.0, 0.0, -0.42), 3)   # 6 October 2026: the dots of the v2 reference are dark PITS (p1 of the petal 0.34 against 0.55 before), not raised bumps
+    h = T.mix(net, 'H11_speckles__added', h, T.lin(net, 'H11a_gain', spk, 0.0, 1.0, 0.0, -0.30), 3)   # 6 October 2026: the dots of the v2 reference are dark PITS (p1 of the petal 0.34 against 0.55 before), not raised bumps
     ring = T.mix(net, 'H12_ring', T.node(net, 'blur', 'H12a_soft', [spk], units=1, size_pixel=3.0), spk, 4)
     h = T.mix(net, 'H13_dimple__added', h, T.mix(net, 'H13a_gain', ring, T.const(net, 'H13b_k', lv, 0.35), 5), 3)
     h = V.dots_layer(net, 'H21_pores', h, lv, mb, 0.0022, 9.9, 0.66, 0.045)
@@ -72,6 +92,7 @@ def opacity(net, ry, rx):
     """the petal mask alone (1 inside a petal, 0 on the ground between petals) for the opacity map. FR : masque d'opacite."""
     lv = T.lin(net, 'OP0_lv', ry, 0.0, BAND_V1); cx = T.lin(net, 'OP0_cx', rx, 0.0, 1.0, -1.0 / 6, 1.0 / 6); ax = T.mix(net, 'OP0_ax', cx, T.const(net, 'OP0_zero', lv, 0.0), 9)
     wb = T.curve(net, 'OP0_wb', lv, [(x, y / 0.2) for x, y in SIL], 1.0, 0.0, 0.2, T.SMOOTH)
+    wb = scallop(net, 'OP0s', lv, wb)
     return T.mix(net, 'OP0_mask', T.smooth(net, 'OP0_edge', T.mix(net, 'OP0_dist', wb, ax, 4), -EDGE * 0.6, EDGE * 0.6), T.smooth(net, 'OP0_top', lv, 0.014, 0.024), 5)
 if __name__ == '__main__':
     hou.hipFile.clear(suppress_save_prompt=True); net = hou.node('/obj').createNode('copnet', 'Band0V3_test'); res = int(sys.argv[3]) if len(sys.argv) > 3 else 2048

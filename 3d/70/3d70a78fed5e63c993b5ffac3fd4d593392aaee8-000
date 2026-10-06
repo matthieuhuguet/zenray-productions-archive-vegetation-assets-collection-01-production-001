@@ -55,7 +55,6 @@ def calyx(net):
     rim = V.profile(net, 'D20_arch_rim', d_arch, [(-0.02, 0.0), (-0.004, 0.10), (-0.001, 0.22), (0.001, -0.06), (0.006, -0.10), (0.02, 0.0)], -0.02, 0.03, -0.15, 0.25)
     h = T.mix(net, 'D21_rim_added', h, rim, 3)
     block = T.lin(net, 'D30_base_block_zone', T.smooth(net, 'D30a', lv, 0.60, 0.64), 0.0, 1.0, 0.0, 1.0)
-    h = V.grain(net, 'D40_grain', h, lv, T.lin(net, 'D40a_funnel', ma, 0.0, 1.0, 1.0, 0.0), 0.0025, 3.3, 0.05)
     return h
 def stem(net):
     """STEM: hairs. Tone profile (darker top and bottom edges), tiling streak noise, two crossing families of thin oblique hair lines made of Ramp-based coordinates (period exact, so the band tiles), sparse bright bumps."""
@@ -68,30 +67,47 @@ def stem(net):
         h = V.lines_layer(net, 'C4%d_hair_lines' % i, h, coord, cnt, c['soft'], 0.8, depth, 0.30, dens, lv)
     h = V.dots_layer(net, 'C50_bumps', h, lv, one, 0.006, 4.1, 0.60, 0.22)
     return h
+LEAF_HW = [(0.0, 0.0), (0.05, 0.085), (0.1, 0.177), (0.15, 0.255), (0.2, 0.319), (0.3, 0.39), (0.4, 0.44), (0.5, 0.447), (0.6, 0.433), (0.7, 0.383), (0.8, 0.312), (0.9, 0.184), (0.95, 0.085), (1.0, 0.0)]      # 6 October 2026: measured on ref 06
 def leaf(net):
     c = prelude(net, 5); lv, rx = c['lv'], c['rx']; P = c['P']; one = T.const(net, 'A06_one', lv, 1.0)
-    hw = T.curve(net, 'B10_leaf__halfwidth', rx, [(0.0, 0.0), (0.04, 0.20), (0.15, 0.54), (0.3, 0.76), (0.5, 0.86), (0.7, 0.76), (0.85, 0.54), (0.96, 0.20), (1.0, 0.0)], 1.0, 0.0, 0.5, T.SMOOTH)
-    wav = V.grain(net, 'B11_edge_wave', T.const(net, 'B11a_zero', lv, 0.0), lv, one, 0.05, 3.7, 0.025, 1.0, 1.0)
-    hw = T.mix(net, 'B12_leaf__halfwidth_wavy', hw, wav, 3)
+    hw = T.curve(net, 'B10_leaf__halfwidth', rx, [(0.0, 0.0), (0.05, 0.17), (0.1, 0.354), (0.15, 0.51), (0.2, 0.638), (0.3, 0.78), (0.4, 0.88), (0.5, 0.894), (0.6, 0.866), (0.7, 0.766), (0.8, 0.624), (0.9, 0.368), (0.95, 0.17), (1.0, 0.0)], 1.0, 0.0, 0.5, T.SMOOTH)
     dy = T.mix(net, 'B13_dy', lv, T.const(net, 'B13a_half', lv, 0.5), 9)
     d_in = T.mix(net, 'B14_inside', hw, dy, 4)
     m = T.smooth(net, 'B15_mask', d_in, -0.012, 0.012)
     v = T.node(net, 'clamp', 'B16_v', [T.mix(net, 'B16a_dy_over_hw', dy, T.mix(net, 'B16b_hw_floor', hw, T.const(net, 'B16c_floor', lv, 0.02), 12), 6)])
-    tone = T.mix(net, 'C10_tone', T.curve(net, 'C10a_across', v, [(0.0, 0.50), (0.3, 0.55), (0.8, 0.50), (1.0, 0.40)], 1.0), T.curve(net, 'C10b_along', rx, [(0.0, 0.0), (0.2, 0.5), (0.5, 0.6), (0.8, 0.5), (1.0, 0.0)], 1.0, -0.1, 0.1), 3)
+    tone = T.mix(net, 'C10_tone', T.curve(net, 'C10a_across', v, [(0.0, 0.34), (0.1, 0.32), (0.3, 0.38), (0.6, 0.40), (0.8, 0.36), (0.93, 0.31), (1.0, 0.25)], 1.0), T.curve(net, 'C10b_along', rx, [(0.0, 0.0), (0.2, 0.5), (0.5, 0.6), (0.8, 0.5), (1.0, 0.0)], 1.0, -0.1, 0.1), 3)
     bg = T.const(net, 'C11_background', lv, 0.35)
     h = T.mix(net, 'C12_over_background', bg, T.mix(net, 'C12a_delta_masked', T.mix(net, 'C12b_delta', tone, bg, 4), m, 5), 3)
-    rib = V.profile(net, 'D10_midrib', dy, [(0.0, 0.0), (0.004, -0.08), (0.010, 0.12), (0.020, 0.04), (0.04, -0.03), (0.08, 0.0)], 0.0, 0.08, -0.15, 0.2)
+    rib = V.profile(net, 'D10_midrib', dy, [(0.0, 0.30), (0.006, 0.36), (0.014, 0.22), (0.024, -0.06), (0.045, -0.05), (0.08, 0.0)], 0.0, 0.08, -0.15, 0.5)
     h = T.mix(net, 'D11_rib_added', h, T.mix(net, 'D11a_rib_masked', rib, m, 5), 3)
-    h = V.lines_layer(net, 'D20_veins', h, T.mix(net, 'D20a_oblique', T.lin(net, 'D20b_dy_scaled', dy, 0.0, 0.5, 0.0, 0.5), T.lin(net, 'D20c_x_scaled', rx, 0.0, 1.0, 0.0, 0.0), 3) if False else T.mix(net, 'D20a_oblique', v, T.lin(net, 'D20c_x', rx, 0.0, 1.0, -0.4, 0.4), 3), 12, c['soft'], 0.3, 0.05, 0.4, m, lv)
-    h = V.lines_layer(net, 'D21_veins_fine', h, v, 40, c['soft'], 0.3, 0.025, 0.5, m, lv)
-    rim = V.profile(net, 'D30_rim', d_in, [(-0.05, 0.0), (-0.01, -0.10), (-0.002, -0.14), (0.0, 0.0), (0.004, 0.20), (0.012, 0.02), (0.05, 0.0)], -0.05, 0.05, -0.2, 0.3)
+    mod = T.mix(net, 'D19_vein_strength', m, V.modulation(net, 'D19a_unequal', lv, 0.07, 8.0, 0.6, 3.1, 0.25), 5)      # 6 October 2026: veins unequal, some strong some faint, like the ref
+    h = V.lines_layer(net, 'D20_veins', h, v, 5, c['soft'], 0.6, -0.28, 0.22, mod, lv)
+    h = V.lines_layer(net, 'D22_veins_b', h, v, 7, c['soft'], 0.8, -0.2, 0.25, mod, lv)       # 6 October 2026: BRIGHT veins (ref v2), constant v lines so they converge to the tips
+    rim = V.profile(net, 'D30_rim', d_in, [(-0.05, 0.0), (-0.012, -0.12), (-0.003, -0.18), (0.0, 0.0), (0.006, 0.34), (0.014, 0.30), (0.026, 0.08), (0.05, 0.0)], -0.05, 0.05, -0.2, 0.4)      # 6 October 2026: the global contour is BIGGER (Matthieu)
     h = T.mix(net, 'D31_rim_added', h, rim, 3)
-    h = V.grain(net, 'D40_grain', h, lv, m, 0.003, 4.4, 0.04)
+    dv = T.mix(net, 'D33_inner_contour__distance', T.mix(net, 'D33a_dv', v, T.const(net, 'D33b_at', lv, 0.47), 9), hw, 5)      # 6 October 2026: a SECOND CONTOUR in the middle of each half leaf (ref 06: an arc at about 0.47 of the half width, following the outline)
+    inner = V.profile(net, 'D34_inner', dv, [(0.0, 0.32), (0.004, 0.26), (0.010, 0.05), (0.018, -0.06), (0.03, 0.0), (0.06, 0.0)], 0.0, 0.06, -0.12, 0.4)
+    h = T.mix(net, 'D35_inner_added', h, T.mix(net, 'D35a_masked', inner, T.mix(net, 'D35b_not_rib', m, T.smooth(net, 'D35c_away_from_rib', dy, 0.015, 0.04), 5), 5), 3)
+    h = V.grain(net, 'D32_large_tone', h, lv, m, 0.09, 13.7, 0.05, 6.0, 1.0)      # 6 October 2026: slow tonal patches along the leaf, like the ref
+    # 6 October 2026: FIBRES BY STREAK BLUR along the vein direction field (the stem method): sparse noise seeds smeared along the tangent of the constant v curves, so the fibres follow the leaf outline and converge to the tips by themselves, no regular sine stripes
+    import numpy as np
+    fx = [k[0] for k in LEAF_HW]; fy = [k[1] for k in LEAF_HW]; dfy = np.gradient(np.array(fy), np.array(fx)) * 0.224       # d half width / d x, in canvas slope
+    deriv = T.curve(net, 'E00_hw_slope', rx, [(x, (d + 1.0) / 2.0) for x, d in zip(fx, dfy)], 1.0, -1.0, 1.0, T.SMOOTH)
+    sgn = T.smooth(net, 'E01_side', lv, 0.47, 0.53, -1.0, 1.0)
+    dyv = T.mix(net, 'E02_dir_y', T.mix(net, 'E02a_v_slope', v, deriv, 5), sgn, 5)
+    cj = T.node(net, 'channeljoin', 'E03_flow__vector', [one, dyv, T.const(net, 'E03a_zero', lv, 0.0)]); dirf = T.node(net, 'rgbatouv', 'E04_flow__field', [cj])
+    def fibre(tag, size, seed, thr, length, gain, sign):
+        nz = T.node(net, 'fractalnoise', tag + '_noise', [lv], amp=0.5, center=0.5, elementsize=size, noisetype=1, offx=seed)
+        sd = T.curve(net, tag + '_cut', nz, [(0.0, 0.0), (thr, 0.0), (thr + 0.06, 1.0), (1.0, 1.0)], 1.0, 0.0, 1.0)
+        st = T.node(net, 'streakblur', tag + '_streak', [sd, dirf], dirtype=1, normalizedir=1, units=1, length_pixels=length, border=4)
+        return T.mix(net, tag + '_masked', T.lin(net, tag + '_gain', st, 0.0, 1.0, 0.0, gain), m, 5), sign
+    for tag, size, seed, thr, length, gain, sign in [('E10_fine', 0.0016, 3.1, 0.62, 60, 0.38, 3), ('E11_medium', 0.0022, 7.7, 0.66, 120, 0.5, 3), ('E12_groove', 0.0016, 11.3, 0.60, 150, 0.95, 4), ('E13_grain', 0.0009, 5.5, 0.55, 30, 0.45, 3), ('E14_long', 0.0040, 17.1, 0.72, 520, 0.9, 3), ('E15_long_b', 0.0050, 23.3, 0.74, 700, 0.8, 3)]:
+        f, sg = fibre(tag, size, seed, thr, length, gain, sign); h = T.mix(net, tag + '_added', h, f, sg)
     return h
 def leaf_opacity(net, ry, rx):
     """leaf lens mask alone for the opacity map. FR : masque d'opacite de la feuille."""
     lv = T.lin(net, 'OP5_lv', ry, 0.725, 0.837); r2 = T.node(net, 'ramp', 'OP5_rx', signature='f1', cycles=2.0, method=1)
-    hw = T.curve(net, 'OP5_hw', r2, [(0.0, 0.0), (0.04, 0.20), (0.15, 0.54), (0.3, 0.76), (0.5, 0.86), (0.7, 0.76), (0.85, 0.54), (0.96, 0.20), (1.0, 0.0)], 1.0, 0.0, 0.5, T.SMOOTH)
+    hw = T.curve(net, 'OP5_hw', r2, [(0.0, 0.0), (0.05, 0.17), (0.1, 0.354), (0.15, 0.51), (0.2, 0.638), (0.3, 0.78), (0.4, 0.88), (0.5, 0.894), (0.6, 0.866), (0.7, 0.766), (0.8, 0.624), (0.9, 0.368), (0.95, 0.17), (1.0, 0.0)], 1.0, 0.0, 0.5, T.SMOOTH)
     dy = T.mix(net, 'OP5_dy', lv, T.const(net, 'OP5_half', lv, 0.5), 9)
     return T.smooth(net, 'OP5_mask', T.mix(net, 'OP5_d', hw, dy, 4), -0.008, 0.008)
 def bud(net):
@@ -108,9 +124,14 @@ def bud(net):
     ridges = V.lines_layer(net, 'D10_ridges', h, v, 1.7, c['soft'], 0.15, 0.20, 0.5, m, lv)
     h = V.lines_layer(net, 'D11_ridge_grooves', ridges, v, 3.4, c['soft'], 0.15, 0.10, 0.5, m, lv)
     h = V.lines_layer(net, 'D12_fibres', h, v, 50, c['soft'], 0.2, 0.03, 0.5, m, lv)
-    rim = V.profile(net, 'D30_rim', d_in, [(-0.05, 0.0), (-0.01, -0.10), (-0.002, -0.14), (0.0, 0.0), (0.004, 0.20), (0.012, 0.02), (0.05, 0.0)], -0.05, 0.05, -0.2, 0.3)
+    rim = V.profile(net, 'D30_rim', d_in, [(-0.05, 0.0), (-0.012, -0.12), (-0.003, -0.18), (0.0, 0.0), (0.006, 0.34), (0.014, 0.30), (0.026, 0.08), (0.05, 0.0)], -0.05, 0.05, -0.2, 0.4)      # 6 October 2026: the global contour is BIGGER (Matthieu)
     h = T.mix(net, 'D31_rim_added', h, rim, 3)
-    h = V.grain(net, 'D40_grain', h, lv, m, 0.003, 4.4, 0.04)
+    dv = T.mix(net, 'D33_inner_contour__distance', T.mix(net, 'D33a_dv', v, T.const(net, 'D33b_at', lv, 0.47), 9), hw, 5)      # 6 October 2026: a SECOND CONTOUR in the middle of each half leaf (ref 06: an arc at about 0.47 of the half width, following the outline)
+    inner = V.profile(net, 'D34_inner', dv, [(0.0, 0.32), (0.004, 0.26), (0.010, 0.05), (0.018, -0.06), (0.03, 0.0), (0.06, 0.0)], 0.0, 0.06, -0.12, 0.4)
+    h = T.mix(net, 'D35_inner_added', h, T.mix(net, 'D35a_masked', inner, T.mix(net, 'D35b_not_rib', m, T.smooth(net, 'D35c_away_from_rib', dy, 0.015, 0.04), 5), 5), 3)
+    h = V.grain(net, 'D32_large_tone', h, lv, m, 0.09, 13.7, 0.05, 6.0, 1.0)      # 6 October 2026: slow tonal patches along the leaf, like the ref
+    mod2 = T.mix(net, 'D41a_strength', m, V.modulation(net, 'D41b_unequal', lv, 0.03, 10.0, 0.5, 7.7, 0.15), 5)
+    h = V.lines_layer(net, 'D41_fibres', h, v, 34, c['soft'], 1.4, -0.07, 0.5, mod2, lv)      # 6 October 2026: fine uneven fibres along the leaf
     h = V.dots_layer(net, 'D41_spots', h, lv, m, 0.005, 6.6, 0.60, 0.10)
     return h
 BUILD = {2: stamens, 3: calyx, 4: stem, 5: leaf, 6: bud}

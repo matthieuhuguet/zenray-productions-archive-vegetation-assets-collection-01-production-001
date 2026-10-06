@@ -54,12 +54,11 @@ def build(net):
 def pads(net, tag, h, n0):
     P = [lambda h, i: T.node(net, 'clamp', '%s9%d_clamp' % (tag, i), [h]), lambda h, i: T.curve(net, '%s9%d_identity' % (tag, i), h, [(0.0, 0.0), (1.0, 1.0)], 1.0)]
     i = 0
-    while len(net.children()) - n0 < 64: h = P[i % 2](h, i); i += 1
-    return h
+    return h      # 6 October 2026: no more padding to exactly 64 nodes (identity nodes did nothing); the iteration is now limited by a ceiling in close()
 def box(net, tag, comment, color):
     b = net.createNetworkBox('Iteration_' + tag); b.setComment(comment); b.setColor(hou.Color(color)); return b
 def close(net, b, tag, n0):
-    assert len(net.children()) - n0 == 64, 'iteration %s holds %d nodes' % (tag, len(net.children()) - n0)
+    assert len(net.children()) - n0 <= 150, 'iteration %s holds %d nodes' % (tag, len(net.children()) - n0)
     for n in net.children():
         if n.name().startswith(tag): b.addNode(n)
     b.fitAroundContents()
