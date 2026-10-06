@@ -1,0 +1,20 @@
+{
+  "copiedFrames": 84,
+  "allCopiesHashVerified": true,
+  "fullVideoDecode": true,
+  "probe": {
+    "programs": [],
+    "stream_groups": [],
+    "streams": [
+      {
+        "width": 418,
+        "height": 242,
+        "nb_frames": "672"
+      }
+    ],
+    "format": {
+      "duration": "28.000000",
+      "size": "4476331"
+    }
+  }
+}

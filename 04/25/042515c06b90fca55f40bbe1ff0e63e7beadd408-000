@@ -1,0 +1,1014 @@
+{
+  "date": "6 October 2026",
+  "classification": "Houdini generated petal crops; reference panels excluded",
+  "frames": [
+    {
+      "frame": "f001.png",
+      "time_utc": "2026-10-05 11:38:31",
+      "source": "recovered/0056_2026-10-05_11-38-31_band0_cmp.png.png",
+      "source_crop_size": [
+        341,
+        200
+      ],
+      "archivedFrame": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/petal_evolution/frames/f001.png",
+      "sha256": "f47e247b4b867f67f03011730ee792a036009cfaf42a213a3b46d97abe3def94",
+      "comparisonSource": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/recovered_from_conversation/0056_2026-10-05_11-38-31_band0_cmp.png.png"
+    },
+    {
+      "frame": "f002.png",
+      "time_utc": "2026-10-05 11:38:59",
+      "source": "recovered/0057_2026-10-05_11-38-59_band0_cmp.png.png",
+      "source_crop_size": [
+        341,
+        200
+      ],
+      "archivedFrame": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/petal_evolution/frames/f002.png",
+      "sha256": "f44c3e55586faaa4a7bb03fffc103933de6f0350182bbbaed01240dc41dd3cde",
+      "comparisonSource": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/recovered_from_conversation/0057_2026-10-05_11-38-59_band0_cmp.png.png"
+    },
+    {
+      "frame": "f003.png",
+      "time_utc": "2026-10-05 11:39:59",
+      "source": "recovered/0058_2026-10-05_11-39-59_band0_cmp.png.png",
+      "source_crop_size": [
+        341,
+        200
+      ],
+      "archivedFrame": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/petal_evolution/frames/f003.png",
+      "sha256": "44a0d5c9c8c79f4eba8215e46c156ca68ec6de28622c8175c0a417c4076d7ddb",
+      "comparisonSource": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/recovered_from_conversation/0058_2026-10-05_11-39-59_band0_cmp.png.png"
+    },
+    {
+      "frame": "f004.png",
+      "time_utc": "2026-10-05 11:48:57",
+      "source": "recovered/0059_2026-10-05_11-48-57_band0_cmp.png.png",
+      "source_crop_size": [
+        341,
+        200
+      ],
+      "archivedFrame": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/petal_evolution/frames/f004.png",
+      "sha256": "174bb98cde91a48573c0f9fc622a58294a979c175ea688264391bc09aac19d9d",
+      "comparisonSource": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/recovered_from_conversation/0059_2026-10-05_11-48-57_band0_cmp.png.png"
+    },
+    {
+      "frame": "f005.png",
+      "time_utc": "2026-10-05 11:49:25",
+      "source": "recovered/0060_2026-10-05_11-49-25_band0_cmp.png.png",
+      "source_crop_size": [
+        341,
+        200
+      ],
+      "archivedFrame": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/petal_evolution/frames/f005.png",
+      "sha256": "5071e9fb486314b99a32fc2bf85457768220f621cabc6885a45b268246c06f8b",
+      "comparisonSource": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/recovered_from_conversation/0060_2026-10-05_11-49-25_band0_cmp.png.png"
+    },
+    {
+      "frame": "f006.png",
+      "time_utc": "2026-10-05 11:49:48",
+      "source": "recovered/0061_2026-10-05_11-49-48_band0_cmp.png.png",
+      "source_crop_size": [
+        341,
+        200
+      ],
+      "archivedFrame": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/petal_evolution/frames/f006.png",
+      "sha256": "379fd85b613b38343f19e1340d269f6bf1796302403da9b1f8b606e720fc7858",
+      "comparisonSource": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/recovered_from_conversation/0061_2026-10-05_11-49-48_band0_cmp.png.png"
+    },
+    {
+      "frame": "f007.png",
+      "time_utc": "2026-10-05 11:53:20",
+      "source": "recovered/0062_2026-10-05_11-53-20_band0_cmp.png.png",
+      "source_crop_size": [
+        341,
+        200
+      ],
+      "archivedFrame": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/petal_evolution/frames/f007.png",
+      "sha256": "d4bcf703b567ccc8839244a6a3cd80cd6249f6fa101ebc43fc275cf9a5179af7",
+      "comparisonSource": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/recovered_from_conversation/0062_2026-10-05_11-53-20_band0_cmp.png.png"
+    },
+    {
+      "frame": "f008.png",
+      "time_utc": "2026-10-05 11:54:01",
+      "source": "recovered/0063_2026-10-05_11-54-01_band0_cmp.png.png",
+      "source_crop_size": [
+        341,
+        200
+      ],
+      "archivedFrame": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/petal_evolution/frames/f008.png",
+      "sha256": "19d348f157d7dd446a5523322532be4edddafeb10b11337daa8e1c805e4b1252",
+      "comparisonSource": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/recovered_from_conversation/0063_2026-10-05_11-54-01_band0_cmp.png.png"
+    },
+    {
+      "frame": "f009.png",
+      "time_utc": "2026-10-05 11:55:00",
+      "source": "recovered/0064_2026-10-05_11-55-00_band0_cmp.png.png",
+      "source_crop_size": [
+        341,
+        200
+      ],
+      "archivedFrame": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/petal_evolution/frames/f009.png",
+      "sha256": "722c44643765a2081699a9243fbfec8cfc067110ce6379cb129dca9f46168874",
+      "comparisonSource": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/recovered_from_conversation/0064_2026-10-05_11-55-00_band0_cmp.png.png"
+    },
+    {
+      "frame": "f010.png",
+      "time_utc": "2026-10-05 11:55:17",
+      "source": "recovered/0065_2026-10-05_11-55-17_band0_cmp.png.png",
+      "source_crop_size": [
+        341,
+        200
+      ],
+      "archivedFrame": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/petal_evolution/frames/f010.png",
+      "sha256": "97df68e1087c8f8eb153d3c5a0d455f0bf67f31aabcbe060e24bbb09a5747879",
+      "comparisonSource": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/recovered_from_conversation/0065_2026-10-05_11-55-17_band0_cmp.png.png"
+    },
+    {
+      "frame": "f011.png",
+      "time_utc": "2026-10-05 11:55:29",
+      "source": "recovered/0066_2026-10-05_11-55-29_band0_cmp.png.png",
+      "source_crop_size": [
+        341,
+        200
+      ],
+      "archivedFrame": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/petal_evolution/frames/f011.png",
+      "sha256": "13104b22c84a3c90431b144afb9b01f5c11cea887f06f9a072f18ef26dd2f6af",
+      "comparisonSource": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/recovered_from_conversation/0066_2026-10-05_11-55-29_band0_cmp.png.png"
+    },
+    {
+      "frame": "f012.png",
+      "time_utc": "2026-10-05 11:56:08",
+      "source": "recovered/0067_2026-10-05_11-56-08_band0_cmp.png.png",
+      "source_crop_size": [
+        341,
+        200
+      ],
+      "archivedFrame": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/petal_evolution/frames/f012.png",
+      "sha256": "c30d964d57240ee51614463b840649213fae565f009171a36891485809e9ab2d",
+      "comparisonSource": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/recovered_from_conversation/0067_2026-10-05_11-56-08_band0_cmp.png.png"
+    },
+    {
+      "frame": "f013.png",
+      "time_utc": "2026-10-05 11:58:16",
+      "source": "recovered/0068_2026-10-05_11-58-16_band0_cmp.png.png",
+      "source_crop_size": [
+        341,
+        200
+      ],
+      "archivedFrame": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/petal_evolution/frames/f013.png",
+      "sha256": "08b9e879c0385e132d958988c2726bf93e5a92e78e1ccbd9eb63a9588cf7e630",
+      "comparisonSource": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/recovered_from_conversation/0068_2026-10-05_11-58-16_band0_cmp.png.png"
+    },
+    {
+      "frame": "f014.png",
+      "time_utc": "2026-10-05 11:59:02",
+      "source": "recovered/0069_2026-10-05_11-59-02_band0_cmp.png.png",
+      "source_crop_size": [
+        341,
+        200
+      ],
+      "archivedFrame": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/petal_evolution/frames/f014.png",
+      "sha256": "d9a5f99ec2af9a06bb8747321ffa00a726f8cb68cf2fde23908ca53de0147c10",
+      "comparisonSource": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/recovered_from_conversation/0069_2026-10-05_11-59-02_band0_cmp.png.png"
+    },
+    {
+      "frame": "f015.png",
+      "time_utc": "2026-10-05 11:59:16",
+      "source": "recovered/0070_2026-10-05_11-59-16_band0_cmp.png.png",
+      "source_crop_size": [
+        341,
+        200
+      ],
+      "archivedFrame": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/petal_evolution/frames/f015.png",
+      "sha256": "86238d9503e4f7249e98e7bea1cb035a6b384c71fcfe4885822b6d26e867e6bc",
+      "comparisonSource": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/recovered_from_conversation/0070_2026-10-05_11-59-16_band0_cmp.png.png"
+    },
+    {
+      "frame": "f016.png",
+      "time_utc": "2026-10-05 12:01:22",
+      "source": "recovered/0071_2026-10-05_12-01-22_band0_cmp.png.png",
+      "source_crop_size": [
+        341,
+        200
+      ],
+      "archivedFrame": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/petal_evolution/frames/f016.png",
+      "sha256": "96330132ed4416ab73878d6b227a85b4c0fc7be037b6747477b42441cb8f5a9b",
+      "comparisonSource": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/recovered_from_conversation/0071_2026-10-05_12-01-22_band0_cmp.png.png"
+    },
+    {
+      "frame": "f017.png",
+      "time_utc": "2026-10-05 12:06:01",
+      "source": "recovered/0075_2026-10-05_12-06-01_band0_cmp.png.png",
+      "source_crop_size": [
+        341,
+        200
+      ],
+      "archivedFrame": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/petal_evolution/frames/f017.png",
+      "sha256": "d2ab88912381593106166d13f62af7dda940ae9c2cc19b2591e8b7f9afc270da",
+      "comparisonSource": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/recovered_from_conversation/0075_2026-10-05_12-06-01_band0_cmp.png.png"
+    },
+    {
+      "frame": "f018.png",
+      "time_utc": "2026-10-05 12:08:25",
+      "source": "recovered/0077_2026-10-05_12-08-25_band0_cmp.png.png",
+      "source_crop_size": [
+        341,
+        200
+      ],
+      "archivedFrame": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/petal_evolution/frames/f018.png",
+      "sha256": "7e7831d907815a873d46850dc323e2bc92c94eefc5a48328b1ebc7ddf751e9c6",
+      "comparisonSource": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/recovered_from_conversation/0077_2026-10-05_12-08-25_band0_cmp.png.png"
+    },
+    {
+      "frame": "f019.png",
+      "time_utc": "2026-10-05 12:10:27",
+      "source": "recovered/0078_2026-10-05_12-10-27_band0_cmp.png.png",
+      "source_crop_size": [
+        341,
+        200
+      ],
+      "archivedFrame": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/petal_evolution/frames/f019.png",
+      "sha256": "f15f8dc1d6d4cd07216a8a84cf2819faeb901744b6404b7deddfd648b087d267",
+      "comparisonSource": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/recovered_from_conversation/0078_2026-10-05_12-10-27_band0_cmp.png.png"
+    },
+    {
+      "frame": "f020.png",
+      "time_utc": "2026-10-05 12:11:04",
+      "source": "recovered/0079_2026-10-05_12-11-04_band0_cmp.png.png",
+      "source_crop_size": [
+        341,
+        200
+      ],
+      "archivedFrame": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/petal_evolution/frames/f020.png",
+      "sha256": "3a7c888ed889ce7bf772c7b9ac1326b0b30e1b438bc4c1d8ff64cd22b6e80013",
+      "comparisonSource": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/recovered_from_conversation/0079_2026-10-05_12-11-04_band0_cmp.png.png"
+    },
+    {
+      "frame": "f021.png",
+      "time_utc": "2026-10-05 12:11:22",
+      "source": "recovered/0080_2026-10-05_12-11-22_band0_cmp.png.png",
+      "source_crop_size": [
+        341,
+        200
+      ],
+      "archivedFrame": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/petal_evolution/frames/f021.png",
+      "sha256": "72d3c6721ce8580f0a13fd8ac564ec773d3f0d1c4af1a1852afb0109453818ed",
+      "comparisonSource": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/recovered_from_conversation/0080_2026-10-05_12-11-22_band0_cmp.png.png"
+    },
+    {
+      "frame": "f022.png",
+      "time_utc": "2026-10-05 12:12:16",
+      "source": "recovered/0081_2026-10-05_12-12-16_band0_cmp.png.png",
+      "source_crop_size": [
+        341,
+        200
+      ],
+      "archivedFrame": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/petal_evolution/frames/f022.png",
+      "sha256": "693dc0d223ca8f907739aa272c5761a4b4bd9057c26b4b1e8bf8cc95e10cf9c7",
+      "comparisonSource": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/recovered_from_conversation/0081_2026-10-05_12-12-16_band0_cmp.png.png"
+    },
+    {
+      "frame": "f023.png",
+      "time_utc": "2026-10-05 12:13:14",
+      "source": "recovered/0082_2026-10-05_12-13-14_band0_cmp.png.png",
+      "source_crop_size": [
+        341,
+        200
+      ],
+      "archivedFrame": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/petal_evolution/frames/f023.png",
+      "sha256": "f1ebe9c97f0b69cfab7c51df54677b2b49778ffb6eb5d4f80039b28404d4bd64",
+      "comparisonSource": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/recovered_from_conversation/0082_2026-10-05_12-13-14_band0_cmp.png.png"
+    },
+    {
+      "frame": "f024.png",
+      "time_utc": "2026-10-05 12:17:43",
+      "source": "recovered/0086_2026-10-05_12-17-43_band0_cmp.png.jpg",
+      "source_crop_size": [
+        666,
+        389
+      ],
+      "archivedFrame": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/petal_evolution/frames/f024.png",
+      "sha256": "837ae8bff004017dcb76cbec98025684ab8f5a5e13ad1611f3fecdcc0ca50c5e",
+      "comparisonSource": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/recovered_from_conversation/0086_2026-10-05_12-17-43_band0_cmp.png.jpg"
+    },
+    {
+      "frame": "f025.png",
+      "time_utc": "2026-10-05 12:23:16",
+      "source": "recovered/0093_2026-10-05_12-23-16_band0_cmp.png.jpg",
+      "source_crop_size": [
+        666,
+        389
+      ],
+      "archivedFrame": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/petal_evolution/frames/f025.png",
+      "sha256": "a4f61be96dec3ca7f36eeaedd40f126d820e9ffaf4ef19277812bc37f40f3ff4",
+      "comparisonSource": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/recovered_from_conversation/0093_2026-10-05_12-23-16_band0_cmp.png.jpg"
+    },
+    {
+      "frame": "f026.png",
+      "time_utc": "2026-10-05 12:29:23",
+      "source": "recovered/0100_2026-10-05_12-29-23_band0_cmp.png.jpg",
+      "source_crop_size": [
+        666,
+        389
+      ],
+      "archivedFrame": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/petal_evolution/frames/f026.png",
+      "sha256": "61e5d32930aab27dc122eed17091021896f1fdec988a9a9114e69b2ddb8aba1c",
+      "comparisonSource": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/recovered_from_conversation/0100_2026-10-05_12-29-23_band0_cmp.png.jpg"
+    },
+    {
+      "frame": "f027.png",
+      "time_utc": "2026-10-05 12:44:32",
+      "source": "recovered/0112_2026-10-05_12-44-32_band0v2_cmp.png.jpg",
+      "source_crop_size": [
+        666,
+        389
+      ],
+      "archivedFrame": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/petal_evolution/frames/f027.png",
+      "sha256": "a6ec8b1112be166e3fe478fa3621a64e12b73e52e6ff041cf977524a6e48dd65",
+      "comparisonSource": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/recovered_from_conversation/0112_2026-10-05_12-44-32_band0v2_cmp.png.jpg"
+    },
+    {
+      "frame": "f028.png",
+      "time_utc": "2026-10-05 12:44:58",
+      "source": "recovered/0113_2026-10-05_12-44-58_band0v2_cmp.png.jpg",
+      "source_crop_size": [
+        666,
+        389
+      ],
+      "archivedFrame": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/petal_evolution/frames/f028.png",
+      "sha256": "2fbcab830de65a9d5bd1b6fd8ef2ed26620ab07b06297cc78ef457e8ee9f205b",
+      "comparisonSource": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/recovered_from_conversation/0113_2026-10-05_12-44-58_band0v2_cmp.png.jpg"
+    },
+    {
+      "frame": "f029.png",
+      "time_utc": "2026-10-05 12:45:16",
+      "source": "recovered/0114_2026-10-05_12-45-16_band0v2_cmp.png.jpg",
+      "source_crop_size": [
+        666,
+        389
+      ],
+      "archivedFrame": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/petal_evolution/frames/f029.png",
+      "sha256": "8d65612edd25c9e32ad219b240bc4620a921ee21e611293881cc12056da9f4e1",
+      "comparisonSource": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/recovered_from_conversation/0114_2026-10-05_12-45-16_band0v2_cmp.png.jpg"
+    },
+    {
+      "frame": "f030.png",
+      "time_utc": "2026-10-05 12:45:41",
+      "source": "recovered/0115_2026-10-05_12-45-41_band0v2_cmp.png.jpg",
+      "source_crop_size": [
+        666,
+        389
+      ],
+      "archivedFrame": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/petal_evolution/frames/f030.png",
+      "sha256": "2518daf8865c323ac0a01f5baf000b57a3a6df704b76d60ca320a74e095c2722",
+      "comparisonSource": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/recovered_from_conversation/0115_2026-10-05_12-45-41_band0v2_cmp.png.jpg"
+    },
+    {
+      "frame": "f031.png",
+      "time_utc": "2026-10-05 12:46:40",
+      "source": "recovered/0117_2026-10-05_12-46-40_band0v2_cmp.png.jpg",
+      "source_crop_size": [
+        666,
+        389
+      ],
+      "archivedFrame": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/petal_evolution/frames/f031.png",
+      "sha256": "b83b5530dd17bf819c5f1d5b9e7c6c8aeecbd298e0b39beaa1789bf286b164a2",
+      "comparisonSource": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/recovered_from_conversation/0117_2026-10-05_12-46-40_band0v2_cmp.png.jpg"
+    },
+    {
+      "frame": "f032.png",
+      "time_utc": "2026-10-05 14:52:38",
+      "source": "recovered/0124_2026-10-05_14-52-38_band0v2_cmp.png.jpg",
+      "source_crop_size": [
+        666,
+        389
+      ],
+      "archivedFrame": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/petal_evolution/frames/f032.png",
+      "sha256": "e744f52ee1c5be52307376a9349b65d27b801d588b133a21d1e4dfec83cc66fd",
+      "comparisonSource": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/recovered_from_conversation/0124_2026-10-05_14-52-38_band0v2_cmp.png.jpg"
+    },
+    {
+      "frame": "f033.png",
+      "time_utc": "2026-10-05 21:06:01",
+      "source": "recovered/0126_2026-10-05_21-06-01_band0v2_cmp.png.jpg",
+      "source_crop_size": [
+        666,
+        389
+      ],
+      "archivedFrame": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/petal_evolution/frames/f033.png",
+      "sha256": "eafbd7a7f726722dadf00c77e5aae4ce20098e15295cbaade018531f1bfdef11",
+      "comparisonSource": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/recovered_from_conversation/0126_2026-10-05_21-06-01_band0v2_cmp.png.jpg"
+    },
+    {
+      "frame": "f034.png",
+      "time_utc": "2026-10-05 21:06:19",
+      "source": "recovered/0127_2026-10-05_21-06-19_band0v2_cmp.png.jpg",
+      "source_crop_size": [
+        666,
+        389
+      ],
+      "archivedFrame": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/petal_evolution/frames/f034.png",
+      "sha256": "90aa416836157dcb229a73caf1752ae11664325454f9664602f22be641d7b178",
+      "comparisonSource": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/recovered_from_conversation/0127_2026-10-05_21-06-19_band0v2_cmp.png.jpg"
+    },
+    {
+      "frame": "f035.png",
+      "time_utc": "2026-10-05 22:42:39",
+      "source": "recovered/0174_2026-10-05_22-42-39_band0v3_cmp.png.jpg",
+      "source_crop_size": [
+        666,
+        389
+      ],
+      "archivedFrame": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/petal_evolution/frames/f035.png",
+      "sha256": "ac19c4ca3b39f651ed8c7805356961cf06e9c77f834c3a2a55867414f36a4c95",
+      "comparisonSource": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/recovered_from_conversation/0174_2026-10-05_22-42-39_band0v3_cmp.png.jpg"
+    },
+    {
+      "frame": "f036.png",
+      "time_utc": "2026-10-05 22:57:33",
+      "source": "auto/2026-10-06_005733_band0v3_cmp.png",
+      "source_crop_size": [
+        682,
+        398
+      ],
+      "archivedFrame": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/petal_evolution/frames/f036.png",
+      "sha256": "98935a703c7ce19e9c1cb6be6261939e87a24303e8ae227628de42209802f0bb",
+      "comparisonSource": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/auto/2026-10-06_005733_band0v3_cmp.png"
+    },
+    {
+      "frame": "f037.png",
+      "time_utc": "2026-10-05 23:34:39",
+      "source": "auto/2026-10-06_013439_band0v3_cmp.png",
+      "source_crop_size": [
+        682,
+        398
+      ],
+      "archivedFrame": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/petal_evolution/frames/f037.png",
+      "sha256": "f08cad529d5ce1d3b6336e2ebacca7fec5416de97dca765c638dc9e2f0047a3a",
+      "comparisonSource": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/auto/2026-10-06_013439_band0v3_cmp.png"
+    },
+    {
+      "frame": "f038.png",
+      "time_utc": "2026-10-06 11:12:58",
+      "source": "band0_refv2/petal_h_01_base.png",
+      "source_crop_size": [
+        418,
+        242
+      ],
+      "archivedFrame": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/petal_evolution/frames/f038.png",
+      "sha256": "c8c1714e19e52af5861e2bd5630151d0195ae861d46287fa80b9ffee95bdb7be",
+      "comparisonSource": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/band0_refv2/petal_h_01_base.png"
+    },
+    {
+      "frame": "f039.png",
+      "time_utc": "2026-10-06 11:13:33",
+      "source": "band0_refv2/petal_h_02_a1.png",
+      "source_crop_size": [
+        418,
+        242
+      ],
+      "archivedFrame": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/petal_evolution/frames/f039.png",
+      "sha256": "26d87175b54dd7e8e363ea6d9685fab679b532f7fa401c0e4c0650839beb0efb",
+      "comparisonSource": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/band0_refv2/petal_h_02_a1.png"
+    },
+    {
+      "frame": "f040.png",
+      "time_utc": "2026-10-06 11:14:13",
+      "source": "band0_refv2/petal_h_03_a2.png",
+      "source_crop_size": [
+        418,
+        242
+      ],
+      "archivedFrame": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/petal_evolution/frames/f040.png",
+      "sha256": "26d87175b54dd7e8e363ea6d9685fab679b532f7fa401c0e4c0650839beb0efb",
+      "comparisonSource": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/band0_refv2/petal_h_03_a2.png"
+    },
+    {
+      "frame": "f041.png",
+      "time_utc": "2026-10-06 11:14:36",
+      "source": "band0_refv2/petal_h_04_a2.png",
+      "source_crop_size": [
+        418,
+        242
+      ],
+      "archivedFrame": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/petal_evolution/frames/f041.png",
+      "sha256": "f5baeecbdb5bf074144e7dd0d918bd4264efa5c8f57e7c63f3282d9d4022137e",
+      "comparisonSource": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/band0_refv2/petal_h_04_a2.png"
+    },
+    {
+      "frame": "f042.png",
+      "time_utc": "2026-10-06 11:14:54",
+      "source": "band0_refv2/petal_h_05_a3.png",
+      "source_crop_size": [
+        418,
+        242
+      ],
+      "archivedFrame": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/petal_evolution/frames/f042.png",
+      "sha256": "6bcfeba72c01ffe383e85896bfd26455bc896e3bf388038026e8e6796fcd794e",
+      "comparisonSource": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/band0_refv2/petal_h_05_a3.png"
+    },
+    {
+      "frame": "f043.png",
+      "time_utc": "2026-10-06 11:15:09",
+      "source": "band0_refv2/petal_h_06_a4.png",
+      "source_crop_size": [
+        418,
+        242
+      ],
+      "archivedFrame": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/petal_evolution/frames/f043.png",
+      "sha256": "c8cd0843d38800044e4c51ffa3259f858d9cdf88ba70446a06234b09c9fb4f1b",
+      "comparisonSource": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/band0_refv2/petal_h_06_a4.png"
+    },
+    {
+      "frame": "f044.png",
+      "time_utc": "2026-10-06 11:15:29",
+      "source": "band0_refv2/petal_h_07_a5.png",
+      "source_crop_size": [
+        418,
+        242
+      ],
+      "archivedFrame": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/petal_evolution/frames/f044.png",
+      "sha256": "23d4a04eab660919e489b15ba2b4d8ab2ed8077cf33db2f220da59123f1db322",
+      "comparisonSource": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/band0_refv2/petal_h_07_a5.png"
+    },
+    {
+      "frame": "f045.png",
+      "time_utc": "2026-10-06 11:15:42",
+      "source": "band0_refv2/petal_h_08_a6.png",
+      "source_crop_size": [
+        418,
+        242
+      ],
+      "archivedFrame": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/petal_evolution/frames/f045.png",
+      "sha256": "be3c42287765d37b86325c9c08fe78b7ad370a80fd38902096bb0f5d1bd4c404",
+      "comparisonSource": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/band0_refv2/petal_h_08_a6.png"
+    },
+    {
+      "frame": "f046.png",
+      "time_utc": "2026-10-06 11:15:56",
+      "source": "band0_refv2/petal_h_09_a7.png",
+      "source_crop_size": [
+        418,
+        242
+      ],
+      "archivedFrame": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/petal_evolution/frames/f046.png",
+      "sha256": "e9505380dd6dc238202978f06f889aae406f901478362005a5b0ad8b1336a46c",
+      "comparisonSource": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/band0_refv2/petal_h_09_a7.png"
+    },
+    {
+      "frame": "f047.png",
+      "time_utc": "2026-10-06 11:16:10",
+      "source": "band0_refv2/petal_h_10_a8.png",
+      "source_crop_size": [
+        418,
+        242
+      ],
+      "archivedFrame": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/petal_evolution/frames/f047.png",
+      "sha256": "31813c899a1f266b9115d45939c56f4904743394aae59d4cff99cea12edc296d",
+      "comparisonSource": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/band0_refv2/petal_h_10_a8.png"
+    },
+    {
+      "frame": "f048.png",
+      "time_utc": "2026-10-06 11:16:41",
+      "source": "band0_refv2/petal_h_11_a9.png",
+      "source_crop_size": [
+        418,
+        242
+      ],
+      "archivedFrame": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/petal_evolution/frames/f048.png",
+      "sha256": "11b791dd35f20de35f828bf02b7a07dd5466730c958220bc2d183094e61dfa13",
+      "comparisonSource": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/band0_refv2/petal_h_11_a9.png"
+    },
+    {
+      "frame": "f049.png",
+      "time_utc": "2026-10-06 11:16:52",
+      "source": "band0_refv2/petal_h_12_a10.png",
+      "source_crop_size": [
+        418,
+        242
+      ],
+      "archivedFrame": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/petal_evolution/frames/f049.png",
+      "sha256": "7474d02536ee3cc5fec1ceecda9009fb86ee6973d549d880764f182d0b66a6c3",
+      "comparisonSource": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/band0_refv2/petal_h_12_a10.png"
+    },
+    {
+      "frame": "f050.png",
+      "time_utc": "2026-10-06 11:18:34",
+      "source": "band0_refv2/petal_h_13_vault1.png",
+      "source_crop_size": [
+        418,
+        242
+      ],
+      "archivedFrame": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/petal_evolution/frames/f050.png",
+      "sha256": "7474d02536ee3cc5fec1ceecda9009fb86ee6973d549d880764f182d0b66a6c3",
+      "comparisonSource": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/band0_refv2/petal_h_13_vault1.png"
+    },
+    {
+      "frame": "f051.png",
+      "time_utc": "2026-10-06 11:18:51",
+      "source": "band0_refv2/petal_h_14_vault1.png",
+      "source_crop_size": [
+        418,
+        242
+      ],
+      "archivedFrame": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/petal_evolution/frames/f051.png",
+      "sha256": "4b623c5a80d27a8f65a672e8731986bb993c26031e18d229b5895a5ba80ba982",
+      "comparisonSource": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/band0_refv2/petal_h_14_vault1.png"
+    },
+    {
+      "frame": "f052.png",
+      "time_utc": "2026-10-06 11:19:23",
+      "source": "band0_refv2/petal_h_15_vault2.png",
+      "source_crop_size": [
+        418,
+        242
+      ],
+      "archivedFrame": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/petal_evolution/frames/f052.png",
+      "sha256": "fb18cc9e584b720d894ef4074cff71417683364f67eb8e55f4fd4e83d6115221",
+      "comparisonSource": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/band0_refv2/petal_h_15_vault2.png"
+    },
+    {
+      "frame": "f053.png",
+      "time_utc": "2026-10-06 11:19:35",
+      "source": "band0_refv2/petal_h_16_vault3.png",
+      "source_crop_size": [
+        418,
+        242
+      ],
+      "archivedFrame": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/petal_evolution/frames/f053.png",
+      "sha256": "b84347e37da5c46f0c0b40e5763c969fde332f952745358c80084fe59b4e92d8",
+      "comparisonSource": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/band0_refv2/petal_h_16_vault3.png"
+    },
+    {
+      "frame": "f054.png",
+      "time_utc": "2026-10-06 11:19:48",
+      "source": "band0_refv2/petal_h_17_vault4.png",
+      "source_crop_size": [
+        418,
+        242
+      ],
+      "archivedFrame": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/petal_evolution/frames/f054.png",
+      "sha256": "f025ce144087c5968c13281a2ecfbbe966107d4d7113ed4e6ee2b6ccf48f89fb",
+      "comparisonSource": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/band0_refv2/petal_h_17_vault4.png"
+    },
+    {
+      "frame": "f055.png",
+      "time_utc": "2026-10-06 11:20:00",
+      "source": "band0_refv2/petal_h_18_vault5.png",
+      "source_crop_size": [
+        418,
+        242
+      ],
+      "archivedFrame": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/petal_evolution/frames/f055.png",
+      "sha256": "59e70a30e2dcc0a207268805fc8c950b5a980d191eb5fd6a2c9c54c4c4455cd3",
+      "comparisonSource": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/band0_refv2/petal_h_18_vault5.png"
+    },
+    {
+      "frame": "f056.png",
+      "time_utc": "2026-10-06 11:20:11",
+      "source": "band0_refv2/petal_h_19_vault6.png",
+      "source_crop_size": [
+        418,
+        242
+      ],
+      "archivedFrame": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/petal_evolution/frames/f056.png",
+      "sha256": "6134c157d495efadaee4d4436d2377afa2316aad88bd35b7cd068500530b95fa",
+      "comparisonSource": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/band0_refv2/petal_h_19_vault6.png"
+    },
+    {
+      "frame": "f057.png",
+      "time_utc": "2026-10-06 11:24:44",
+      "source": "band0_refv2/petal_h_20_meas1.png",
+      "source_crop_size": [
+        418,
+        242
+      ],
+      "archivedFrame": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/petal_evolution/frames/f057.png",
+      "sha256": "2f7f03842e6f9523d88102b6631110ad22e7e35aaa73aba619a7cd153537e673",
+      "comparisonSource": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/band0_refv2/petal_h_20_meas1.png"
+    },
+    {
+      "frame": "f058.png",
+      "time_utc": "2026-10-06 11:25:05",
+      "source": "band0_refv2/petal_h_21_meas2.png",
+      "source_crop_size": [
+        418,
+        242
+      ],
+      "archivedFrame": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/petal_evolution/frames/f058.png",
+      "sha256": "d23816767e480e13ca622484515056b31412fe398be948ee4b932c2fbac43693",
+      "comparisonSource": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/band0_refv2/petal_h_21_meas2.png"
+    },
+    {
+      "frame": "f059.png",
+      "time_utc": "2026-10-06 11:25:26",
+      "source": "band0_refv2/petal_h_22_meas3.png",
+      "source_crop_size": [
+        418,
+        242
+      ],
+      "archivedFrame": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/petal_evolution/frames/f059.png",
+      "sha256": "f85b06e2a76ec8c18415f4f7dea0eb493caabcff795cef0bb631dcf7c40e7fdf",
+      "comparisonSource": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/band0_refv2/petal_h_22_meas3.png"
+    },
+    {
+      "frame": "f060.png",
+      "time_utc": "2026-10-06 11:25:50",
+      "source": "band0_refv2/petal_h_23_meas4.png",
+      "source_crop_size": [
+        418,
+        242
+      ],
+      "archivedFrame": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/petal_evolution/frames/f060.png",
+      "sha256": "80cf489f42a015f3ada570881f2d42ccd4b348a4ee65eabb5a5dea629ea41f3a",
+      "comparisonSource": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/band0_refv2/petal_h_23_meas4.png"
+    },
+    {
+      "frame": "f061.png",
+      "time_utc": "2026-10-06 11:26:03",
+      "source": "band0_refv2/petal_h_24_meas5.png",
+      "source_crop_size": [
+        418,
+        242
+      ],
+      "archivedFrame": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/petal_evolution/frames/f061.png",
+      "sha256": "e40f77b264859cfb7f42d59a28e1f57b338c1c494dd45792f4324c4af5903c4d",
+      "comparisonSource": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/band0_refv2/petal_h_24_meas5.png"
+    },
+    {
+      "frame": "f062.png",
+      "time_utc": "2026-10-06 11:26:48",
+      "source": "band0_refv2/petal_h_25_meas6.png",
+      "source_crop_size": [
+        418,
+        242
+      ],
+      "archivedFrame": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/petal_evolution/frames/f062.png",
+      "sha256": "d81619924d64bce6f5cdccfaac55cc57eef3bd7af4098e3a26a1872037b9a217",
+      "comparisonSource": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/band0_refv2/petal_h_25_meas6.png"
+    },
+    {
+      "frame": "f063.png",
+      "time_utc": "2026-10-06 11:28:01",
+      "source": "band0_refv2/petal_h_26_fan1.png",
+      "source_crop_size": [
+        418,
+        242
+      ],
+      "archivedFrame": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/petal_evolution/frames/f063.png",
+      "sha256": "c1f32aee9146175a8827f1762d5cfc5ead8b05b0c07da2b5869a35a0e5643542",
+      "comparisonSource": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/band0_refv2/petal_h_26_fan1.png"
+    },
+    {
+      "frame": "f064.png",
+      "time_utc": "2026-10-06 11:28:14",
+      "source": "band0_refv2/petal_h_27_fan2.png",
+      "source_crop_size": [
+        418,
+        242
+      ],
+      "archivedFrame": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/petal_evolution/frames/f064.png",
+      "sha256": "eb16bdc59cda0a9cb5f8524242cb2b42243e9cf28c519fe232bf23ccaac7c34b",
+      "comparisonSource": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/band0_refv2/petal_h_27_fan2.png"
+    },
+    {
+      "frame": "f065.png",
+      "time_utc": "2026-10-06 11:28:38",
+      "source": "band0_refv2/petal_h_28_fan_k0.55.png",
+      "source_crop_size": [
+        418,
+        242
+      ],
+      "archivedFrame": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/petal_evolution/frames/f065.png",
+      "sha256": "64f1932f797eddcb540d06d9a836be554bc3b398c049e34dce0a01180adc9bb2",
+      "comparisonSource": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/band0_refv2/petal_h_28_fan_k0.55.png"
+    },
+    {
+      "frame": "f066.png",
+      "time_utc": "2026-10-06 11:28:44",
+      "source": "band0_refv2/petal_h_29_fan_k0.7.png",
+      "source_crop_size": [
+        418,
+        242
+      ],
+      "archivedFrame": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/petal_evolution/frames/f066.png",
+      "sha256": "64f1932f797eddcb540d06d9a836be554bc3b398c049e34dce0a01180adc9bb2",
+      "comparisonSource": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/band0_refv2/petal_h_29_fan_k0.7.png"
+    },
+    {
+      "frame": "f067.png",
+      "time_utc": "2026-10-06 11:29:10",
+      "source": "band0_refv2/petal_h_30_fan_k0.55.png",
+      "source_crop_size": [
+        418,
+        242
+      ],
+      "archivedFrame": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/petal_evolution/frames/f067.png",
+      "sha256": "64f1932f797eddcb540d06d9a836be554bc3b398c049e34dce0a01180adc9bb2",
+      "comparisonSource": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/band0_refv2/petal_h_30_fan_k0.55.png"
+    },
+    {
+      "frame": "f068.png",
+      "time_utc": "2026-10-06 11:29:18",
+      "source": "band0_refv2/petal_h_31_fan_k0.75.png",
+      "source_crop_size": [
+        418,
+        242
+      ],
+      "archivedFrame": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/petal_evolution/frames/f068.png",
+      "sha256": "9da56495955852fb3dc669f7cee6a6fd3094114f8d72ed3ea1010ae44420e680",
+      "comparisonSource": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/band0_refv2/petal_h_31_fan_k0.75.png"
+    },
+    {
+      "frame": "f069.png",
+      "time_utc": "2026-10-06 11:29:25",
+      "source": "band0_refv2/petal_h_32_fan_k0.95.png",
+      "source_crop_size": [
+        418,
+        242
+      ],
+      "archivedFrame": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/petal_evolution/frames/f069.png",
+      "sha256": "b06acd3e85ee0dd6243d925f610459d0a0666477a82070b4a1ce18f3da5912ed",
+      "comparisonSource": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/band0_refv2/petal_h_32_fan_k0.95.png"
+    },
+    {
+      "frame": "f070.png",
+      "time_utc": "2026-10-06 11:29:36",
+      "source": "band0_refv2/petal_h_33_fan_k0.3.png",
+      "source_crop_size": [
+        418,
+        242
+      ],
+      "archivedFrame": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/petal_evolution/frames/f070.png",
+      "sha256": "56bab6f00986d8b69ce2f1d62559fdc80778f97362b00e2eeb0c92611d8230a2",
+      "comparisonSource": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/band0_refv2/petal_h_33_fan_k0.3.png"
+    },
+    {
+      "frame": "f071.png",
+      "time_utc": "2026-10-06 11:29:43",
+      "source": "band0_refv2/petal_h_34_fan_k0.42.png",
+      "source_crop_size": [
+        418,
+        242
+      ],
+      "archivedFrame": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/petal_evolution/frames/f071.png",
+      "sha256": "3762bbfe31b428cb718d5bf8b201b1a19ec568b5f1b4b81c06a429a70bef9acd",
+      "comparisonSource": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/band0_refv2/petal_h_34_fan_k0.42.png"
+    },
+    {
+      "frame": "f072.png",
+      "time_utc": "2026-10-06 11:33:40",
+      "source": "band0_refv2/petal_h_35_spine1.png",
+      "source_crop_size": [
+        418,
+        242
+      ],
+      "archivedFrame": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/petal_evolution/frames/f072.png",
+      "sha256": "18e7fdc63e8b4aa3bc45341a9c21abae0dcf8073beb6087599f307114f3a8874",
+      "comparisonSource": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/band0_refv2/petal_h_35_spine1.png"
+    },
+    {
+      "frame": "f073.png",
+      "time_utc": "2026-10-06 11:34:03",
+      "source": "band0_refv2/petal_h_36_spine2.png",
+      "source_crop_size": [
+        418,
+        242
+      ],
+      "archivedFrame": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/petal_evolution/frames/f073.png",
+      "sha256": "864be09a2d74f2da8b96608ae3fb6f383428eb35a6eb1e3093beab41015dfc8c",
+      "comparisonSource": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/band0_refv2/petal_h_36_spine2.png"
+    },
+    {
+      "frame": "f074.png",
+      "time_utc": "2026-10-06 11:34:17",
+      "source": "band0_refv2/petal_h_37_spine3.png",
+      "source_crop_size": [
+        418,
+        242
+      ],
+      "archivedFrame": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/petal_evolution/frames/f074.png",
+      "sha256": "87d91837f31be346a431a6cca77e70df0ea3bcaf8a0f091a3f7b628bfc50fa7a",
+      "comparisonSource": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/band0_refv2/petal_h_37_spine3.png"
+    },
+    {
+      "frame": "f075.png",
+      "time_utc": "2026-10-06 11:34:29",
+      "source": "band0_refv2/petal_h_38_spine4.png",
+      "source_crop_size": [
+        418,
+        242
+      ],
+      "archivedFrame": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/petal_evolution/frames/f075.png",
+      "sha256": "90406efa67c78423d16502cebc0f3fba6e98ef61ed9106e9af25633f4d20ff6f",
+      "comparisonSource": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/band0_refv2/petal_h_38_spine4.png"
+    },
+    {
+      "frame": "f076.png",
+      "time_utc": "2026-10-06 11:34:42",
+      "source": "band0_refv2/petal_h_39_spine5.png",
+      "source_crop_size": [
+        418,
+        242
+      ],
+      "archivedFrame": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/petal_evolution/frames/f076.png",
+      "sha256": "984a838a167fd7b41611b4e6448011f77dea75a999c1b36321456397e496f6fe",
+      "comparisonSource": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/band0_refv2/petal_h_39_spine5.png"
+    },
+    {
+      "frame": "f077.png",
+      "time_utc": "2026-10-06 11:35:28",
+      "source": "band0_refv2/petal_h_40_wave1.png",
+      "source_crop_size": [
+        418,
+        242
+      ],
+      "archivedFrame": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/petal_evolution/frames/f077.png",
+      "sha256": "098c64cf0f4e469b2009940cef99055036cefa78c69cad7c9b2d9f1d8fe40f40",
+      "comparisonSource": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/band0_refv2/petal_h_40_wave1.png"
+    },
+    {
+      "frame": "f078.png",
+      "time_utc": "2026-10-06 11:36:49",
+      "source": "band0_refv2/petal_h_41_subtle1.png",
+      "source_crop_size": [
+        418,
+        242
+      ],
+      "archivedFrame": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/petal_evolution/frames/f078.png",
+      "sha256": "b2fb92cff35eb1a45fd4953a6610e51f47c95c7b1e83fe6c724cc73f314e8474",
+      "comparisonSource": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/band0_refv2/petal_h_41_subtle1.png"
+    },
+    {
+      "frame": "f079.png",
+      "time_utc": "2026-10-06 11:37:04",
+      "source": "band0_refv2/petal_h_42_subtle2.png",
+      "source_crop_size": [
+        418,
+        242
+      ],
+      "archivedFrame": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/petal_evolution/frames/f079.png",
+      "sha256": "d6744e2626ee24b6cef4e2a3cc8a9d2bbcc11b829132297b525d4bc778f11901",
+      "comparisonSource": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/band0_refv2/petal_h_42_subtle2.png"
+    },
+    {
+      "frame": "f080.png",
+      "time_utc": "2026-10-06 11:38:56",
+      "source": "band0_refv2/petal_h_43_spine6.png",
+      "source_crop_size": [
+        418,
+        242
+      ],
+      "archivedFrame": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/petal_evolution/frames/f080.png",
+      "sha256": "b67a9c74b3eb4ff6a6c71fa37d04394eaff002d0ef21255c80b2ea7cba6ad6fe",
+      "comparisonSource": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/band0_refv2/petal_h_43_spine6.png"
+    },
+    {
+      "frame": "f081.png",
+      "time_utc": "2026-10-06 11:39:24",
+      "source": "band0_refv2/petal_h_44_spine7.png",
+      "source_crop_size": [
+        418,
+        242
+      ],
+      "archivedFrame": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/petal_evolution/frames/f081.png",
+      "sha256": "3337034731630846b6fbeaf3bddd0a70ad642134582fc2c1331bdbf87471b6c4",
+      "comparisonSource": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/band0_refv2/petal_h_44_spine7.png"
+    },
+    {
+      "frame": "f082.png",
+      "time_utc": "2026-10-06 11:41:04",
+      "source": "band0_refv2/petal_h_45_moles1.png",
+      "source_crop_size": [
+        418,
+        242
+      ],
+      "archivedFrame": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/petal_evolution/frames/f082.png",
+      "sha256": "b3e7bc39c2d11c17cd95f415017d848674f4155fe2f2be075ea4ee8ec1609c36",
+      "comparisonSource": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/band0_refv2/petal_h_45_moles1.png"
+    },
+    {
+      "frame": "f083.png",
+      "time_utc": "2026-10-06 11:41:17",
+      "source": "band0_refv2/petal_h_46_moles2.png",
+      "source_crop_size": [
+        418,
+        242
+      ],
+      "archivedFrame": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/petal_evolution/frames/f083.png",
+      "sha256": "863ed9bef67c183be8bc28ee43b1ecfb6e8322980985e3df91422d015697416f",
+      "comparisonSource": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/band0_refv2/petal_h_46_moles2.png"
+    },
+    {
+      "frame": "f084.png",
+      "time_utc": "2026-10-06 11:41:30",
+      "source": "band0_refv2/petal_h_47_moles3.png",
+      "source_crop_size": [
+        418,
+        242
+      ],
+      "archivedFrame": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/petal_evolution/frames/f084.png",
+      "sha256": "f416697b7876373ccf90cab227788c5f9ecb8b693bd88ab53daabe761a7d4186",
+      "comparisonSource": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/versions/band0_refv2/petal_h_47_moles3.png"
+    }
+  ]
+}
