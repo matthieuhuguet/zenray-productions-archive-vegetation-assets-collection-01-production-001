@@ -1,0 +1,11 @@
+# Subtitle style, 6 October 2026
+
+Vogun Medium original, white #FFFFFF, centered black shadow at 55 percent opacity, blur 8 pixels and zero offset at 1920 x 1920. Text is centered horizontally in the lower margin, top 1690 pixels, maximum font size 80 and maximum width 84 percent. (6 October 2026)
+
+Adapted from maps/trim/petals/title-animation/vogun-cyber/Animation.html and its white variant. Each letter has four clipped horizontal bands, alternating electrical offsets with amplitude 45 pixels and frequency 120, settling without extra VFX. (6 October 2026)
+
+One second appearance, two seconds fully visible, one second disappearance. Appearance travels left to right; disappearance travels right to left with two local ping-pong cycles, amplitude 14 pixels. Start 0.015, spread 0.65 and settle 0.32 seconds ensure the full line settles before the hold. (6 October 2026)
+
+Images are ordered by filename number; captions retain the filename words without the number or extension. Original landscape images fit inside the square without cropping or stretching, with black margins. Seven four-second shots total 28 seconds at 30 fps. (6 October 2026)
+
+Parameters: steps/Animation.json. Sources: steps/inputs, with checksums in the configuration. Renderer: ../Scripts/RenderTitleAnimations.cjs. Output: LilySteps_v004.mov, HEVC, optimized hardware encoding. (6 October 2026)
