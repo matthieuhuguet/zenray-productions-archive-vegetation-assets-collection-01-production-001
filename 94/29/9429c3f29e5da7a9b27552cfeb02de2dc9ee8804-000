@@ -81,3 +81,19 @@ Each frame is the whole 2048 x 2048 sheet at the time of the event: the band nam
 | 075_20261005_224143_band6v2.png | 2026-10-05T22:41:43.320Z | 6 | band6v2 |
 | 076_20261005_224239_band0v3.png | 2026-10-05T22:42:39.969Z | 0 | band0v3 |
 | 077_CURRENT_lily_trim_height.png | now | -1 | current height of the sheet |
+
+## Completion, 6 October 2026
+
+The original 77-frame archive remains intact. The completed reconstruction contains 160 saved states of the full 2048 x 2048 height sheet, including 6 October iterations. (6 October 2026)
+
+[Completed video](height_evolution_complete.mp4), [contact sheet](contact_sheet_complete.jpg), [chronology and sources](complete/INDEX.md), [source and crop manifest](complete/Manifest.json). (6 October 2026)
+
+Only verified generated Houdini regions enter the reconstruction; 108 recovered images with other or unverified roles are excluded. Unknown historical bands remain grey until a saved generated state exists. Saved-image chronology does not recover unsaved graph states. (6 October 2026)
+
+The final frame matches the current production height pixel for pixel. Comparison source checksums and crop coordinates remain in the manifest. CmpPetal.py places generated height at top-right despite its header; PetalLab.py and LeafLab.py place generated strips below references. (6 October 2026)
+
+[84 petal evolution frames and standalone preview](../petal_evolution/INDEX.md), [original complete MOV montage](../../video/LilyHeightToRender_v004.mov), [compact original MP4](../../video/LilyHeightToRender_v004.mp4). (6 October 2026)
+
+## Video cut, 6 October 2026
+
+Removed the first 3 seconds (72 frames) from height_evolution_complete.mp4 at the user request. Verified duration: 50.333333 seconds, 1208 frames; full decoding succeeds. Original retained in archive/6-October-2026/height_evolution_complete_before_trim.mp4. The 160 source images remain unchanged. (6 October 2026)
