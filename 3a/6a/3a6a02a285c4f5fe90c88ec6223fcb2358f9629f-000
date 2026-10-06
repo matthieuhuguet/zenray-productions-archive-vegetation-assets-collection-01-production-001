@@ -28,7 +28,7 @@
         "02-connexions-croisees-cyan-105.png",
         "02-connexions-croisees-cyan-149.png"
       ],
-      "bytes": 1255282
+      "bytes": 1342753
     },
     {
       "id": "02-connexions-croisees-magenta",
@@ -57,10 +57,10 @@
         "02-connexions-croisees-magenta-105.png",
         "02-connexions-croisees-magenta-149.png"
       ],
-      "bytes": 1203010
+      "bytes": 1477919
     },
     {
-      "id": "02-connexions-croisees-turquoise",
+      "id": "02-connexions-croisees-yellow",
       "layout": [
         {
           "text": "ZenRay Vegetation Collection 01",
@@ -78,15 +78,15 @@
         }
       ],
       "samples": [
-        "02-connexions-croisees-turquoise-000.png",
-        "02-connexions-croisees-turquoise-009.png",
-        "02-connexions-croisees-turquoise-018.png",
-        "02-connexions-croisees-turquoise-030.png",
-        "02-connexions-croisees-turquoise-045.png",
-        "02-connexions-croisees-turquoise-105.png",
-        "02-connexions-croisees-turquoise-149.png"
+        "02-connexions-croisees-yellow-000.png",
+        "02-connexions-croisees-yellow-009.png",
+        "02-connexions-croisees-yellow-018.png",
+        "02-connexions-croisees-yellow-030.png",
+        "02-connexions-croisees-yellow-045.png",
+        "02-connexions-croisees-yellow-105.png",
+        "02-connexions-croisees-yellow-149.png"
       ],
-      "bytes": 1196448
+      "bytes": 1297283
     }
   ]
 }

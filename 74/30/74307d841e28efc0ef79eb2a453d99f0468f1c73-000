@@ -1,0 +1,62 @@
+{
+  "date": "6 October 2026",
+  "results": [
+    {
+      "file": "02-connexions-croisees-cyan.mov",
+      "color": "#00FFFF",
+      "MB": 1.34,
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "width": 3840,
+            "height": 2160,
+            "nb_frames": "150"
+          }
+        ],
+        "format": {
+          "duration": "5.000000"
+        }
+      }
+    },
+    {
+      "file": "02-connexions-croisees-magenta.mov",
+      "color": "#FF00FF",
+      "MB": 1.48,
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "width": 3840,
+            "height": 2160,
+            "nb_frames": "150"
+          }
+        ],
+        "format": {
+          "duration": "5.000000"
+        }
+      }
+    },
+    {
+      "file": "02-connexions-croisees-yellow.mov",
+      "color": "#FFFF00",
+      "MB": 1.3,
+      "probe": {
+        "programs": [],
+        "stream_groups": [],
+        "streams": [
+          {
+            "width": 3840,
+            "height": 2160,
+            "nb_frames": "150"
+          }
+        ],
+        "format": {
+          "duration": "5.000000"
+        }
+      }
+    }
+  ]
+}

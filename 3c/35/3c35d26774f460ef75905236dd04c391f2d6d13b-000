@@ -11,7 +11,7 @@
     "Fleur de Lys"
   ],
   "font": "AnthropicSerif-Light.ttf",
-  "foreground": "#00cfff",
+  "foreground": "#00FFFF",
   "background": "#f6f4ee",
   "widthRatio": 0.92,
   "lineGap": 110,
@@ -24,7 +24,7 @@
       "settle": 0.48,
       "amplitude": 125,
       "frequency": 120,
-      "foreground": "#00cfff"
+      "foreground": "#00FFFF"
     }
   ],
   "rowDelay": 0.5,

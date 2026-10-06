@@ -11,11 +11,21 @@
     "Fleur de Lys"
   ],
   "font": "AnthropicSerif-Light.ttf",
-  "foreground": "#FF00FF",
+  "foreground": "#ffffff",
   "background": "#f6f4ee",
   "widthRatio": 0.92,
   "lineGap": 110,
   "variants": [
+    {
+      "id": "02-connexions-croisees-cyan",
+      "name": "Micro-coupures cyan",
+      "motion": 2,
+      "spread": 0.48,
+      "settle": 0.48,
+      "amplitude": 125,
+      "frequency": 120,
+      "foreground": "#00FFFF"
+    },
     {
       "id": "02-connexions-croisees-magenta",
       "name": "Micro-coupures magenta",
@@ -25,6 +35,16 @@
       "amplitude": 125,
       "frequency": 120,
       "foreground": "#FF00FF"
+    },
+    {
+      "id": "02-connexions-croisees-yellow",
+      "name": "Micro-coupures yellow",
+      "motion": 2,
+      "spread": 0.48,
+      "settle": 0.48,
+      "amplitude": 125,
+      "frequency": 120,
+      "foreground": "#FFFF00"
     }
   ],
   "rowDelay": 0.5,
