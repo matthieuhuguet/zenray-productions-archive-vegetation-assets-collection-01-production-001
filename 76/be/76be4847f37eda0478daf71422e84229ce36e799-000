@@ -69,14 +69,7 @@ def iteration1(net, h, c):
     fm = T.mix(net, 'G14_fan__mask', T.mix(net, 'G13_fan__in_petal', mb, fade, 5), V.modulation(net, 'G13a_modulation', lv, 0.09, 2.0, 0.6, 7.3, 0.25), 5)
     h = V.lines_layer(net, 'G21_fan_main', h, phi, 20, soft, 0.18, 0.11, 0.30, fm, lv)
     h = V.lines_layer(net, 'G22_fan_fine', h, phi, 70, soft, 0.18, 0.075, 0.40, fm, lv)
-    cxs = T.lin(net, 'G50_cx_signed', c['rx'], 0.0, 1.0, -1.0 / 6, 1.0 / 6)      # 6 October 2026: FIBRES BY STREAK BLUR along the RADIAL direction from the pivot below the petal (the stem and leaf method): wavy irregular fibres that fan out by themselves
-    # 6 October 2026: the fibre direction field is the FAN FITTED ON REF 06 (FitFan.py, mean error 2.8 deg over 85 blocks): tan(phi) = 6.1 * 100 * (x / 100)^0.7 / (800 - y), x = distance to the axis and y = row in px of a 1254 sheet. Pivot far below the band (800 px = 3.3 band heights) and a power 0.7 across: the fibres CURVE (angle grows faster than a straight fan). Going down a fibre leans toward the axis (the fan converges at the BOTTOM of the petal, checked with the angle tables): direction (sign(x) * tan(phi), 1) in the field sign convention of rgbatouv.
-    KFAN = 0.58      # 6 October 2026: calibration factor on the fitted fan (see PetalMeasure angle tables)
-    pw = lambda xc: KFAN * 610.0 * ((abs(xc) * 1254.0) / 100.0) ** 0.7 * (1.0 if xc > 0 else -1.0)
-    ks = [(r / 24.0, pw((r / 24.0 - 0.5) / 3.0)) for r in range(25)]
-    numer = T.curve(net, 'G51_fan_numerator', c['rx'], [(x, (y + 1200.0) / 2400.0) for x, y in ks], 1.0, -1200.0, 1200.0, T.SMOOTH)
-    denom = T.lin(net, 'G51a_fan_denominator', lv, 0.0, 1.0, 800.0, 800.0 - 242.0)
-    flow = T.node(net, 'rgbatouv', 'G52_flow__field', [T.node(net, 'channeljoin', 'G52a_flow__vector', [T.mix(net, 'G52c_dx', T.mix(net, 'G52e_tan_signed', numer, denom, 6), T.const(net, 'G52h_sign', lv, 1.0), 5), T.const(net, 'G52d_one', lv, 1.0), T.const(net, 'G52b_zero', lv, 0.0)])])
+    flow = fan_flow(net, 'G5', lv, c['rx'])
     def fibre(tag, size, seed, thr, length, gain, sign):
         nz = T.node(net, 'fractalnoise', tag + '_noise', [lv], amp=0.5, center=0.5, elementsize=size, noisetype=1, offx=seed)
         sd = T.curve(net, tag + '_cut', nz, [(0.0, 0.0), (thr, 0.0), (thr + 0.06, 1.0), (1.0, 1.0)], 1.0, 0.0, 1.0)
@@ -91,7 +84,16 @@ def iteration1(net, h, c):
     sh = T.mix(net, 'G41a_contact_scaled', sh, T.const(net, 'G41b_contact_strength', lv, RIM), 5)
     h = T.mix(net, 'G43_contact__added', h, T.mix(net, 'G42_contact__outside', sh, T.lin(net, 'G42a', mb, 0.0, 1.0, 1.0, 0.0), 5), 3)
     h = V.pads(net, 'G', h, n0); V.close(net, b, 'G', n0); return h
-def speckles(net, lv, ax, wb, mb, tag='SP', shift=0.0, hot=False):
+SMEAR = 12.0      # dot stretch along the fibres, px of 2048
+KFAN = 0.58      # 6 October 2026: calibration factor on the fitted fan (see PetalMeasure angle tables)
+def fan_flow(net, tag, lv, rx):
+    """the fibre direction field of the petal: the FAN FITTED ON REF 06 (FitFan.py, mean error 2.8 deg over 85 blocks): tan(phi) = KFAN * 610 * (x / 100)^0.7 / (800 - y), x = distance to the axis and y = row in px of a 1254 sheet. The fan converges at the BOTTOM of the petal and the power 0.7 makes the fibres curve. Used by the fibres AND by the dots (they are stretched along it). FR : champ de direction des fibres."""
+    pw = lambda xc: KFAN * 610.0 * ((abs(xc) * 1254.0) / 100.0) ** 0.7 * (1.0 if xc > 0 else -1.0)
+    ks = [(r / 24.0, pw((r / 24.0 - 0.5) / 3.0)) for r in range(25)]
+    numer = T.curve(net, tag + '1_fan_numerator', rx, [(x, (y + 1200.0) / 2400.0) for x, y in ks], 1.0, -1200.0, 1200.0, T.SMOOTH)
+    denom = T.lin(net, tag + '1a_fan_denominator', lv, 0.0, 1.0, 800.0, 800.0 - 242.0)
+    return T.node(net, 'rgbatouv', tag + '2_flow__field', [T.node(net, 'channeljoin', tag + '2a_flow__vector', [T.mix(net, tag + '2c_dx', T.mix(net, tag + '2e_tan_signed', numer, denom, 6), T.const(net, tag + '2h_sign', lv, 1.0), 5), T.const(net, tag + '2d_one', lv, 1.0), T.const(net, tag + '2b_zero', lv, 0.0)])])
+def speckles(net, lv, ax, wb, mb, tag='SP', shift=0.0, hot=False, rx=None):
     """THE SPECKLES of the petal (Matthieu, 6 October 2026: add small random dots, like the photo): scattered round dots, dense around the centre and the lower middle of the petal, rarer toward the white edge. Returns a 0..1 mask. The same function builds the same pattern in the height AND in the base colour (deterministic noise), so the dot is dark pink in the colour exactly where it is a bump in the height. 11 nodes. FR : points aleatoires du petale."""
     t = T.node(net, 'clamp', tag + '01_across', [T.mix(net, tag + '01a', ax, T.mix(net, tag + '01b', wb, T.const(net, tag + '01c', lv, 0.01), 12), 6)])
     # 6 October 2026: dot DENSITY measured on ref 06 (dark pixel counts by t: 2351 2069 2136 1205 619 278 0, by row band of 40: 275 714 1228 1904 2208 2261): a probability P(t) * P(lv); a dot is kept where the probability beats a fine random noise, so the density follows the measurement.
@@ -100,17 +102,24 @@ def speckles(net, lv, ax, wb, mb, tag='SP', shift=0.0, hot=False):
     rnd = T.lin(net, tag + '02b_random', T.node(net, 'fractalnoise', tag + '02c_rnd', [lv], amp=0.5, center=0.5, elementsize=0.05, noisetype=1, offx=3.9), 0.15, 0.85, 0.0, 1.0)
     keep = T.smooth(net, tag + '02d_keep', T.mix(net, tag + '02e_p_minus_rnd', T.mix(net, tag + '02f_p', T.mix(net, tag + '02f1_p0', pt, pl, 5), T.const(net, tag + '02f2_dots', lv, DOTS), 5), rnd, 4), 0.0, 0.015)
     nz = T.node(net, 'worleynoise', tag + '03_dots', [lv], elementsize=0.027, jitter=1.0, offx=7.0 + shift, offy=0.0 + shift * 0.8)      # 6 October 2026: Worley F1 distance, thresholded below, gives perfectly ROUND dots (fractal noise blobs were angular), one per cell, like the pits of the v2 reference
-    dots = T.smooth(net, tag + '04_round', nz, 0.010, 0.020, 1.0, 0.0) if hot else T.smooth(net, tag + '04_round', nz, 0.105, 0.135, 1.0, 0.0)
+    # 6 October 2026 (Matthieu): the black dots are like MOLES on the skin: slightly ELONGATED along the curved fibre direction (like a firework from the centre), SOFT edged (a coffee stain, not a disc), of varying size. A disc of varying radius (Worley distance plus a slow noise), stretched with a Streak Blur along the fan field, then a soft threshold. The white point (hot) stays tiny and round.
+    if hot:
+        dots = T.smooth(net, tag + '04_round', nz, 0.006, 0.013, 1.0, 0.0)
+    else:
+        nzv = T.mix(net, tag + '03a_radius_varies', nz, T.lin(net, tag + '03b_slow_noise', T.node(net, 'fractalnoise', tag + '03c_noise', [lv], amp=0.5, center=0.5, elementsize=0.03, noisetype=1, offx=11.1), 0.15, 0.85, -0.035, 0.035), 3)
+        disc = T.smooth(net, tag + '04_round', nzv, 0.11, 0.15, 1.0, 0.0)
+        st = T.node(net, 'streakblur', tag + '04a_stretch', [disc, fan_flow(net, tag + '4s', lv, rx)], dirtype=1, normalizedir=1, units=1, length_pixels=SMEAR, border=4)
+        dots = T.smooth(net, tag + '04b_soft', T.node(net, 'blur', tag + '04c_soften', [st], units=1, size_pixel=1.6), 0.10, 0.50, 0.0, 1.0)
     return T.mix(net, tag + '06_mask', T.mix(net, tag + '06a_kept', dots, keep, 5), mb, 5)
 def iteration2(net, h, c):
     """ITERATION 2 (64 nodes): the speckles in the height: small raised dots with a tiny dimple ring, plus fine pores scattered over the whole petal."""
     lv, ax, wb, mb = c['lv'], c['ax'], c['wb'], c['mb']
     n0 = len(net.children()); b = V.box(net, 'H', 'BAND 0 V3 ITERATION 2 : 64 nodes, speckles', (1.0, 0.8, 0.85))
-    spk = speckles(net, lv, ax, wb, mb)
+    spk = speckles(net, lv, ax, wb, mb, rx=c['rx'])
     h = T.mix(net, 'H11_speckles__added', h, T.lin(net, 'H11a_gain', spk, 0.0, 1.0, 0.0, -0.42), 3)
     # 6 October 2026 (Matthieu): the 3D effect of the dots = a small WHITE POINT inside a BLACK SPHERE (the first bead shading was coarse): a second, tiny round mask from the same dot field (Worley distance under 0.022) pulled to a bright tone.
     hl = speckles(net, lv, ax, wb, mb, 'SH', hot=True)
-    h = T.mix(net, 'H11b_white_point__added', h, T.mix(net, 'H11c_pull', T.mix(net, 'H11d_gap', T.const(net, 'H11e_white', lv, 0.90), h, 4), hl, 5), 3)   # 6 October 2026: the dots of the v2 reference are dark PITS (p1 of the petal 0.34 against 0.55 before), not raised bumps
+    h = T.mix(net, 'H11b_white_point__added', h, T.mix(net, 'H11c_pull', T.mix(net, 'H11d_gap', T.const(net, 'H11e_white', lv, 0.84), h, 4), hl, 5), 3)   # 6 October 2026: the dots of the v2 reference are dark PITS (p1 of the petal 0.34 against 0.55 before), not raised bumps
     h = V.dots_layer(net, 'H21_pores', h, lv, mb, 0.0022, 9.9, 0.66, 0.045)
     h = V.dots_layer(net, 'H22_pores_dark', h, lv, mb, 0.0017, 14.1, 0.70, -0.04)
     h = V.pads(net, 'H', h, n0); V.close(net, b, 'H', n0); return h

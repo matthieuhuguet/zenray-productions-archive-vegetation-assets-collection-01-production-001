@@ -72,7 +72,7 @@ def build(net, with_maps=True):
             lv0 = T.lin(net, 'U05_lv_band0', ry, 0.0, 0.193, 0.0, 1.0)
             m = T.node(net, 'blend', 'U06_pink_to_base', [m, flat_colour(net, 'U06a_pink', ry, (0.80, 0.50, 0.58)), T.lin(net, 'U06b_amount', T.smooth(net, 'U06c', lv0, 0.45, 1.0), 0.0, 1.0, 0.0, 0.55)], mode=0)   # the petal turns pink toward its base, where it meets the outer petal
         if k == 0:      # THREE PETALS, THREE PINKS (Matthieu, 6 October 2026): white pink, pink, deep fuchsia, with a deeper centre, a pale edge and dark speckles like the photo
-            lv0, ax0, wb0, mb0 = B0.coords(net, ry, rx3); spk = B0.speckles(net, lv0, ax0, wb0, mb0, 'SC')
+            lv0, ax0, wb0, mb0 = B0.coords(net, ry, rx3); spk = B0.speckles(net, lv0, ax0, wb0, mb0, 'SC', rx=rx3)
             rx1 = T.node(net, 'ramp', 'U80_ramp__one_cycle_x', signature='f1')
             # measured on the reference photo (05_photo_petal-colour-reference.webp): the OUTER EDGE of the petal is almost white, the colour is carried by the inside, saturated and deeper toward the centre. Palettes: edge white, body, deep, speckle.
             PET = [dict(edge=(0.97, 0.94, 0.93), body=(0.99, 0.78, 0.86), deep=(0.95, 0.56, 0.62), dot=(0.72, 0.08, 0.28)),      # pale pink (white pink lily)
