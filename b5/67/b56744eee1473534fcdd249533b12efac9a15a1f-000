@@ -1,0 +1,560 @@
+{
+ "movie": "LilyHeight_petals_v005",
+ "fps": 24,
+ "size": [
+  2048,
+  2048
+ ],
+ "seconds": 42.667,
+ "title": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/title-animation/vogun-cyber/vogun-cyber-pingpong-yellow.mov",
+ "title_resolution": [
+  3840,
+  2160
+ ],
+ "title_start_s": 1.0,
+ "music": "/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/audio/Grandbrothers - Sonic Riots (3m59 to end).mp3",
+ "timeline": [
+  {
+   "start": 0.0,
+   "end": 6.0,
+   "shot": "hook_bed_orbit_flat_2k",
+   "source": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/render/bed_orbit_flat_2k/flat_%04d.png"
+  },
+  {
+   "start": 6.0,
+   "end": 6.333,
+   "shot": "h001",
+   "source": "/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f001.png"
+  },
+  {
+   "start": 6.333,
+   "end": 6.667,
+   "shot": "h002",
+   "source": "/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f002.png"
+  },
+  {
+   "start": 6.667,
+   "end": 7.0,
+   "shot": "h003",
+   "source": "/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f003.png"
+  },
+  {
+   "start": 7.0,
+   "end": 7.333,
+   "shot": "h004",
+   "source": "/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f004.png"
+  },
+  {
+   "start": 7.333,
+   "end": 7.667,
+   "shot": "h005",
+   "source": "/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f005.png"
+  },
+  {
+   "start": 7.667,
+   "end": 8.0,
+   "shot": "h006",
+   "source": "/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f006.png"
+  },
+  {
+   "start": 8.0,
+   "end": 8.333,
+   "shot": "h007",
+   "source": "/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f007.png"
+  },
+  {
+   "start": 8.333,
+   "end": 8.667,
+   "shot": "h008",
+   "source": "/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f008.png"
+  },
+  {
+   "start": 8.667,
+   "end": 9.0,
+   "shot": "h009",
+   "source": "/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f009.png"
+  },
+  {
+   "start": 9.0,
+   "end": 9.333,
+   "shot": "h010",
+   "source": "/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f010.png"
+  },
+  {
+   "start": 9.333,
+   "end": 9.667,
+   "shot": "h011",
+   "source": "/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f011.png"
+  },
+  {
+   "start": 9.667,
+   "end": 10.0,
+   "shot": "h012",
+   "source": "/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f012.png"
+  },
+  {
+   "start": 10.0,
+   "end": 10.333,
+   "shot": "h013",
+   "source": "/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f013.png"
+  },
+  {
+   "start": 10.333,
+   "end": 10.667,
+   "shot": "h014",
+   "source": "/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f014.png"
+  },
+  {
+   "start": 10.667,
+   "end": 11.0,
+   "shot": "h015",
+   "source": "/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f015.png"
+  },
+  {
+   "start": 11.0,
+   "end": 11.333,
+   "shot": "h016",
+   "source": "/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f016.png"
+  },
+  {
+   "start": 11.333,
+   "end": 11.667,
+   "shot": "h017",
+   "source": "/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f017.png"
+  },
+  {
+   "start": 11.667,
+   "end": 12.0,
+   "shot": "h018",
+   "source": "/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f018.png"
+  },
+  {
+   "start": 12.0,
+   "end": 12.333,
+   "shot": "h019",
+   "source": "/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f019.png"
+  },
+  {
+   "start": 12.333,
+   "end": 12.667,
+   "shot": "h020",
+   "source": "/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f020.png"
+  },
+  {
+   "start": 12.667,
+   "end": 13.0,
+   "shot": "h021",
+   "source": "/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f021.png"
+  },
+  {
+   "start": 13.0,
+   "end": 13.333,
+   "shot": "h022",
+   "source": "/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f022.png"
+  },
+  {
+   "start": 13.333,
+   "end": 13.667,
+   "shot": "h023",
+   "source": "/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f023.png"
+  },
+  {
+   "start": 13.667,
+   "end": 14.0,
+   "shot": "h024",
+   "source": "/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f024.png"
+  },
+  {
+   "start": 14.0,
+   "end": 14.333,
+   "shot": "h025",
+   "source": "/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f025.png"
+  },
+  {
+   "start": 14.333,
+   "end": 14.667,
+   "shot": "h026",
+   "source": "/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f026.png"
+  },
+  {
+   "start": 14.667,
+   "end": 15.0,
+   "shot": "h027",
+   "source": "/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f027.png"
+  },
+  {
+   "start": 15.0,
+   "end": 15.333,
+   "shot": "h028",
+   "source": "/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f028.png"
+  },
+  {
+   "start": 15.333,
+   "end": 15.667,
+   "shot": "h029",
+   "source": "/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f029.png"
+  },
+  {
+   "start": 15.667,
+   "end": 16.0,
+   "shot": "h030",
+   "source": "/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f030.png"
+  },
+  {
+   "start": 16.0,
+   "end": 16.333,
+   "shot": "h031",
+   "source": "/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f031.png"
+  },
+  {
+   "start": 16.333,
+   "end": 16.667,
+   "shot": "h032",
+   "source": "/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f032.png"
+  },
+  {
+   "start": 16.667,
+   "end": 17.0,
+   "shot": "h033",
+   "source": "/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f033.png"
+  },
+  {
+   "start": 17.0,
+   "end": 17.333,
+   "shot": "h034",
+   "source": "/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f034.png"
+  },
+  {
+   "start": 17.333,
+   "end": 17.667,
+   "shot": "h035",
+   "source": "/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f035.png"
+  },
+  {
+   "start": 17.667,
+   "end": 18.0,
+   "shot": "h036",
+   "source": "/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f036.png"
+  },
+  {
+   "start": 18.0,
+   "end": 18.333,
+   "shot": "h037",
+   "source": "/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f037.png"
+  },
+  {
+   "start": 18.333,
+   "end": 18.667,
+   "shot": "h038",
+   "source": "/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f038.png"
+  },
+  {
+   "start": 18.667,
+   "end": 19.0,
+   "shot": "h039",
+   "source": "/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f039.png"
+  },
+  {
+   "start": 19.0,
+   "end": 19.333,
+   "shot": "h040",
+   "source": "/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f040.png"
+  },
+  {
+   "start": 19.333,
+   "end": 19.667,
+   "shot": "h041",
+   "source": "/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f041.png"
+  },
+  {
+   "start": 19.667,
+   "end": 20.0,
+   "shot": "h042",
+   "source": "/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f042.png"
+  },
+  {
+   "start": 20.0,
+   "end": 20.333,
+   "shot": "h043",
+   "source": "/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f043.png"
+  },
+  {
+   "start": 20.333,
+   "end": 20.667,
+   "shot": "h044",
+   "source": "/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f044.png"
+  },
+  {
+   "start": 20.667,
+   "end": 21.0,
+   "shot": "h045",
+   "source": "/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f045.png"
+  },
+  {
+   "start": 21.0,
+   "end": 21.333,
+   "shot": "h046",
+   "source": "/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f046.png"
+  },
+  {
+   "start": 21.333,
+   "end": 21.667,
+   "shot": "h047",
+   "source": "/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f047.png"
+  },
+  {
+   "start": 21.667,
+   "end": 22.0,
+   "shot": "h048",
+   "source": "/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f048.png"
+  },
+  {
+   "start": 22.0,
+   "end": 22.333,
+   "shot": "h049",
+   "source": "/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f049.png"
+  },
+  {
+   "start": 22.333,
+   "end": 22.667,
+   "shot": "h050",
+   "source": "/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f050.png"
+  },
+  {
+   "start": 22.667,
+   "end": 23.0,
+   "shot": "h051",
+   "source": "/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f051.png"
+  },
+  {
+   "start": 23.0,
+   "end": 23.333,
+   "shot": "h052",
+   "source": "/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f052.png"
+  },
+  {
+   "start": 23.333,
+   "end": 23.667,
+   "shot": "h053",
+   "source": "/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f053.png"
+  },
+  {
+   "start": 23.667,
+   "end": 24.0,
+   "shot": "h054",
+   "source": "/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f054.png"
+  },
+  {
+   "start": 24.0,
+   "end": 24.333,
+   "shot": "h055",
+   "source": "/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f055.png"
+  },
+  {
+   "start": 24.333,
+   "end": 24.667,
+   "shot": "h056",
+   "source": "/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f056.png"
+  },
+  {
+   "start": 24.667,
+   "end": 25.0,
+   "shot": "h057",
+   "source": "/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f057.png"
+  },
+  {
+   "start": 25.0,
+   "end": 25.333,
+   "shot": "h058",
+   "source": "/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f058.png"
+  },
+  {
+   "start": 25.333,
+   "end": 25.667,
+   "shot": "h059",
+   "source": "/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f059.png"
+  },
+  {
+   "start": 25.667,
+   "end": 26.0,
+   "shot": "h060",
+   "source": "/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f060.png"
+  },
+  {
+   "start": 26.0,
+   "end": 26.333,
+   "shot": "h061",
+   "source": "/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f061.png"
+  },
+  {
+   "start": 26.333,
+   "end": 26.667,
+   "shot": "h062",
+   "source": "/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f062.png"
+  },
+  {
+   "start": 26.667,
+   "end": 27.0,
+   "shot": "h063",
+   "source": "/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f063.png"
+  },
+  {
+   "start": 27.0,
+   "end": 27.333,
+   "shot": "h064",
+   "source": "/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f064.png"
+  },
+  {
+   "start": 27.333,
+   "end": 27.667,
+   "shot": "h065",
+   "source": "/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f065.png"
+  },
+  {
+   "start": 27.667,
+   "end": 28.0,
+   "shot": "h066",
+   "source": "/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f066.png"
+  },
+  {
+   "start": 28.0,
+   "end": 28.333,
+   "shot": "h067",
+   "source": "/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f067.png"
+  },
+  {
+   "start": 28.333,
+   "end": 28.667,
+   "shot": "h068",
+   "source": "/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f068.png"
+  },
+  {
+   "start": 28.667,
+   "end": 29.0,
+   "shot": "h069",
+   "source": "/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f069.png"
+  },
+  {
+   "start": 29.0,
+   "end": 29.333,
+   "shot": "h070",
+   "source": "/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f070.png"
+  },
+  {
+   "start": 29.333,
+   "end": 29.667,
+   "shot": "h071",
+   "source": "/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f071.png"
+  },
+  {
+   "start": 29.667,
+   "end": 30.0,
+   "shot": "h072",
+   "source": "/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f072.png"
+  },
+  {
+   "start": 30.0,
+   "end": 30.333,
+   "shot": "h073",
+   "source": "/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f073.png"
+  },
+  {
+   "start": 30.333,
+   "end": 30.667,
+   "shot": "h074",
+   "source": "/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f074.png"
+  },
+  {
+   "start": 30.667,
+   "end": 31.0,
+   "shot": "h075",
+   "source": "/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f075.png"
+  },
+  {
+   "start": 31.0,
+   "end": 31.333,
+   "shot": "h076",
+   "source": "/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f076.png"
+  },
+  {
+   "start": 31.333,
+   "end": 31.667,
+   "shot": "h077",
+   "source": "/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f077.png"
+  },
+  {
+   "start": 31.667,
+   "end": 32.0,
+   "shot": "h078",
+   "source": "/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f078.png"
+  },
+  {
+   "start": 32.0,
+   "end": 32.333,
+   "shot": "h079",
+   "source": "/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f079.png"
+  },
+  {
+   "start": 32.333,
+   "end": 32.667,
+   "shot": "h080",
+   "source": "/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f080.png"
+  },
+  {
+   "start": 32.667,
+   "end": 33.0,
+   "shot": "h081",
+   "source": "/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f081.png"
+  },
+  {
+   "start": 33.0,
+   "end": 33.333,
+   "shot": "h082",
+   "source": "/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f082.png"
+  },
+  {
+   "start": 33.333,
+   "end": 33.667,
+   "shot": "h083",
+   "source": "/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f083.png"
+  },
+  {
+   "start": 33.667,
+   "end": 34.667,
+   "shot": "h084",
+   "source": "/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/petal_movie/frames/f084.png"
+  },
+  {
+   "start": 34.667,
+   "end": 35.667,
+   "shot": "petal1",
+   "source": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/lily_petal_01_basecolor.png"
+  },
+  {
+   "start": 35.667,
+   "end": 36.667,
+   "shot": "petal2",
+   "source": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/lily_petal_02_basecolor.png"
+  },
+  {
+   "start": 36.667,
+   "end": 37.667,
+   "shot": "petal3",
+   "source": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/maps/trim/petals/lily_petal_03_basecolor.png"
+  },
+  {
+   "start": 37.667,
+   "end": 42.667,
+   "shot": "flower_close_orbit_2k_5s",
+   "source": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/render/flower_close_orbit_2k/close_%04d.png"
+  }
+ ],
+ "sfx_at_title": {
+  "file": "/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/audio/DS 13. Prompt.mp3",
+  "normalised_copy": "/Users/zenray/.claude/tmp/tmp-vegetation-assets-collection-01/audio/DS13_Prompt_norm.wav",
+  "start_s": 1.0,
+  "level": "-17 LUFS, true peak -1.5 dB before the mix",
+  "final_track": "-14 LUFS two-pass after the mix"
+ },
+ "folder": "/Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/video/FinalVideos/"
+}
