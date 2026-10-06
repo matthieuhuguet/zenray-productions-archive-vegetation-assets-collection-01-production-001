@@ -1,0 +1,11 @@
+<!doctype html><html lang="fr"><meta charset="utf-8"><title>ZenRay, titre pop Inter Black</title><style>
+/* 6 October 2026 14:40: Measure both real font faces and snap the Black title on its exact frame. */
+@font-face{font-family:SerifDisplay;font-weight:300;src:url('assets/AnthropicSerif-Light.ttf')}@font-face{font-family:InterDisplay;font-weight:100 900;src:url('assets/InterVariable.ttf')}html,body{margin:0;overflow:hidden}canvas{display:block}
+</style><body><canvas id="view"></canvas><script>
+let config,variant,ctx,rows=[];
+const smooth=x=>{x=Math.max(0,Math.min(1,x));return x*x*(3-2*x)};
+window.setup=async(c,v)=>{config=c;variant=v;await Promise.all([document.fonts.load('300 200px SerifDisplay'),document.fonts.load('900 200px InterDisplay')]);const canvas=document.getElementById('view');canvas.width=c.width;canvas.height=c.height;ctx=canvas.getContext('2d');
+for(let i=0;i<c.lines.length;i++){const text=c.lines[i],family=i===0?'SerifDisplay':'InterDisplay',weight=i===0?300:900;let size=200;ctx.font=`${weight} ${size}px ${family}`;size=Math.floor(size*c.width*c.widthRatio/ctx.measureText(text).width);ctx.font=`${weight} ${size}px ${family}`;let metrics=ctx.measureText(text);while(metrics.actualBoundingBoxLeft+metrics.actualBoundingBoxRight>c.width*c.widthRatio){size--;ctx.font=`${weight} ${size}px ${family}`;metrics=ctx.measureText(text)}rows.push({text,family,weight,size,width:metrics.width,height:metrics.actualBoundingBoxAscent+metrics.actualBoundingBoxDescent,ascent:metrics.actualBoundingBoxAscent});}
+let top=(c.height-rows.reduce((s,r)=>s+r.height,0)-c.lineGap)/2;for(const r of rows){r.x=(c.width-r.width)/2;r.baseline=top+r.ascent;r.top=top;r.bottom=top+r.height;top+=r.height+c.lineGap;}renderFrame(0);return rows;};
+window.renderFrame=t=>{ctx.globalAlpha=1;ctx.shadowColor='transparent';ctx.fillStyle=config.background;ctx.fillRect(0,0,config.width,config.height);if(t>=5)return;rows.forEach((r,i)=>{let opacity=i===0?(t<config.firstCut?smooth(t/config.firstFade):0):(t>=variant.popAt?1:0);if(!opacity)return;ctx.globalAlpha=opacity;ctx.font=`${r.weight} ${r.size}px ${r.family}`;ctx.fillStyle=config.foreground;ctx.shadowColor=config.shadow.color;ctx.shadowBlur=config.shadow.blur;ctx.shadowOffsetX=0;ctx.shadowOffsetY=0;ctx.fillText(r.text,r.x,r.baseline);});ctx.globalAlpha=1;ctx.shadowColor='transparent';};
+</script></body></html>

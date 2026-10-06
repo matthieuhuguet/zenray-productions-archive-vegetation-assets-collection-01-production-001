@@ -1,0 +1,85 @@
+{
+  "date": "6 October 2026",
+  "result": [
+    {
+      "id": "07-pop-at-1-second",
+      "layout": [
+        {
+          "text": "ZenRay Vegetation Collection 01",
+          "family": "SerifDisplay",
+          "weight": 300,
+          "size": 241,
+          "width": 3604.15478515625,
+          "height": 243.41000366210938,
+          "ascent": 183.16000366210938,
+          "x": 117.922607421875,
+          "baseline": 792.9882049560547,
+          "top": 609.8282012939453,
+          "bottom": 853.2382049560547
+        },
+        {
+          "text": "Fleur de Lys",
+          "family": "InterDisplay",
+          "weight": 900,
+          "size": 630,
+          "width": 3605.2734375,
+          "height": 586.93359375,
+          "ascent": 458.349609375,
+          "x": 117.36328125,
+          "baseline": 1421.5878143310547,
+          "top": 963.2382049560547,
+          "bottom": 1550.1717987060547
+        }
+      ],
+      "samples": [
+        "07-pop-at-1-second-000.png",
+        "07-pop-at-1-second-009.png",
+        "07-pop-at-1-second-018.png",
+        "07-pop-at-1-second-030.png",
+        "07-pop-at-1-second-045.png",
+        "07-pop-at-1-second-149.png"
+      ],
+      "bytes": 532474
+    },
+    {
+      "id": "08-pop-at-1_5-seconds",
+      "layout": [
+        {
+          "text": "ZenRay Vegetation Collection 01",
+          "family": "SerifDisplay",
+          "weight": 300,
+          "size": 241,
+          "width": 3604.15478515625,
+          "height": 243.41000366210938,
+          "ascent": 183.16000366210938,
+          "x": 117.922607421875,
+          "baseline": 792.9882049560547,
+          "top": 609.8282012939453,
+          "bottom": 853.2382049560547
+        },
+        {
+          "text": "Fleur de Lys",
+          "family": "InterDisplay",
+          "weight": 900,
+          "size": 630,
+          "width": 3605.2734375,
+          "height": 586.93359375,
+          "ascent": 458.349609375,
+          "x": 117.36328125,
+          "baseline": 1421.5878143310547,
+          "top": 963.2382049560547,
+          "bottom": 1550.1717987060547
+        }
+      ],
+      "samples": [
+        "08-pop-at-1_5-seconds-000.png",
+        "08-pop-at-1_5-seconds-009.png",
+        "08-pop-at-1_5-seconds-018.png",
+        "08-pop-at-1_5-seconds-030.png",
+        "08-pop-at-1_5-seconds-045.png",
+        "08-pop-at-1_5-seconds-149.png"
+      ],
+      "bytes": 505413
+    }
+  ]
+}

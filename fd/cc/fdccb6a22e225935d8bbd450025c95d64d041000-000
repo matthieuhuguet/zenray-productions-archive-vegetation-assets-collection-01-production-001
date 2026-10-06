@@ -1,0 +1,40 @@
+{
+  "date": "6 October 2026",
+  "width": 3840,
+  "height": 2160,
+  "fps": 30,
+  "appear": 1.5,
+  "hold": 3.5,
+  "disappear": 0,
+  "lines": [
+    "ZenRay Vegetation Collection 01",
+    "Fleur de Lys"
+  ],
+  "font": "AnthropicSerif-Light.ttf",
+  "foreground": "#ffffff",
+  "background": "#f6f4ee",
+  "widthRatio": 0.94,
+  "lineGap": 110,
+  "variants": [
+    {
+      "id": "08-pop-at-1_5-seconds",
+      "name": "Pop à 1,5 seconde",
+      "popAt": 1.5
+    }
+  ],
+  "rowDelay": 0.5,
+  "firstStart": 0.015,
+  "spread": 0.3,
+  "settle": 0.17,
+  "slices": 8,
+  "sourceHTML": "Animation.html",
+  "shadow": {
+    "color": "rgba(0,0,0,0.55)",
+    "blur": 16,
+    "offsetX": 0,
+    "offsetY": 0
+  },
+  "cutAtEnd": true,
+  "firstFade": 1.5,
+  "firstCut": 1.5
+}
