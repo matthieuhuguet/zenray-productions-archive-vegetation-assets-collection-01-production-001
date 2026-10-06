@@ -1,7 +1,8 @@
 // 6 October 2026 14:00: Render HTML glyph motion once per moving frame, reuse the static hold.
 const fs=require('fs'),path=require('path'),{spawn}=require('child_process'),{once}=require('events');
 const {chromium}=require('playwright');
-const output=path.resolve(__dirname,'../maps/trim/petals/title-animation');
+// 6 October 2026 14:25: Select a separate output instance without replacing previous animations.
+const output=process.argv[2]?path.resolve(process.argv[2]):path.resolve(__dirname,'../maps/trim/petals/title-animation');
 const config=JSON.parse(fs.readFileSync(path.join(output,'Animation.json')));
 (async()=>{const browser=await chromium.launch({headless:true});try{await Promise.all(config.variants.map(async variant=>{
  const page=await browser.newPage({viewport:{width:config.width,height:config.height},deviceScaleFactor:1});await page.goto('file://'+path.join(output,'Animation.html'));const layout=await page.evaluate(async({config,variant})=>await setup(config,variant),{config,variant});

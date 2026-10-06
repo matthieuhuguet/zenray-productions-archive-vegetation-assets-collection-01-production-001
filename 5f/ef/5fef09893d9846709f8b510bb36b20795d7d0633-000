@@ -19,3 +19,11 @@
 6 October 2026 : source éditable Animation.html, paramètres centralisés Animation.json, police embarquée dans assets/. Export reproductible depuis Scripts/RenderTitleAnimations.cjs : NODE_PATH=/Users/zenray/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules node /Users/zenray/Create/Build/Productions/ZenRayHoudini/VegetationCollection01/Scripts/RenderTitleAnimations.cjs.
 
 6 October 2026 : dérivé du gabarit text-asset.html et de la méthode HTML image par image du skill zenray-html-photoshop-pdf-hda-socialmedia-shorts-reel. Le texte reste une source indépendante des textures des pétales.
+
+## 6 October 2026 : correction du sens de lecture et du courant
+
+6 October 2026 : cette version remplace les trois directions précédentes. Toutes les variantes activent les lettres de gauche à droite, terminent la ligne du haut avant de commencer celle du bas et suivent le même ordre pendant la disparition.
+
+6 October 2026 : le courant devient discontinu : micro-coupures franches, bandes de lettres décalées horizontalement, impulsions qui se verrouillent en place. Aucune particule ni décoration. Variante 01 : Courant haché ; variante 02 : Micro-coupures ; variante 03 : Décharge numérique.
+
+6 October 2026 : apparition de la ligne du haut entre 0,015 et 0,485 seconde ; apparition de la ligne du bas entre 0,515 et 0,985 seconde. Le maintien reste stable de 1 à 4 secondes. Les fichiers de la première version sont conservés dans archive-v1/.

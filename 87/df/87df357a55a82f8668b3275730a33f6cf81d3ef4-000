@@ -1,0 +1,20 @@
+<!doctype html><html lang="fr"><meta charset="utf-8"><title>ZenRay, agglomération de pixels</title><style>
+/* 6 October 2026 14:25: Assemble tiled glyph masks, preserving the original Light font at rest. */
+@font-face{font-family:Display;font-weight:300;src:url('assets/AnthropicSerif-Light.ttf')}html,body{margin:0;overflow:hidden}canvas{display:block}
+</style><body><canvas id="view"></canvas><script>
+let config,variant,ctx,mask,tiles=[],rows=[];
+const ease=x=>{x=Math.max(0,Math.min(1,x));return 1-(1-x)**3};
+window.setup=async(c,v)=>{config=c;variant=v;await document.fonts.load('300 200px Display');const canvas=document.getElementById('view');canvas.width=c.width;canvas.height=c.height;ctx=canvas.getContext('2d');mask=document.createElement('canvas');mask.width=c.width;mask.height=c.height;const m=mask.getContext('2d',{willReadFrequently:true});
+for(const text of c.lines){m.font='300 200px Display';const size=Math.floor(200*c.width*c.widthRatio/m.measureText(text).width);m.font=`300 ${size}px Display`;const a=m.measureText(text);rows.push({text,size,width:a.width,height:a.actualBoundingBoxAscent+a.actualBoundingBoxDescent,ascent:a.actualBoundingBoxAscent});}
+let top=(c.height-rows.reduce((a,r)=>a+r.height,0)-c.lineGap)/2;m.fillStyle=c.foreground;
+rows.forEach((r,i)=>{r.x=(c.width-r.width)/2;r.top=top;m.font=`300 ${r.size}px Display`;m.fillText(r.text,r.x,top+r.ascent);top+=r.height+c.lineGap;});
+const data=m.getImageData(0,0,c.width,c.height).data;
+rows.forEach((r,row)=>{for(let y=Math.floor(r.top/v.tile)*v.tile;y<r.top+r.height+v.tile;y+=v.tile){for(let x=Math.floor(r.x/v.tile)*v.tile;x<r.x+r.width+v.tile;x+=v.tile){let occupied=false;for(let yy=y;yy<Math.min(y+v.tile,c.height)&&!occupied;yy++){for(let xx=x;xx<Math.min(x+v.tile,c.width);xx++){if(data[(yy*c.width+xx)*4+3]>8){occupied=true;break;}}}if(!occupied)continue;const u=Math.max(0,Math.min(1,(x-r.x)/r.width)),q=Math.max(0,Math.min(1,(y-r.top)/r.height));const start=c.firstStart+row*c.rowDelay+u*c.spread+q*c.verticalSpread;const seed=Math.sin(x*12.9898+y*78.233)*43758.5453;tiles.push({x,y,start,row,u,q,seed:seed-Math.floor(seed)});}}});renderFrame(0);return {rows,tileSize:v.tile,tileCount:tiles.length,topComplete:Math.max(...tiles.filter(t=>t.row===0).map(t=>t.start+c.settle)),bottomStart:Math.min(...tiles.filter(t=>t.row===1).map(t=>t.start))};};
+window.renderFrame=t=>{ctx.globalAlpha=1;ctx.fillStyle=config.background;ctx.fillRect(0,0,config.width,config.height);if(t>=1&&t<4){ctx.drawImage(mask,0,0);return;}
+ctx.fillStyle=config.foreground;const size=variant.tile;
+for(const tile of tiles){let p=(t-tile.start)/config.settle;if(p<=0)continue;if(t>=4){p=(t-(4+tile.start-config.firstStart))/config.settle;if(p<=0){ctx.globalAlpha=1;ctx.drawImage(mask,tile.x,tile.y,size,size,tile.x,tile.y,size,size);continue;}if(p>=1)continue;const motion=ease(p);ctx.globalAlpha=1-motion;ctx.fillRect(Math.round(tile.x+variant.travel*motion),Math.round(tile.y+variant.drift*motion*(.2+tile.seed*.8)),size,size);continue;}
+if(p>=1){ctx.globalAlpha=1;ctx.drawImage(mask,tile.x,tile.y,size,size,tile.x,tile.y,size,size);continue;}
+const motion=ease(p),remaining=1-motion;const dx=-variant.travel*remaining*(.65+tile.seed*.7),dy=(tile.seed-.5)*variant.drift*remaining+Math.sin(p*Math.PI*2+tile.seed*6.28)*size*remaining;const x=Math.round(tile.x+dx),y=Math.round(tile.y+dy);ctx.globalAlpha=Math.min(1,p*5);ctx.fillRect(x,y,size,size);
+if(p>.72){ctx.globalAlpha=(p-.72)/.28;ctx.drawImage(mask,tile.x,tile.y,size,size,tile.x,tile.y,size,size);}
+}ctx.globalAlpha=1;};
+</script></body></html>

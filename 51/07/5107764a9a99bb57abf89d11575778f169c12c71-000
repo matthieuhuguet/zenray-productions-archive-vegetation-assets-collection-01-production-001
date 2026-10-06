@@ -1,0 +1,119 @@
+{
+  "date": "6 October 2026",
+  "result": [
+    {
+      "id": "04-sable-fin",
+      "layout": {
+        "rows": [
+          {
+            "text": "ZenRay Vegetation Collection 01",
+            "size": 236,
+            "width": 3529.3798828125,
+            "height": 238.36000061035156,
+            "ascent": 179.36000061035156,
+            "x": 155.31005859375,
+            "top": 583.629997253418
+          },
+          {
+            "text": "Fleur de Lys",
+            "size": 638,
+            "width": 3530.373046875,
+            "height": 644.3800048828125,
+            "ascent": 484.8800048828125,
+            "x": 154.8134765625,
+            "top": 931.9899978637695
+          }
+        ],
+        "tileSize": 4,
+        "tileCount": 37924,
+        "topComplete": 0.4818568633079596,
+        "bottomStart": 0.5172946085774139
+      },
+      "samples": [
+        "04-sable-fin-000.png",
+        "04-sable-fin-009.png",
+        "04-sable-fin-018.png",
+        "04-sable-fin-030.png",
+        "04-sable-fin-120.png",
+        "04-sable-fin-149.png"
+      ],
+      "bytes": 2369006
+    },
+    {
+      "id": "05-pixels-agglomeres",
+      "layout": {
+        "rows": [
+          {
+            "text": "ZenRay Vegetation Collection 01",
+            "size": 236,
+            "width": 3529.3798828125,
+            "height": 238.36000061035156,
+            "ascent": 179.36000061035156,
+            "x": 155.31005859375,
+            "top": 583.629997253418
+          },
+          {
+            "text": "Fleur de Lys",
+            "size": 638,
+            "width": 3530.373046875,
+            "height": 644.3800048828125,
+            "ascent": 484.8800048828125,
+            "x": 154.8134765625,
+            "top": 931.9899978637695
+          }
+        ],
+        "tileSize": 14,
+        "tileCount": 4320,
+        "topComplete": 0.4806439893305231,
+        "bottomStart": 0.5168221737190841
+      },
+      "samples": [
+        "05-pixels-agglomeres-000.png",
+        "05-pixels-agglomeres-009.png",
+        "05-pixels-agglomeres-018.png",
+        "05-pixels-agglomeres-030.png",
+        "05-pixels-agglomeres-120.png",
+        "05-pixels-agglomeres-149.png"
+      ],
+      "bytes": 1650664
+    },
+    {
+      "id": "06-blocs-voxels",
+      "layout": {
+        "rows": [
+          {
+            "text": "ZenRay Vegetation Collection 01",
+            "size": 236,
+            "width": 3529.3798828125,
+            "height": 238.36000061035156,
+            "ascent": 179.36000061035156,
+            "x": 155.31005859375,
+            "top": 583.629997253418
+          },
+          {
+            "text": "Fleur de Lys",
+            "size": 638,
+            "width": 3530.373046875,
+            "height": 644.3800048828125,
+            "ascent": 484.8800048828125,
+            "x": 154.8134765625,
+            "top": 931.9899978637695
+          }
+        ],
+        "tileSize": 40,
+        "tileCount": 935,
+        "topComplete": 0.4799528461085856,
+        "bottomStart": 0.5154113521554855
+      },
+      "samples": [
+        "06-blocs-voxels-000.png",
+        "06-blocs-voxels-009.png",
+        "06-blocs-voxels-018.png",
+        "06-blocs-voxels-030.png",
+        "06-blocs-voxels-120.png",
+        "06-blocs-voxels-149.png"
+      ],
+      "bytes": 1184242
+    }
+  ]
+}

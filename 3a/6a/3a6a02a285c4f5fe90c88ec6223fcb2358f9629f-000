@@ -27,7 +27,7 @@
         "01-circuit-sequentiel-120.png",
         "01-circuit-sequentiel-149.png"
       ],
-      "bytes": 1215940
+      "bytes": 1082881
     },
     {
       "id": "02-connexions-croisees",
@@ -55,7 +55,7 @@
         "02-connexions-croisees-120.png",
         "02-connexions-croisees-149.png"
       ],
-      "bytes": 1260343
+      "bytes": 1061425
     },
     {
       "id": "03-impulsion-synchronisee",
@@ -83,7 +83,7 @@
         "03-impulsion-synchronisee-120.png",
         "03-impulsion-synchronisee-149.png"
       ],
-      "bytes": 1363232
+      "bytes": 974320
     }
   ]
 }
